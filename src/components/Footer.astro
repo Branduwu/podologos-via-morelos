@@ -55,7 +55,6 @@ const socialLinks = [
           <li><a class="footer-link hover:underline" href={privacyUrl}>Aviso de privacidad</a></li>
           <li><a class="footer-link hover:underline" href={noticesUrl}>Comunicados</a></li>
         </ul>
-        <p class="mt-3 text-xs text-sky-100/90">Sitio creado por DEV ABJV</p>
       </div>
 
       <div>
@@ -88,15 +87,26 @@ const socialLinks = [
   </div>
 
   <div class="border-t border-white/25">
-    <div class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-2 px-4 py-4 text-center text-sky-100">
-      <div class="type-footer-body flex items-center justify-center gap-2">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-2 px-4 py-4 text-sky-100 md:grid-cols-[1fr_auto_1fr]">
+      <p class="text-center text-xs font-medium tracking-wide text-sky-100/85 md:justify-self-start md:text-left">
+        <a
+          href="https://www.linkedin.com/in/ingabrahamjv/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline-offset-2 hover:underline"
+        >
+          Sitio creado por ABJV
+        </a>
+      </p>
+      <div class="type-footer-body flex items-center justify-center gap-2 text-center md:col-start-2 md:justify-self-center">
+        <span class="text-center md:whitespace-nowrap">Copyright (c) {new Date().getFullYear()} {businessName} | {copyrightText}</span>
         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/15" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
-            <path d="M12 4 9.8 6.2 7 5 6 8 3.5 9.3 5 12l-1.5 2.7L6 16l1 3 2.8-1.2L12 20l2.2-2.2L17 19l1-3 2.5-1.3L19 12l1.5-2.7L18 8l-1-3-2.8 1.2L12 4Zm-4 8a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm6 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm-5 3.2c.9.8 1.9 1.2 3 1.2s2.1-.4 3-1.2l.8 1c-1.1 1-2.4 1.5-3.8 1.5s-2.7-.5-3.8-1.5l.8-1Z"/>
+            <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-1 10h-4v4h-4v-4H6V9h4V5h4v4h4v4Z" />
           </svg>
         </span>
-        <span>Copyright (c) {new Date().getFullYear()} {businessName} | {copyrightText}</span>
       </div>
+      <div class="hidden md:block" aria-hidden="true"></div>
     </div>
   </div>
 </footer>
