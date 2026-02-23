@@ -99,12 +99,14 @@ function buildAgendarHref(price: PriceRow) {
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p class="text-sm font-semibold">Cotizacion rapida</p>
-                <p class="text-xs text-slate-600 dark:text-slate-300">Puedes seleccionar varios servicios para enviar una sola solicitud por WhatsApp.</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">
+                  Usa <strong>Agregar a cotizacion</strong> para varios servicios o <strong>Agendar solo este</strong> si solo quieres uno.
+                </p>
               </div>
               <a
                 id="quote-agendar-link"
                 href="/agendar"
-                class="pointer-events-none inline-flex items-center justify-center rounded-xl bg-slate-400 px-4 py-2 text-sm font-semibold text-white"
+                class="btn-base btn-muted pointer-events-none"
               >
                 Selecciona servicios
               </a>
@@ -140,17 +142,17 @@ function buildAgendarHref(price: PriceRow) {
                 </div>
                 <div class="mt-4 grid grid-cols-2 gap-2">
                   <a
-                    class="inline-flex w-full items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+                    class="btn-base btn-primary w-full"
                     href={buildAgendarHref(p)}
                   >
-                    Quiero este servicio
+                    Agendar solo este
                   </a>
                   <button
                     type="button"
                     data-select-service
-                    class="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                    class="btn-base btn-secondary w-full"
                   >
-                    Agregar
+                    Agregar a cotizacion
                   </button>
                 </div>
               </article>
@@ -185,17 +187,17 @@ function buildAgendarHref(price: PriceRow) {
                     <td class="px-4 py-3">
                       <div class="flex flex-wrap gap-2">
                         <a
-                          class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800"
+                          class="btn-base btn-primary"
                           href={buildAgendarHref(p)}
                         >
-                          Quiero este servicio
+                          Agendar solo este
                         </a>
                         <button
                           type="button"
                           data-select-service
-                          class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                          class="btn-base btn-secondary"
                         >
-                          Agregar
+                          Agregar a cotizacion
                         </button>
                       </div>
                     </td>
@@ -213,7 +215,7 @@ function buildAgendarHref(price: PriceRow) {
 
       <div class="mt-8">
         <a
-          class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
+          class="btn-base bg-slate-900 text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
           href="/agendar"
         >
           Agendar cita
@@ -275,14 +277,14 @@ function buildAgendarHref(price: PriceRow) {
 
     if (quoteList) {
       quoteList.textContent = selected.length > 0
-        ? selected.map((item) => item.title).join(" · ")
+        ? selected.map((item) => item.title).join(" | ")
         : "Aun no has seleccionado servicios.";
     }
 
     if (!quoteAgendarLink) return;
     if (selected.length === 0) {
-      quoteAgendarLink.classList.add("pointer-events-none", "bg-slate-400");
-      quoteAgendarLink.classList.remove("bg-sky-700", "hover:bg-sky-800");
+      quoteAgendarLink.classList.add("pointer-events-none", "btn-muted");
+      quoteAgendarLink.classList.remove("btn-primary");
       quoteAgendarLink.textContent = "Selecciona servicios";
       quoteAgendarLink.setAttribute("href", "/agendar");
       return;
@@ -293,8 +295,8 @@ function buildAgendarHref(price: PriceRow) {
     selected.forEach((item) => params.append("services", item.title));
     if (total > 0) params.set("approxTotal", String(Math.round(total)));
     quoteAgendarLink.setAttribute("href", `/agendar?${params.toString()}`);
-    quoteAgendarLink.classList.remove("pointer-events-none", "bg-slate-400");
-    quoteAgendarLink.classList.add("bg-sky-700", "hover:bg-sky-800");
+    quoteAgendarLink.classList.remove("pointer-events-none", "btn-muted");
+    quoteAgendarLink.classList.add("btn-primary");
     quoteAgendarLink.textContent = "Cotizar servicios en agenda";
 
     addButtons.forEach((button) => {
@@ -303,7 +305,7 @@ function buildAgendarHref(price: PriceRow) {
       const isSelected = selectedServices.has(title);
       const disableAdd = reachedLimit && !isSelected;
 
-      button.textContent = isSelected ? "Quitar" : "Agregar";
+      button.textContent = isSelected ? "Quitar" : "Agregar a cotizacion";
       button.classList.toggle("bg-sky-100", isSelected);
       button.classList.toggle("text-sky-800", isSelected);
       button.classList.toggle("border-sky-300", isSelected);

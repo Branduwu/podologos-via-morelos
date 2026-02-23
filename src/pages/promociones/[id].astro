@@ -66,7 +66,7 @@ const promoAgendarHref = (() => {
     <article class="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
       {promo.imageUrl ? (
         <div class="flex w-full items-center justify-center bg-slate-50 p-4 dark:bg-slate-900 md:p-6">
-          <img src={promo.imageUrl} alt={promo.title} class="max-h-[42rem] w-auto max-w-full object-contain" loading="eager" />
+          <img src={promo.imageUrl} alt={promo.title} class="max-h-[42rem] w-auto max-w-full object-contain" loading="eager" data-fallback-src="/placeholder.jpg" />
         </div>
       ) : (
         <div class="flex h-72 items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
@@ -97,8 +97,8 @@ const promoAgendarHref = (() => {
         )}
 
         <div class="mt-8 flex flex-wrap gap-3">
-          <a href={promoAgendarHref} class="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800">Agendar con esta promocion</a>
-          <a href="/contacto" class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">Resolver dudas</a>
+          <a href={promoAgendarHref} class="btn-base btn-primary">Agendar con esta promocion</a>
+          <a href="/contacto" class="btn-base btn-secondary">Resolver dudas</a>
         </div>
       </div>
     </article>

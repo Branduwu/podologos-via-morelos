@@ -69,6 +69,7 @@ const prefilledAgendarHref = (() => {
           src={specialist.photoUrl || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1000&q=80"}
           alt={specialist.name || "Especialista"}
           loading="eager"
+          data-fallback-src="/placeholder.jpg"
         />
       </div>
 
@@ -89,10 +90,10 @@ const prefilledAgendarHref = (() => {
         )}
 
         <div class="mt-8 flex flex-wrap gap-3">
-          <a href={waLink} target={waNumber ? "_blank" : undefined} rel={waNumber ? "noopener noreferrer" : undefined} class="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800">
+          <a href={waLink} target={waNumber ? "_blank" : undefined} rel={waNumber ? "noopener noreferrer" : undefined} class="btn-base btn-primary">
             WhatsApp con este especialista
           </a>
-          <a href={prefilledAgendarHref} class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">
+          <a href={prefilledAgendarHref} class="btn-base btn-secondary">
             Agendar con este especialista
           </a>
         </div>

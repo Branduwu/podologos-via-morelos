@@ -221,7 +221,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
 
   <main class="pb-12">
     <section class="relative overflow-hidden border-y border-sky-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
-      <img class="absolute inset-0 h-full w-full object-cover" src={heroImageUrl} alt="Consultorio medico" loading="eager" />
+      <img class="absolute inset-0 h-full w-full object-cover" src={heroImageUrl} alt="Consultorio medico" loading="eager" data-fallback-src="/placeholder.jpg" />
       <div class="absolute inset-0 bg-gradient-to-r from-sky-950/78 via-sky-900/65 to-slate-900/52"></div>
 
       <div class="relative mx-auto max-w-6xl px-4 py-16 text-white md:py-20">
@@ -282,7 +282,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
             {homePromos.map((p, index) => (
               <article data-promo-carousel-item={index} class="flex min-h-[29rem] min-w-[86%] snap-start flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg md:min-w-[48%] lg:min-w-[32%] dark:border-slate-800 dark:bg-slate-950">
                 <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700/70">
-                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl || promotionsFallbackImage} alt={p.title} loading="lazy" />
+                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl || promotionsFallbackImage} alt={p.title} loading="lazy" data-fallback-src={promotionsFallbackImage || "/placeholder.jpg"} />
                 </div>
 
                 <div class="flex flex-1 flex-col p-5">
@@ -360,14 +360,14 @@ function getVideoAspectClass(it: HomeGalleryItem) {
         </div>
 
         <div>
-          <img class="h-80 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[30rem] dark:ring-slate-700" src={aboutMainImage} alt="Nosotros" loading="lazy" />
+          <img class="h-80 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[30rem] dark:ring-slate-700" src={aboutMainImage} alt="Nosotros" loading="lazy" data-fallback-src="/placeholder.jpg" />
         </div>
       </div>
 
       {aboutGallery.length > 0 && (
         <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {aboutGallery.map((img, idx) => (
-            <img class="h-44 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Nosotros ${idx + 1}`} loading="lazy" />
+            <img class="h-44 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Nosotros ${idx + 1}`} loading="lazy" data-fallback-src="/placeholder.jpg" />
           ))}
         </div>
       )}
@@ -413,7 +413,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
                         <p class="type-meta mt-1 text-slate-500 dark:text-slate-400">{it.category || "galeria"}</p>
                       </div>
                       {it.imageUrl ? (
-                        <img class="h-56 w-full object-cover ring-1 ring-slate-200/70 transition duration-300 hover:opacity-95 dark:ring-slate-700/70" src={it.imageUrl} alt={it.title || "Imagen"} loading="lazy" />
+                        <img class="h-56 w-full object-cover ring-1 ring-slate-200/70 transition duration-300 hover:opacity-95 dark:ring-slate-700/70" src={it.imageUrl} alt={it.title || "Imagen"} loading="lazy" data-fallback-src="/placeholder.jpg" />
                       ) : (
                         <div class="flex h-56 items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
                           Sin imagen
@@ -480,6 +480,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
                               <img
                                 src={getVideoPreviewSource(it)}
                                 alt={it.title || "Video"}
+                                data-fallback-src="/placeholder.jpg"
                                 class:list={[
                                   "h-full w-full transition duration-300 group-hover:scale-[1.02]",
                                   it.platform === "tiktok" ? "object-contain" : "object-cover",

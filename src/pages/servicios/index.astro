@@ -111,30 +111,30 @@ function moneyMXN(n: number | string | null | undefined) {
               )}
             </div>
 
-            <div class="mt-6 flex flex-wrap gap-3">
+            <div class="mt-6 grid grid-cols-2 gap-2">
               <a
-                class="inline-flex flex-1 items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
+                class="btn-base btn-primary w-full"
                 href={detailHref}
               >
                 Ver
               </a>
 
               <a
-                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                class="btn-base btn-secondary w-full"
                 href="/precios"
               >
                 Precios
               </a>
 
               <a
-                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                class="btn-base btn-secondary w-full col-span-2"
                 href={agendarHref}
               >
                 Agendar este servicio
               </a>
 
               <a
-                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                class="btn-base btn-secondary w-full col-span-2"
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"

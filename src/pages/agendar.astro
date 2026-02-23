@@ -278,8 +278,8 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     approxTotal: Number(urlPrefill.approxTotal || serverPrefill.approxTotal || 0),
   };
   const quoteLimit = Math.max(1, Number(config.quoteSelectionLimit || 6));
-  const selectedServicesFromPrefill = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
-  const approxTotalFromPrefill = Number(prefill.approxTotal || 0);
+  let selectedServicesState = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
+  let quoteTotalState = Number(prefill.approxTotal || 0);
   const hasSpecialistPrefill = Boolean(String(prefill.specialist || "").trim());
   const priceCatalog = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
   const waNumber = String(config.whatsappNumber || "").replace(/\D/g, "");
@@ -324,11 +324,11 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const getCurrentQuote = () => {
     const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
     const selectedCategory = String(serviceSelect.value || "");
-    const list = selectedServicesFromPrefill.length > 0
-      ? selectedServicesFromPrefill
+    const list = selectedServicesState.length > 0
+      ? selectedServicesState
       : (selectedLabel ? [selectedLabel] : []);
 
-    let total = Number.isFinite(approxTotalFromPrefill) && approxTotalFromPrefill > 0 ? approxTotalFromPrefill : 0;
+    let total = Number.isFinite(quoteTotalState) && quoteTotalState > 0 ? quoteTotalState : 0;
     if (total <= 0 && selectedCategory && !hasSpecialistPrefill) {
       total = getMinPriceByCategory(selectedCategory);
     }
@@ -469,8 +469,8 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       if (matchService) serviceValue = prefill.service;
     }
 
-    if (!serviceValue && selectedServicesFromPrefill.length > 0) {
-      const firstSelected = String(selectedServicesFromPrefill[0] || "").toLowerCase().trim();
+    if (!serviceValue && selectedServicesState.length > 0) {
+      const firstSelected = String(selectedServicesState[0] || "").toLowerCase().trim();
       const fromCatalog = priceCatalog.find((row) => {
         const title = String(row.title || "").toLowerCase().trim();
         const category = String(row.category || "").trim();
@@ -604,6 +604,9 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   updateCta();
 
   serviceSelect.addEventListener("change", () => {
+    const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
+    selectedServicesState = selectedLabel ? [selectedLabel] : [];
+    quoteTotalState = 0;
     renderSpecialists(serviceSelect.value, "");
     updateQuoteSummary();
     updateCta();

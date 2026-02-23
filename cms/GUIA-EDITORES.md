@@ -4,6 +4,20 @@
 
 Esta guia explica que editar en cada area para mantener la web clara y ordenada.
 
+## Novedades sincronizadas (Front + CMS)
+
+- `Agenda desde cualquier pagina`:
+  - Servicios, Especialistas, Precios y Promociones ya envian datos a `Agenda tu cita`.
+  - Si eliges varios servicios en Precios, se envia cotizacion con total aproximado.
+- `Categorias unificadas`:
+  - Usa siempre: `Podologia`, `Psicologia`, `Optica`, `Quiropractica`.
+  - Estas categorias alimentan filtros en Web (Precios, Especialistas, Promociones, FAQ).
+- `Botones de Precios`:
+  - La web ya usa texto claro:
+    - `Agendar solo este`
+    - `Agregar a cotizacion`
+  - No cambies estos textos en CMS porque son parte del flujo de conversion.
+
 ## Orden recomendado de edicion
 
 1. `1) Configuracion del sitio`
@@ -38,6 +52,8 @@ Esta guia explica que editar en cada area para mantener la web clara y ordenada.
 ### Precios
 - Relaciona cada precio con un servicio.
 - Edita: nombre del precio, monto, nota, activo y orden.
+- La categoria del servicio debe estar correcta para que el filtro y la agenda funcionen.
+- Si un precio no aparece en filtro, revisa categoria del servicio relacionado.
 
 ### Promociones
 - Edita: titulo, etiqueta, descripcion, vigencia, imagen y estado.
@@ -75,8 +91,11 @@ Esta guia explica que editar en cada area para mantener la web clara y ordenada.
 1. Guardar borrador.
 2. Revisar ortografia.
 3. Validar links (WhatsApp, Maps, redes).
-4. Confirmar categoria correcta.
-5. Publicar.
+4. Confirmar categoria correcta (Podologia/Psicologia/Optica/Quiropractica).
+5. Probar un click real en Web:
+   - `Agendar este servicio` o `Agendar con este especialista`.
+   - Verificar que se precargue en `Agenda tu cita`.
+6. Publicar.
 
 ## Errores comunes y como resolver
 

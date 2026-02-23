@@ -37,6 +37,16 @@ export default function EditorGuidePane() {
             <Text size={1}>- Categoria correcta</Text>
             <Text size={1}>- Estado Activo encendido</Text>
             <Text size={1}>- Fechas completas (si aplica)</Text>
+            <Text size={1}>- Prueba un clic real en la web (Agenda desde Servicio/Especialista/Precio)</Text>
+          </Stack>
+        </Section>
+
+        <Section title="Cambios clave sincronizados con la web">
+          <Stack space={2}>
+            <Text size={1}>Agenda: Servicios, Especialistas, Precios y Promociones ya envian datos a Agenda tu cita.</Text>
+            <Text size={1}>Precios: se permite cotizacion de varios servicios con total aproximado.</Text>
+            <Text size={1}>Categorias oficiales: Podologia, Psicologia, Optica y Quiropractica.</Text>
+            <Text size={1}>Si una categoria esta mal escrita, filtros y agenda pueden fallar.</Text>
           </Stack>
         </Section>
 
@@ -117,6 +127,7 @@ export default function EditorGuidePane() {
             <Text size={1}>Duracion y nota son opcionales, pero ayudan al paciente a decidir.</Text>
             <Text size={1}>Orden: controla que precios salen primero en la tabla.</Text>
             <Text size={1}>Error comun: no relacionar el precio con un servicio.</Text>
+            <Text size={1}>Flujo web: Agendar solo este envia un servicio; Agregar a cotizacion suma varios.</Text>
           </Stack>
         </Section>
 
@@ -147,6 +158,7 @@ export default function EditorGuidePane() {
           <Stack space={2}>
             <Text size={1}>- Error al borrar servicio: el servicio tiene referencias en otros documentos.</Text>
             <Text size={1}>- Solucion: quita la referencia en precios/promociones y vuelve a intentar.</Text>
+            <Text size={1}>- Si algo no se refleja en Agenda: revisa categoria del servicio y estado Activo.</Text>
             <Text size={1}>- Si aparece un error tecnico: revisa esta guia.</Text>
             <Text size={1}>- Si persiste: contacta al desarrollador de este sistema ABJV.</Text>
           </Stack>

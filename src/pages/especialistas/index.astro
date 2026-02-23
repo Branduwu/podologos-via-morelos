@@ -118,6 +118,7 @@ function specialistWhatsAppHref(specialist: Specialist) {
                 src={specialist.photoUrl || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1000&q=80"}
                 alt={specialist.name || "Especialista"}
                 loading="lazy"
+                data-fallback-src="/placeholder.jpg"
               />
               <div class="p-5">
                 <h2 class="text-lg font-bold">{specialist.name || "Especialista"}</h2>
@@ -132,19 +133,19 @@ function specialistWhatsAppHref(specialist: Specialist) {
                   </ul>
                 )}
 
-                <div class="mt-4 flex flex-wrap gap-2">
-                  <a class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800" href={specialistHref(specialist)}>
+                <div class="mt-4 grid gap-2">
+                  <a class="btn-base btn-primary w-full" href={specialistHref(specialist)}>
                     Ver perfil
                   </a>
                   <a
-                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+                    class="btn-base btn-secondary w-full"
                     href={agendarSpecialistHref(specialist)}
                   >
                     Agendar con este especialista
                   </a>
                   {waNumber && (
                     <a
-                      class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+                      class="btn-base btn-secondary w-full"
                       href={specialistWhatsAppHref(specialist)}
                       target="_blank"
                       rel="noopener noreferrer"

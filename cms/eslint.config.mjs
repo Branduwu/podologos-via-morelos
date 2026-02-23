@@ -1,4 +1,10 @@
-import studio from '@sanity/eslint-config-studio'
+let studio = []
+try {
+  const module = await import('@sanity/eslint-config-studio')
+  studio = module.default || module
+} catch {
+  studio = []
+}
 
 export default [
   ...studio,

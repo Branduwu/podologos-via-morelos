@@ -51,6 +51,7 @@ const localBusinessLd = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <link rel="preload" as="image" href="/placeholder.jpg" />
     <link id="theme-favicon" rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -126,6 +127,28 @@ const localBusinessLd = {
 
         const main = document.querySelector("main");
         if (main && !main.id) main.id = "contenido-principal";
+
+        const attachImageFallback = () => {
+          const images = Array.from(document.querySelectorAll("img[data-fallback-src]"));
+          images.forEach((img) => {
+            const fallback = img.getAttribute("data-fallback-src") || "/placeholder.jpg";
+            const applyFallback = () => {
+              if (img.getAttribute("data-fallback-applied") === "true") return;
+              img.setAttribute("data-fallback-applied", "true");
+              img.setAttribute("src", fallback);
+            };
+
+            const src = (img.getAttribute("src") || "").trim();
+            if (!src || src === "undefined" || src === "null") {
+              applyFallback();
+              return;
+            }
+
+            img.addEventListener("error", applyFallback, { once: true });
+          });
+        };
+
+        attachImageFallback();
 
         const scrollButton = document.getElementById("scroll-to-top");
         if (scrollButton) {

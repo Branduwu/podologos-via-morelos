@@ -81,7 +81,7 @@ const categoryLabel: Record<string, string> = {
                 </p>
               </div>
               {it.imageUrl ? (
-                <img class="aspect-[4/3] w-full object-cover" src={it.imageUrl} alt={it.title} loading="lazy" />
+                <img class="aspect-[4/3] w-full object-cover" src={it.imageUrl} alt={it.title} loading="lazy" data-fallback-src="/placeholder.jpg" />
               ) : (
                 <div class="flex aspect-[4/3] items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
                   Sin imagen

@@ -59,6 +59,44 @@ npm run quality
 - `check`: validacion de tipos y templates Astro.
 - `lint`: ESLint para archivos JS/MJS del sitio.
 - `lint:cms`: lint del Studio de Sanity.
+- `quality`: ejecuta `check + lint + lint:cms`.
+
+## Pruebas E2E (Playwright)
+
+Primera vez (local):
+
+```bash
+npx playwright install chromium
+```
+
+Ejecutar pruebas E2E:
+
+```bash
+npm run test:e2e
+```
+
+Notas:
+
+- Las pruebas E2E usan `playwright.config.ts`.
+- Levantan el sitio con `npm run dev` durante el test.
+- Si faltan navegadores, Playwright mostrara el comando de instalacion.
+
+## CI (GitHub Actions)
+
+Archivo: `.github/workflows/ci.yml`
+
+- Job `quality`:
+  - `npm ci`
+  - `npm run check`
+  - `npm run lint`
+  - `npm run test:unit`
+- Job `e2e` (despues de `quality`):
+  - `npm ci`
+  - `npx playwright install --with-deps chromium`
+  - `npm run test:e2e`
+  - Publica artifacts: `playwright-report/` y `test-results/`
+
+Con esto, el pipeline valida calidad tecnica y flujos reales de interfaz.
 
 ## Observabilidad (Sentry)
 
@@ -115,3 +153,5 @@ Si despliegas en otro hosting, replica esas cabeceras en su configuracion equiva
 - Los slugs de `service` se validan para evitar rutas invalidas en build estatico.
 - Las consultas usan fallback seguro cuando Sanity falla.
 - Usa `active` en `promotion`, `galleryItem` y `priceItem` para publicar u ocultar.
+- Las URLs que vienen de CMS (redes, maps, enlaces de footer) se sanean antes de renderizar.
+- En `agendar`, al cambiar servicio se limpia el prefill de cotizacion para evitar mensajes inconsistentes.

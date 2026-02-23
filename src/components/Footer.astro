@@ -1,19 +1,20 @@
 ---
 import { getBusinessInfo } from "../lib/sanity.js";
+import { safeCmsUrl } from "../utils/url";
 
 const business = await getBusinessInfo();
 const businessName = business?.name || "Podologos Via Morelos Tulpetlac";
 const phone = business?.phone || "";
 const logoUrl = business?.logoImageUrl || "/default-logo-clinica.svg";
 
-const facebookUrl = business?.facebookUrl || "";
-const instagramUrl = business?.instagramUrl || "";
-const tiktokUrl = business?.tiktokUrl || "";
+const facebookUrl = safeCmsUrl(business?.facebookUrl, "");
+const instagramUrl = safeCmsUrl(business?.instagramUrl, "");
+const tiktokUrl = safeCmsUrl(business?.tiktokUrl, "");
 
 const menuTitle = business?.footerMenuTitle || "Menu";
 const siteTitle = business?.footerSiteTitle || "Sobre el sitio";
-const privacyUrl = business?.footerPrivacyUrl || "/privacidad";
-const noticesUrl = business?.footerNoticesUrl || "/comunicados";
+const privacyUrl = safeCmsUrl(business?.footerPrivacyUrl, "/privacidad");
+const noticesUrl = safeCmsUrl(business?.footerNoticesUrl, "/comunicados");
 const copyrightText = business?.footerCopyrightText || "Todos los derechos reservados.";
 
 const socialLinks = [
@@ -28,7 +29,7 @@ const socialLinks = [
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
       <div class="sm:col-span-2 lg:col-span-1">
         <a href="/" class="inline-flex items-center gap-3">
-          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1" loading="lazy" />
+          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
           <span class="type-card-title leading-tight">{businessName}</span>
         </a>
         <p class="type-footer-body mt-3 text-sky-100">Atencion integral en podologia, psicologia, optica y quiropractica.</p>
@@ -54,6 +55,7 @@ const socialLinks = [
           <li><a class="footer-link hover:underline" href={privacyUrl}>Aviso de privacidad</a></li>
           <li><a class="footer-link hover:underline" href={noticesUrl}>Comunicados</a></li>
         </ul>
+        <p class="mt-3 text-xs text-sky-100/90">Sitio creado por DEV ABJV</p>
       </div>
 
       <div>

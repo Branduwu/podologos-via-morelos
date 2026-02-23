@@ -1,6 +1,7 @@
 ---
 import { clinic } from "../config/clinic";
 import { buildContactMessage, buildWhatsAppUrl } from "../utils/whatsapp";
+import { safeCmsUrl } from "../utils/url";
 
 type Props = {
   business?: {
@@ -19,7 +20,7 @@ const address = business?.address || clinic.address;
 const phoneDisplay = business?.phone || clinic.phoneDisplay;
 const phoneTel = String(phoneDisplay).replace(/\D/g, "") || clinic.phoneTel;
 const waNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
-const mapsUrl = business?.mapsUrl || clinic.googleMapsUrl;
+const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
 
 const serviceChips = [
   { key: "podologia", label: "Podologia" },
@@ -44,9 +45,9 @@ const primaryWaMessage = buildContactMessage({ reason: "Quiero informacion y age
 const waPrimaryHref = buildWhatsAppUrl(primaryWaMessage, waNumber);
 
 const socialItems = [
-  { label: "Facebook", value: business?.facebookUrl || "" },
-  { label: "Instagram", value: business?.instagramUrl || "" },
-  { label: "TikTok", value: business?.tiktokUrl || "" },
+  { label: "Facebook", value: safeCmsUrl(business?.facebookUrl, "") },
+  { label: "Instagram", value: safeCmsUrl(business?.instagramUrl, "") },
+  { label: "TikTok", value: safeCmsUrl(business?.tiktokUrl, "") },
 ]
   .filter((x) => Boolean(x.value))
   .map((x) => ({ ...x, handle: socialHandle(String(x.value)) }));
@@ -61,11 +62,11 @@ const socialItems = [
   </div>
 
   <div class="mt-6 flex flex-wrap gap-3">
-    <a class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-800" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">Enviar WhatsApp</a>
-    <a class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900" href={`tel:${phoneTel}`}>Llamar</a>
-    <a class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900" href={mapsUrl} target="_blank" rel="noopener noreferrer">Abrir en Maps</a>
-    <a class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900" href="/agendar">Agendar en web</a>
-    <button id="copy-address-contact" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">Copiar direccion</button>
+    <a class="btn-base btn-primary" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">Enviar WhatsApp</a>
+    <a class="btn-base btn-secondary" href={`tel:${phoneTel}`}>Llamar</a>
+    <a class="btn-base btn-secondary" href={mapsUrl} target="_blank" rel="noopener noreferrer">Abrir en Maps</a>
+    <a class="btn-base btn-secondary" href="/agendar">Agendar en web</a>
+    <button id="copy-address-contact" type="button" class="btn-base btn-secondary">Copiar direccion</button>
   </div>
 
   <div class="mt-5">

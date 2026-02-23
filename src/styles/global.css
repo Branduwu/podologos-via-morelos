@@ -29,6 +29,53 @@
 }
 
 @layer components {
+  .btn-base {
+    display: inline-flex;
+    min-height: 2.45rem;
+    min-width: 9rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.85rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, opacity 180ms ease;
+  }
+
+  .btn-primary {
+    background: #0369a1;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #075985;
+  }
+
+  .btn-secondary {
+    border: 1px solid rgb(203 213 225 / 1);
+    color: rgb(30 41 59 / 1);
+    background: transparent;
+  }
+
+  .btn-secondary:hover {
+    background: rgb(241 245 249 / 1);
+  }
+
+  .btn-muted {
+    background: rgb(148 163 184 / 1);
+    color: #ffffff;
+  }
+
+  .dark .btn-secondary {
+    border-color: rgb(51 65 85 / 1);
+    color: rgb(226 232 240 / 1);
+  }
+
+  .dark .btn-secondary:hover {
+    background: rgb(30 41 59 / 1);
+  }
+
   .nav-link {
     position: relative;
     display: inline-flex;
