@@ -57,20 +57,8 @@ const defaultServiceGuideTips = serviceGuides[defaultServiceGuideKey];
 const facadeImage =
   business?.locationFacadeImageUrl ||
   "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?auto=format&fit=crop&w=1600&q=80";
-
-const now = new Date();
-const day = now.getDay();
-const hour = now.getHours() + now.getMinutes() / 60;
-let todaySchedule = "Domingo cerrado";
-let isOpenNow = false;
-
-if (day >= 1 && day <= 5) {
-  todaySchedule = "Lunes a Viernes 10:00 a 18:00";
-  isOpenNow = hour >= 10 && hour < 18;
-} else if (day === 6) {
-  todaySchedule = "Sabado 10:00 a 16:00";
-  isOpenNow = hour >= 10 && hour < 16;
-}
+const scheduleText =
+  business?.hoursText || "Lunes a viernes: 10:00 a 18:00 · Sabado: 10:00 a 16:00 · Domingo: cerrado";
 ---
 
 <Layout title={`Ubicacion | ${business?.name || "Podologos Via Morelos"}`}>
@@ -82,19 +70,16 @@ if (day >= 1 && day <= 5) {
 
     <div class="mt-8 grid gap-6 lg:grid-cols-2">
       <section class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
-        <div class="flex flex-wrap items-center gap-2">
-          <h2 class="text-lg font-semibold">Como llegar</h2>
-          <span class={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${isOpenNow ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"}`}>
-            {isOpenNow ? "Hoy: Abierto" : "Hoy: Cerrado"}
-          </span>
-        </div>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{todaySchedule}</p>
+        <h2 class="text-lg font-semibold">Como llegar</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          <strong>Horario:</strong> {scheduleText}
+        </p>
 
         <div class="mt-8 grid gap-2 text-sm text-slate-800 dark:text-slate-100">
           <p><strong>Direccion:</strong> {business?.address || "-"}</p>
           <p><strong>Telefono:</strong> {business?.phone || "-"}</p>
           <p><strong>WhatsApp:</strong> {whatsappDigits || "-"}</p>
-          <p><strong>Horarios:</strong> {business?.hoursText || "Lunes a Viernes 10:00 a 18:00 · Sabado 10:00 a 16:00 · Domingo cerrado"}</p>
+          <p><strong>Horarios:</strong> {scheduleText}</p>
           <p><strong>Zona:</strong> {zoneText}</p>
           <p><strong>Referencias:</strong> {referencesText}</p>
         </div>
