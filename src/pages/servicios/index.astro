@@ -77,7 +77,12 @@ function moneyMXN(n: number | string | null | undefined) {
         const detailHref = hasValidSlug ? `/servicios/${cleanSlug}` : "/servicios";
         const serviceLabel = s.title || "Servicio";
         const serviceCategory = normalizeServiceSlug(s.category || s.title || cleanSlug);
-        const agendarHref = serviceCategory ? `/agendar?service=${encodeURIComponent(serviceCategory)}` : "/agendar";
+        const servicePrice = Number(s.priceFrom || 0);
+        const agendarParams = new URLSearchParams();
+        if (serviceCategory) agendarParams.set("service", serviceCategory);
+        if (serviceLabel) agendarParams.append("services", serviceLabel);
+        if (servicePrice > 0) agendarParams.set("approxTotal", String(Math.round(servicePrice)));
+        const agendarHref = agendarParams.toString() ? `/agendar?${agendarParams.toString()}` : "/agendar";
         const waHref = buildWhatsAppUrl(
           buildContactMessage({
             service: serviceLabel,

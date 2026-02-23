@@ -103,6 +103,14 @@ function promoStatus(p: Promotion) {
 function promotionHref(p: Promotion) {
   return `/promociones/${encodeURIComponent((p.slug || p._id || "").trim())}`;
 }
+
+function agendarPromotionHref(p: Promotion) {
+  const params = new URLSearchParams();
+  const category = p.categories?.[0] || "";
+  if (category) params.set("service", category);
+  if (p.title) params.append("services", p.title);
+  return params.toString() ? `/agendar?${params.toString()}` : "/agendar";
+}
 ---
 
 <Layout title="Promociones | Podologos Via Morelos Tulpetlac">
@@ -201,7 +209,7 @@ function promotionHref(p: Promotion) {
                 )}
 
                 <div class="mt-6 flex gap-2">
-                  <a class="inline-flex flex-1 items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900" href="/agendar">
+                  <a class="inline-flex flex-1 items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900" href={agendarPromotionHref(p)}>
                     Agendar
                   </a>
                   <a class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900" href={promotionHref(p)}>
@@ -265,7 +273,7 @@ function promotionHref(p: Promotion) {
                 )}
 
                 <div class="mt-5 flex gap-3">
-                  <a class="inline-flex text-sm font-medium hover:underline" href="/agendar">Agendar</a>
+                  <a class="inline-flex text-sm font-medium hover:underline" href={agendarPromotionHref(p)}>Agendar</a>
                   <a class="inline-flex text-sm font-medium text-sky-700 hover:underline dark:text-sky-300" href={promotionHref(p)}>Ver detalle</a>
                 </div>
               </div>

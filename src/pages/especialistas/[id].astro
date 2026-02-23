@@ -50,6 +50,7 @@ const prefilledAgendarHref = (() => {
   const params = new URLSearchParams();
   if (serviceParam) params.set("service", serviceParam);
   if (specialistParam) params.set("specialist", specialistParam);
+  if (specialist?.specialty) params.append("services", specialist.specialty);
   const qs = params.toString();
   return qs ? `/agendar?${qs}` : "/agendar";
 })();

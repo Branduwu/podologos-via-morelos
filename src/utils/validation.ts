@@ -16,7 +16,9 @@ export function sanitizePhone(input: string): string {
 
 export function isValidPhone(digits: string): boolean {
   const clean = sanitizePhone(digits);
-  return clean.length >= 10 && clean.length <= 15;
+  if (clean.length < 10 || clean.length > 15) return false;
+  if (/^(\d)\1+$/.test(clean)) return false;
+  return true;
 }
 
 export function isValidPhoneInput(raw: string): boolean {

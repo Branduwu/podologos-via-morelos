@@ -3,7 +3,15 @@ import { clinic } from "../config/clinic";
 import { buildContactMessage, buildWhatsAppUrl } from "../utils/whatsapp";
 
 type Props = {
-  business?: any;
+  business?: {
+    address?: string;
+    phone?: string;
+    whatsappCitasNumber?: string;
+    mapsUrl?: string;
+    facebookUrl?: string;
+    instagramUrl?: string;
+    tiktokUrl?: string;
+  } | null;
 };
 
 const { business } = Astro.props as Props;

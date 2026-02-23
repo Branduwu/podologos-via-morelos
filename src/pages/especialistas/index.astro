@@ -61,9 +61,11 @@ const waNumber = String(business?.whatsappCitasNumber || "").replace(/\D/g, "");
 function agendarSpecialistHref(specialist: Specialist) {
   const service = normalizeServiceSlug(specialist.specialtyCategory || specialist.specialty || "");
   const slug = (specialist.slug || specialist._id || "").trim();
+  const serviceName = (specialist.specialty || "").trim();
   const params = new URLSearchParams();
   if (service) params.set("service", service);
   if (slug) params.set("specialist", slug);
+  if (serviceName) params.append("services", serviceName);
   const qs = params.toString();
   return qs ? `/agendar?${qs}` : "/agendar";
 }

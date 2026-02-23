@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { getPromotionByPath, getPromotions } from "../../lib/sanity.js";
+import { normalizeServiceSlug } from "../../utils/prefill";
 
 type Promotion = {
   _id: string;
@@ -45,6 +46,15 @@ function fmt(d: string | Date | null | undefined) {
     return String(d);
   }
 }
+
+const promoServiceParam = normalizeServiceSlug((promo?.appliesTo || [])[0] || "");
+const promoAgendarHref = (() => {
+  const params = new URLSearchParams();
+  if (promoServiceParam) params.set("service", promoServiceParam);
+  if (promo?.title) params.append("services", promo.title);
+  const qs = params.toString();
+  return qs ? `/agendar?${qs}` : "/agendar";
+})();
 ---
 
 <Layout title={`${promo.title} | Promociones`} description={promo.shortDescription || promo.description || "Detalle de promocion"}>
@@ -87,7 +97,7 @@ function fmt(d: string | Date | null | undefined) {
         )}
 
         <div class="mt-8 flex flex-wrap gap-3">
-          <a href="/agendar" class="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800">Agendar con esta promocion</a>
+          <a href={promoAgendarHref} class="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800">Agendar con esta promocion</a>
           <a href="/contacto" class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900">Resolver dudas</a>
         </div>
       </div>

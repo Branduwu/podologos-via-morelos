@@ -23,6 +23,7 @@ export type ClinicConfig = {
   googleMapsUrl: string;
   schedule: Record<DayKey, DaySchedule>;
   serviceCategories: Array<{ key: string; label: string }>;
+  quoteSelectionLimit: number;
 };
 
 export const clinic: ClinicConfig = {
@@ -49,5 +50,5 @@ export const clinic: ClinicConfig = {
     { key: "optica", label: "Optica / Optometria" },
     { key: "quiropractica", label: "Quiropractica" },
   ],
+  quoteSelectionLimit: 6,
 };
-

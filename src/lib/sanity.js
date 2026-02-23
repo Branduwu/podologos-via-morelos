@@ -2,6 +2,7 @@
 
 import { createClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
+import { reportError } from "./reportError.js";
 
 const sanityProjectId =
   import.meta.env.SANITY_PROJECT_ID ||
@@ -26,7 +27,7 @@ async function fetchSafe(query, params = {}, fallback = null) {
   try {
     return await sanityClient.fetch(query, params);
   } catch (error) {
-    console.error("[sanity] fetch failed", error);
+    await reportError("sanity.fetch", error, { query });
     return fallback;
   }
 }

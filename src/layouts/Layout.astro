@@ -1,6 +1,5 @@
 ﻿---
 import "../styles/global.css";
-import ThemeToggle from "../components/ThemeToggle.astro";
 import { getBusinessInfo } from "../lib/sanity.js";
 
 const {
@@ -79,7 +78,6 @@ const localBusinessLd = {
     <a href="#contenido-principal" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[120] focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900">
       Saltar al contenido principal
     </a>
-    <ThemeToggle />
     <div class="flex min-h-screen flex-col">
       <slot />
     </div>

@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { clinic } from "../config/clinic";
-import { getBusinessInfo, getServices, getSpecialists } from "../lib/sanity.js";
+import { getBusinessInfo, getPrices, getServices, getSpecialists } from "../lib/sanity.js";
 import { getPrefillFromUrl, normalizeServiceSlug } from "../utils/prefill";
 
 type ServiceItem = {
@@ -21,9 +21,16 @@ type Specialist = {
   active?: boolean;
 };
 
+type PriceRow = {
+  serviceTitle?: string;
+  category?: string;
+  priceFrom?: number;
+};
+
 const business = await getBusinessInfo();
 const services: ServiceItem[] = (await getServices()) || [];
 const specialists: Specialist[] = (await getSpecialists()) || [];
+const prices: PriceRow[] = (await getPrices()) || [];
 
 const whatsappNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
 const address = business?.address || clinic.address;
@@ -52,6 +59,29 @@ const specialistOptions = specialists
   }));
 
 const prefill = getPrefillFromUrl(Astro.url);
+const quoteSelectionLimit = Math.max(1, Number(clinic.quoteSelectionLimit || 6));
+const prefillServices = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteSelectionLimit) : [];
+const prefillApproxTotal = typeof prefill.approxTotal === "number" ? prefill.approxTotal : 0;
+
+const priceCatalog = prices.map((item) => ({
+  title: item.serviceTitle || "",
+  category: normalizeServiceSlug(item.category || ""),
+  priceFrom: Number(item.priceFrom || 0),
+}));
+
+const validServiceKeys = new Set(serviceOptions.map((option) => option.key));
+let resolvedPrefillService = prefill.service || "";
+if (!validServiceKeys.has(resolvedPrefillService)) {
+  const firstServiceFromList = prefillServices[0] || "";
+  const matchedCatalog = priceCatalog.find(
+    (row) =>
+      row.title &&
+      row.category &&
+      row.title.toLowerCase().trim() === firstServiceFromList.toLowerCase().trim() &&
+      validServiceKeys.has(row.category)
+  );
+  if (matchedCatalog?.category) resolvedPrefillService = matchedCatalog.category;
+}
 ---
 
 <Layout title="Agendar | Podologo Plus Care">
@@ -65,7 +95,21 @@ const prefill = getPrefillFromUrl(Astro.url);
       <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
         <h2 class="text-lg font-semibold">Datos de la cita</h2>
 
-        <form id="appointment-form" class="mt-4 grid gap-4" novalidate>
+        <form id="appointment-form" class="mt-4 grid gap-4" novalidate autocomplete="off">
+          <div id="quote-summary" class="rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm dark:border-sky-900/40 dark:bg-sky-950/20">
+            <p class="font-semibold text-slate-900 dark:text-slate-100">Resumen de cotizacion</p>
+            <p id="context-badge" class="mt-1 hidden text-xs font-semibold text-sky-700 dark:text-sky-300">
+              Agendando con especialista
+            </p>
+            <p id="quote-services" class="mt-1 text-slate-700 dark:text-slate-200">
+              {prefillServices.length > 0 ? prefillServices.join(" · ") : "Selecciona un servicio para ver precio aproximado."}
+            </p>
+            <p id="quote-total" class={`mt-1 text-slate-700 dark:text-slate-200 ${prefillApproxTotal > 0 ? "" : "hidden"}`}>
+              <span class="font-semibold">Total aproximado:</span>{" "}
+              {new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(prefillApproxTotal)}
+            </p>
+          </div>
+
           <div class="grid gap-2">
             <label class="text-sm font-medium" for="name">Nombre</label>
             <input id="name" name="name" required minlength="2" maxlength="80" autocomplete="name" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Tu nombre completo" />
@@ -73,17 +117,17 @@ const prefill = getPrefillFromUrl(Astro.url);
 
           <div class="grid gap-2">
             <label class="text-sm font-medium" for="phone">Telefono</label>
-            <input id="phone" name="phone" type="tel" required autocomplete="tel" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Ej. 55 2538 8683" />
-            <p class="text-xs text-slate-500 dark:text-slate-400">Acepta espacios o guiones. Se valida entre 10 y 15 digitos.</p>
-            <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">El telefono debe tener entre 10 y 15 digitos.</p>
+            <input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="numeric" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Ej. 55 2538 8683" />
+            <p class="text-xs text-slate-500 dark:text-slate-400">Acepta espacios o guiones. Se valida entre 10 y 15 digitos y evita numeros invalidos (ej. todos iguales).</p>
+            <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Ingresa un telefono valido de 10 a 15 digitos (no se permiten numeros repetidos como 0000000000).</p>
           </div>
 
           <div class="grid gap-2">
             <label class="text-sm font-medium" for="service">Servicio</label>
             <select id="service" name="service" required class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950">
-              <option value="" selected disabled>Selecciona servicio...</option>
+              <option value="" selected={!resolvedPrefillService} disabled>Selecciona servicio...</option>
               {serviceOptions.map((s) => (
-                <option value={s.key}>{s.label}</option>
+                <option value={s.key} selected={resolvedPrefillService === s.key}>{s.label}</option>
               ))}
             </select>
           </div>
@@ -161,13 +205,19 @@ const prefill = getPrefillFromUrl(Astro.url);
     whatsappNumber,
     serviceOptions,
     specialistOptions,
-    prefill,
+    prefill: {
+      ...prefill,
+      service: resolvedPrefillService || prefill.service,
+    },
+    quoteSelectionLimit,
+    priceCatalog,
   })}
 ></script>
 
 <script>
   import { buildAppointmentMessage, buildWhatsAppUrl } from "../utils/whatsapp";
   import { formatDateMX, isSunday, isValidPhone, isValidPhoneInput, isWithinSchedule, sanitizePhone } from "../utils/validation";
+  import { getPrefillFromUrl } from "../utils/prefill";
 
   type SpecialistOption = {
     slug: string;
@@ -178,8 +228,10 @@ const prefill = getPrefillFromUrl(Astro.url);
 
   type ClientConfig = {
     whatsappNumber?: string;
-    prefill?: { service?: string; specialist?: string };
+    prefill?: { service?: string; specialist?: string; services?: string[]; approxTotal?: number };
     specialistOptions?: SpecialistOption[];
+    quoteSelectionLimit?: number;
+    priceCatalog?: Array<{ title: string; category: string; priceFrom: number }>;
   };
 
   const configEl = document.getElementById("agendar-config");
@@ -198,15 +250,38 @@ const prefill = getPrefillFromUrl(Astro.url);
   const dateReadable = document.getElementById("date-readable") as HTMLParagraphElement | null;
   const phoneError = document.getElementById("phone-error") as HTMLParagraphElement | null;
   const timeHelp = document.getElementById("time-help") as HTMLParagraphElement | null;
+  const quoteServicesEl = document.getElementById("quote-services") as HTMLParagraphElement | null;
+  const quoteTotalEl = document.getElementById("quote-total") as HTMLParagraphElement | null;
+  const contextBadgeEl = document.getElementById("context-badge") as HTMLParagraphElement | null;
 
   if (!form || !sendBtn || !nameInput || !phoneInput || !serviceSelect || !specialistSelect || !dateInput || !timeSlotSelect || !shiftSelect || !notesInput) {
     throw new Error("No se encontraron elementos del formulario de agendar");
   }
 
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+
   const specialistItems: SpecialistOption[] = Array.isArray(config.specialistOptions)
     ? config.specialistOptions
     : [];
-  const prefill = config.prefill || {};
+  const serverPrefill = config.prefill || {};
+  const urlPrefill = getPrefillFromUrl(window.location.href);
+  const prefill = {
+    ...serverPrefill,
+    ...urlPrefill,
+    services: Array.isArray(urlPrefill.services) && urlPrefill.services.length > 0
+      ? urlPrefill.services
+      : (Array.isArray(serverPrefill.services) ? serverPrefill.services : []),
+    approxTotal: Number(urlPrefill.approxTotal || serverPrefill.approxTotal || 0),
+  };
+  const quoteLimit = Math.max(1, Number(config.quoteSelectionLimit || 6));
+  const selectedServicesFromPrefill = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
+  const approxTotalFromPrefill = Number(prefill.approxTotal || 0);
+  const hasSpecialistPrefill = Boolean(String(prefill.specialist || "").trim());
+  const priceCatalog = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
   const waNumber = String(config.whatsappNumber || "").replace(/\D/g, "");
   const scheduleByDay: Record<number, { open: string; close: string } | null> = {
     0: null,
@@ -232,6 +307,65 @@ const prefill = getPrefillFromUrl(Astro.url);
     setFieldErrorStyle(phoneInput, hasError);
     if (phoneError) phoneError.classList.toggle("hidden", !hasError);
     return valid;
+  };
+
+  const toMoneyMX = (value: number) =>
+    new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value || 0);
+
+  const getMinPriceByCategory = (category: string): number => {
+    const matches = priceCatalog
+      .filter((row) => row.category === category)
+      .map((row) => Number(row.priceFrom || 0))
+      .filter((value) => value > 0);
+    if (matches.length === 0) return 0;
+    return Math.min(...matches);
+  };
+
+  const getCurrentQuote = () => {
+    const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
+    const selectedCategory = String(serviceSelect.value || "");
+    const list = selectedServicesFromPrefill.length > 0
+      ? selectedServicesFromPrefill
+      : (selectedLabel ? [selectedLabel] : []);
+
+    let total = Number.isFinite(approxTotalFromPrefill) && approxTotalFromPrefill > 0 ? approxTotalFromPrefill : 0;
+    if (total <= 0 && selectedCategory && !hasSpecialistPrefill) {
+      total = getMinPriceByCategory(selectedCategory);
+    }
+
+    return { list, total };
+  };
+
+  const updateQuoteSummary = () => {
+    const { list, total } = getCurrentQuote();
+    const specialistSlug = String(prefill.specialist || "").trim();
+    const specialistName = specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)?.name || "";
+
+    if (contextBadgeEl) {
+      if (hasSpecialistPrefill) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = specialistName
+          ? `Agendando con especialista: ${specialistName}`
+          : "Agendando con especialista";
+      } else {
+        contextBadgeEl.classList.add("hidden");
+      }
+    }
+
+    if (quoteServicesEl) {
+      quoteServicesEl.textContent = list.length > 0
+        ? list.join(" · ")
+        : "Selecciona un servicio para ver precio aproximado.";
+    }
+
+    if (quoteTotalEl) {
+      if (total > 0) {
+        quoteTotalEl.classList.remove("hidden");
+        quoteTotalEl.innerHTML = `<span class="font-semibold">Total aproximado:</span> ${toMoneyMX(total)}`;
+      } else {
+        quoteTotalEl.classList.add("hidden");
+      }
+    }
   };
 
   const buildTimeSlots = (open: string, close: string): string[] => {
@@ -335,6 +469,21 @@ const prefill = getPrefillFromUrl(Astro.url);
       if (matchService) serviceValue = prefill.service;
     }
 
+    if (!serviceValue && selectedServicesFromPrefill.length > 0) {
+      const firstSelected = String(selectedServicesFromPrefill[0] || "").toLowerCase().trim();
+      const fromCatalog = priceCatalog.find((row) => {
+        const title = String(row.title || "").toLowerCase().trim();
+        const category = String(row.category || "").trim();
+        return Boolean(title) && Boolean(category) && title === firstSelected;
+      });
+      if (fromCatalog?.category) {
+        const existsInSelect = Array.from(serviceSelect.options).some(
+          (opt: HTMLOptionElement) => opt.value === fromCatalog.category
+        );
+        if (existsInSelect) serviceValue = fromCatalog.category;
+      }
+    }
+
     if (!serviceValue && prefill.specialist) {
       const specialistMatch = specialistItems.find((sp: SpecialistOption) => sp.slug === prefill.specialist);
       if (specialistMatch?.category) serviceValue = specialistMatch.category;
@@ -422,11 +571,14 @@ const prefill = getPrefillFromUrl(Astro.url);
     const specialistName = specialistValue
       ? (specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)?.name || specialistValue)
       : "Sin preferencia";
+    const quote = getCurrentQuote();
 
     const message = buildAppointmentMessage({
       name,
       phone,
       service: serviceSelect.options[serviceSelect.selectedIndex]?.text || service,
+      selectedServices: quote.list,
+      approxTotal: quote.total > 0 ? quote.total : undefined,
       specialist: specialistName,
       date: dateInput.value || undefined,
       time: timeSlotSelect.value || undefined,
@@ -444,13 +596,16 @@ const prefill = getPrefillFromUrl(Astro.url);
   const dd = String(today.getDate()).padStart(2, "0");
   dateInput.min = `${yyyy}-${mm}-${dd}`;
 
+  form.reset();
   applyPrefill();
   updateTimeLimitsByDate();
   updateDatePreview();
+  updateQuoteSummary();
   updateCta();
 
   serviceSelect.addEventListener("change", () => {
     renderSpecialists(serviceSelect.value, "");
+    updateQuoteSummary();
     updateCta();
   });
 

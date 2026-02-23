@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getPrices } from "../lib/sanity.js";
+import { clinic } from "../config/clinic";
 
 type PriceRow = {
   serviceTitle?: string;
@@ -13,6 +14,7 @@ type PriceRow = {
 };
 
 const prices: PriceRow[] = (await getPrices()) || [];
+const quoteSelectionLimit = Math.max(1, Number(clinic.quoteSelectionLimit || 6));
 
 const priceCategories = [
   { key: "all", label: "Todas" },
@@ -55,6 +57,14 @@ function moneyMXN(n: number | string | null | undefined) {
     return `$${num}`;
   }
 }
+
+function buildAgendarHref(price: PriceRow) {
+  const category = priceCategoryKey(price);
+  const title = encodeURIComponent(price.serviceTitle || "");
+  const priceFrom = Number(price.priceFrom);
+  const approxTotal = Number.isFinite(priceFrom) && priceFrom > 0 ? `&approxTotal=${priceFrom}` : "";
+  return `/agendar?service=${encodeURIComponent(category)}&services=${title}${approxTotal}`;
+}
 ---
 
 <Layout title="Precios | Podologos Via Morelos Tulpetlac">
@@ -85,8 +95,70 @@ function moneyMXN(n: number | string | null | undefined) {
             ))}
           </div>
 
-          <div class="mt-8 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
-            <table class="w-full text-sm">
+          <section class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950" id="quote-builder" data-quote-limit={quoteSelectionLimit}>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-sm font-semibold">Cotizacion rapida</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300">Puedes seleccionar varios servicios para enviar una sola solicitud por WhatsApp.</p>
+              </div>
+              <a
+                id="quote-agendar-link"
+                href="/agendar"
+                class="pointer-events-none inline-flex items-center justify-center rounded-xl bg-slate-400 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Selecciona servicios
+              </a>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <p><span class="font-semibold">Seleccionados:</span> <span id="quote-count">0</span></p>
+              <p><span class="font-semibold">Total aprox.:</span> <span id="quote-total">$0</span></p>
+            </div>
+            <p id="quote-list" class="mt-2 text-xs text-slate-600 dark:text-slate-300">Aun no has seleccionado servicios.</p>
+            <p id="quote-limit-msg" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-300">
+              Llegaste al limite de {quoteSelectionLimit} servicios. Quita uno para agregar otro.
+            </p>
+          </section>
+
+          <div id="prices-cards-mobile" class="mt-8 grid gap-3 md:hidden">
+            {prices.map((p: PriceRow) => (
+              <article
+                data-price-row
+                data-category={priceCategoryKey(p)}
+                data-service-title={p.serviceTitle || ""}
+                data-service-category={priceCategoryKey(p)}
+                data-service-price={Number(p.priceFrom || 0)}
+                class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950"
+              >
+                <p class="text-base font-semibold">{p.serviceTitle || "-"}</p>
+                <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+                  <p class="text-slate-600 dark:text-slate-300">Desde</p>
+                  <p class="font-medium">{moneyMXN(p.priceFrom)}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Duracion</p>
+                  <p class="font-medium">{p.duration || "-"}</p>
+                  <p class="text-slate-600 dark:text-slate-300">Nota</p>
+                  <p class="font-medium">{p.note || "-"}</p>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                  <a
+                    class="inline-flex w-full items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+                    href={buildAgendarHref(p)}
+                  >
+                    Quiero este servicio
+                  </a>
+                  <button
+                    type="button"
+                    data-select-service
+                    class="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    Agregar
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div class="mt-8 hidden overflow-x-auto rounded-3xl border border-slate-200 md:block dark:border-slate-800">
+            <table class="min-w-[760px] w-full text-sm">
               <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
                 <tr>
                   <th class="px-4 py-3 text-left font-medium">Servicio</th>
@@ -98,18 +170,34 @@ function moneyMXN(n: number | string | null | undefined) {
               </thead>
               <tbody id="prices-table-body">
                 {prices.map((p: PriceRow) => (
-                  <tr data-price-row data-category={priceCategoryKey(p)} class="border-t border-slate-200 dark:border-slate-800">
+                  <tr
+                    data-price-row
+                    data-category={priceCategoryKey(p)}
+                    data-service-title={p.serviceTitle || ""}
+                    data-service-category={priceCategoryKey(p)}
+                    data-service-price={Number(p.priceFrom || 0)}
+                    class="border-t border-slate-200 dark:border-slate-800"
+                  >
                     <td class="px-4 py-3 font-medium">{p.serviceTitle || "-"}</td>
                     <td class="px-4 py-3">{moneyMXN(p.priceFrom)}</td>
                     <td class="px-4 py-3">{p.duration || "-"}</td>
                     <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{p.note || ""}</td>
                     <td class="px-4 py-3">
-                      <a
-                        class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800"
-                        href={`/agendar?servicio=${encodeURIComponent(p.serviceTitle || "")}`}
-                      >
-                        Quiero este servicio
-                      </a>
+                      <div class="flex flex-wrap gap-2">
+                        <a
+                          class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800"
+                          href={buildAgendarHref(p)}
+                        >
+                          Quiero este servicio
+                        </a>
+                        <button
+                          type="button"
+                          data-select-service
+                          class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                          Agregar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -138,10 +226,22 @@ function moneyMXN(n: number | string | null | undefined) {
 </Layout>
 
 <script is:inline>
+  const quoteBuilder = document.getElementById("quote-builder");
+  const MAX_QUOTE_ITEMS = Math.max(1, Number(quoteBuilder?.getAttribute("data-quote-limit") || 6));
   const priceFilterButtons = Array.from(document.querySelectorAll("[data-price-filter]"));
   const priceRows = Array.from(document.querySelectorAll("[data-price-row]"));
+  const addButtons = Array.from(document.querySelectorAll("[data-select-service]"));
   const pricesEmpty = document.getElementById("prices-empty");
+  const quoteCount = document.getElementById("quote-count");
+  const quoteTotal = document.getElementById("quote-total");
+  const quoteList = document.getElementById("quote-list");
+  const quoteLimitMsg = document.getElementById("quote-limit-msg");
+  const quoteAgendarLink = document.getElementById("quote-agendar-link");
   let activePriceFilter = "all";
+  const selectedServices = new Map();
+
+  const moneyMX = (value) =>
+    new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value || 0);
 
   const updatePriceFilterUI = () => {
     priceFilterButtons.forEach((btn) => {
@@ -165,6 +265,78 @@ function moneyMXN(n: number | string | null | undefined) {
     if (pricesEmpty) pricesEmpty.classList.toggle("hidden", visibleCount > 0);
   };
 
+  const updateQuoteUI = () => {
+    const selected = Array.from(selectedServices.values());
+    const total = selected.reduce((acc, item) => acc + (Number(item.price) || 0), 0);
+    const reachedLimit = selected.length >= MAX_QUOTE_ITEMS;
+    if (quoteCount) quoteCount.textContent = String(selected.length);
+    if (quoteTotal) quoteTotal.textContent = moneyMX(total);
+    if (quoteLimitMsg) quoteLimitMsg.classList.toggle("hidden", !reachedLimit);
+
+    if (quoteList) {
+      quoteList.textContent = selected.length > 0
+        ? selected.map((item) => item.title).join(" · ")
+        : "Aun no has seleccionado servicios.";
+    }
+
+    if (!quoteAgendarLink) return;
+    if (selected.length === 0) {
+      quoteAgendarLink.classList.add("pointer-events-none", "bg-slate-400");
+      quoteAgendarLink.classList.remove("bg-sky-700", "hover:bg-sky-800");
+      quoteAgendarLink.textContent = "Selecciona servicios";
+      quoteAgendarLink.setAttribute("href", "/agendar");
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("service", selected[0].category || "podologia");
+    selected.forEach((item) => params.append("services", item.title));
+    if (total > 0) params.set("approxTotal", String(Math.round(total)));
+    quoteAgendarLink.setAttribute("href", `/agendar?${params.toString()}`);
+    quoteAgendarLink.classList.remove("pointer-events-none", "bg-slate-400");
+    quoteAgendarLink.classList.add("bg-sky-700", "hover:bg-sky-800");
+    quoteAgendarLink.textContent = "Cotizar servicios en agenda";
+
+    addButtons.forEach((button) => {
+      const row = button.closest("[data-price-row]");
+      const title = String(row?.getAttribute("data-service-title") || "").trim();
+      const isSelected = selectedServices.has(title);
+      const disableAdd = reachedLimit && !isSelected;
+
+      button.textContent = isSelected ? "Quitar" : "Agregar";
+      button.classList.toggle("bg-sky-100", isSelected);
+      button.classList.toggle("text-sky-800", isSelected);
+      button.classList.toggle("border-sky-300", isSelected);
+
+      button.toggleAttribute("disabled", disableAdd);
+      button.classList.toggle("opacity-50", disableAdd);
+      button.classList.toggle("cursor-not-allowed", disableAdd);
+    });
+  };
+
+  addButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest("[data-price-row]");
+      if (!row) return;
+
+      const title = String(row.getAttribute("data-service-title") || "").trim();
+      const category = String(row.getAttribute("data-service-category") || "").trim();
+      const price = Number(row.getAttribute("data-service-price") || 0);
+      if (!title) return;
+
+      if (selectedServices.has(title)) {
+        selectedServices.delete(title);
+      } else {
+        if (selectedServices.size >= MAX_QUOTE_ITEMS) {
+          updateQuoteUI();
+          return;
+        }
+        selectedServices.set(title, { title, category, price });
+      }
+      updateQuoteUI();
+    });
+  });
+
   priceFilterButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       activePriceFilter = btn.dataset.priceFilter || "all";
@@ -175,4 +347,5 @@ function moneyMXN(n: number | string | null | undefined) {
 
   updatePriceFilterUI();
   applyPriceFilter();
+  updateQuoteUI();
 </script>

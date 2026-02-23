@@ -14,6 +14,8 @@ type HomePromo = {
   startDate?: string;
   endDate?: string;
   pinned?: boolean;
+  appliesTo?: string[];
+  serviceCategories?: string[];
   imageUrl?: string;
 };
 
@@ -120,6 +122,29 @@ function excerpt(p: HomePromo) {
 
 function promotionHref(p: HomePromo) {
   return `/promociones/${encodeURIComponent((p.slug || p._id || "").trim())}`;
+}
+
+function normalizeCategory(value: string | null | undefined) {
+  const raw = String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+  if (!raw) return "";
+  if (raw.includes("podolog")) return "podologia";
+  if (raw.includes("psicolog")) return "psicologia";
+  if (raw.includes("optic") || raw.includes("optometr")) return "optica";
+  if (raw.includes("quiropr")) return "quiropractica";
+  return "";
+}
+
+function agendarPromoHref(p: HomePromo) {
+  const params = new URLSearchParams();
+  const category = normalizeCategory((p.appliesTo || [])[0]) || normalizeCategory((p.serviceCategories || [])[0]);
+  if (category) params.set("service", category);
+  if (p.title) params.append("services", p.title);
+  const qs = params.toString();
+  return qs ? `/agendar?${qs}` : "/agendar";
 }
 
 function extractYouTubeId(url?: string) {
@@ -281,7 +306,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
                   <p class="type-meta mt-3 text-slate-500 dark:text-slate-400">Vigencia: {fmt(p.startDate)} a {fmt(p.endDate)}</p>
 
                   <div class="mt-auto flex gap-2 pt-4">
-                    <a class="inline-flex flex-1 items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800" href="/agendar">
+                    <a class="inline-flex flex-1 items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800" href={agendarPromoHref(p)}>
                       Agendar
                     </a>
                     <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900" href={promotionHref(p)}>

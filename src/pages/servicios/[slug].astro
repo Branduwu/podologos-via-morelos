@@ -4,6 +4,7 @@ import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { clinic } from "../../config/clinic";
 import { sanityClient } from "../../lib/sanity.js";
+import { reportError } from "../../lib/reportError.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
 import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
 
@@ -65,7 +66,7 @@ export async function getStaticPaths() {
       }
     `);
   } catch (error) {
-    console.error("[servicios/[slug]] getStaticPaths failed", error);
+    await reportError("servicios.getStaticPaths", error);
     return [];
   }
 
@@ -87,7 +88,13 @@ const waHref = service?.title
   : "";
 
 const serviceKey = normalizeServiceSlug(service?.category || service?.title || slugString);
-const agendarServiceHref = serviceKey ? `/agendar?service=${encodeURIComponent(serviceKey)}` : "/agendar";
+const agendarParams = new URLSearchParams();
+if (serviceKey) agendarParams.set("service", serviceKey);
+if (service?.title) agendarParams.append("services", service.title);
+if (typeof service?.priceFrom === "number" && service.priceFrom > 0) {
+  agendarParams.set("approxTotal", String(Math.round(service.priceFrom)));
+}
+const agendarServiceHref = agendarParams.toString() ? `/agendar?${agendarParams.toString()}` : "/agendar";
 ---
 
 <Layout title={`${service?.title || "Servicio"} | Podologos Via Morelos`}>
