@@ -1,43 +1,117 @@
-# Astro Starter Kit: Minimal
+# Podologos Via Morelos
 
-```sh
-npm create astro@latest -- --template minimal
+Sitio web en Astro para Podologos Via Morelos con contenido administrado desde Sanity.
+
+## Stack
+
+- Astro 5
+- Tailwind CSS 4
+- Sanity Studio (carpeta `cms/`)
+- Sentry (`@sentry/astro`) para observabilidad
+
+## Estructura
+
+- `src/`: sitio publico (paginas, componentes, layout, estilos)
+- `src/lib/sanity.js`: cliente y consultas hacia Sanity
+- `cms/`: configuracion de Studio y schemas de contenido
+- `astro.config.mjs`: integraciones globales (Tailwind y Sentry)
+
+## Requisitos
+
+- Node.js 20+
+- npm
+
+## Ejecutar sitio web
+
+```bash
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Build de produccion:
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+npm run build
+npm run preview
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Ejecutar CMS (Sanity Studio)
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```bash
+cd cms
+npm install
+npm run dev
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+Guia para editores de contenido:
 
-## 🧞 Commands
+- `cms/GUIA-EDITORES.md`
 
-All commands are run from the root of the project, from a terminal:
+## Calidad tecnica
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```bash
+npm run check
+npm run lint
+npm run lint:cms
+npm run quality
+```
 
-## 👀 Want to learn more?
+- `check`: validacion de tipos y templates Astro.
+- `lint`: ESLint para archivos JS/MJS del sitio.
+- `lint:cms`: lint del Studio de Sanity.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Observabilidad (Sentry)
+
+1. Copia `.env.example` a `.env`.
+2. Configura:
+   - `PUBLIC_SENTRY_DSN`
+   - `PUBLIC_SENTRY_TRACES_SAMPLE_RATE`
+   - `SENTRY_DSN` (opcional, para entorno server)
+   - `SENTRY_TRACES_SAMPLE_RATE` (opcional, para entorno server)
+   - `SENTRY_AUTH_TOKEN` (solo si subiras source maps)
+   - `SENTRY_ORG` (solo con source maps)
+   - `SENTRY_PROJECT` (solo con source maps)
+3. Ejecuta build.
+
+La integracion de Sentry ya esta conectada en `astro.config.mjs`.
+
+## Entornos Sanity (dev/staging/prod)
+
+Configura variables para separar proyectos/datasets por entorno:
+
+- Sitio (`src/lib/sanity.js`):
+  - `SANITY_PROJECT_ID`
+  - `SANITY_DATASET`
+  - (fallback opcional) `PUBLIC_SANITY_PROJECT_ID`, `PUBLIC_SANITY_DATASET`
+- CMS (`cms/sanity.config.js`):
+  - `SANITY_STUDIO_PROJECT_ID`
+  - `SANITY_STUDIO_DATASET`
+
+Sin variables, el proyecto usa fallback local de desarrollo.
+
+## Headers de seguridad (Vercel)
+
+Se agrego `vercel.json` con:
+
+- `Content-Security-Policy` explicita
+- `Referrer-Policy`
+- `X-Content-Type-Options`
+- `X-Frame-Options`
+- `Permissions-Policy`
+- `Strict-Transport-Security`
+
+Si despliegas en otro hosting, replica esas cabeceras en su configuracion equivalente.
+
+## Modelo de contenido
+
+- `businessInfo`: datos generales del negocio
+- `service`: catalogo de servicios y slugs publicos
+- `promotion`: promociones activas y destacadas
+- `galleryItem`: imagenes y videos de galeria
+- `priceItem`: precios por servicio
+
+## Notas operativas
+
+- Los slugs de `service` se validan para evitar rutas invalidas en build estatico.
+- Las consultas usan fallback seguro cuando Sanity falla.
+- Usa `active` en `promotion`, `galleryItem` y `priceItem` para publicar u ocultar.

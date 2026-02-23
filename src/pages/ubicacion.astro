@@ -1,0 +1,256 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getBusinessInfo } from "../lib/sanity.js";
+
+const business = await getBusinessInfo();
+const mapsUrl = business?.mapsUrl || "https://www.google.com/maps";
+const phoneDigits = String(business?.phone || "").replace(/\D/g, "");
+const whatsappDigits = String(business?.whatsappCitasNumber || "").replace(/\D/g, "");
+const callHref = phoneDigits ? `tel:${phoneDigits}` : null;
+
+const zoneText = business?.locationZoneText || "Sta. Maria Tulpetlac, Ecatepec (sobre Via Morelos).";
+const referencesText =
+  business?.locationReferencesText ||
+  "Consulta referencias exactas por WhatsApp para llegar mas facil.";
+const parkingText = business?.locationParkingText || "Por confirmar";
+const accessText = business?.locationAccessText || "Por confirmar";
+const guideTips =
+  Array.isArray(business?.locationGuideTips) && business.locationGuideTips.length > 0
+    ? business.locationGuideTips
+    : [
+        'Llegas mas facil si buscas "Podologo Plus Care" en Google Maps.',
+        "Atencion con cita para evitar tiempos de espera.",
+        "Si tienes estudios o recetas previas, traelos (opcional).",
+      ];
+
+const serviceGuides = {
+  podologia: [
+    "Trae calzado comodo y, si puedes, sandalias para revision rapida.",
+    "Evita cortar la una 24 a 48 horas antes si vienes por una encarnada.",
+  ],
+  quiropractica: [
+    "Trae ropa comoda o facil de mover para la sesion.",
+    "Evita cargar cosas pesadas antes de tu cita.",
+  ],
+  psicologia: [
+    "Llega 5 a 10 minutos antes para iniciar sin prisa.",
+    "Si quieres, anota 2 a 3 puntos de lo que te gustaria trabajar.",
+  ],
+  optica: [
+    "Si usas lentes, traelos junto con tu graduacion anterior (si la tienes).",
+    "Evita usar gotas o medicacion ocular sin indicacion ese dia.",
+  ],
+};
+
+const serviceGuideLabels = {
+  podologia: "Podologia",
+  quiropractica: "Quiropractica",
+  psicologia: "Psicologia",
+  optica: "Optica",
+};
+
+const defaultServiceGuideKey = "podologia";
+const defaultServiceGuideTips = serviceGuides[defaultServiceGuideKey];
+const facadeImage =
+  business?.locationFacadeImageUrl ||
+  "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?auto=format&fit=crop&w=1600&q=80";
+
+const now = new Date();
+const day = now.getDay();
+const hour = now.getHours() + now.getMinutes() / 60;
+let todaySchedule = "Domingo cerrado";
+let isOpenNow = false;
+
+if (day >= 1 && day <= 5) {
+  todaySchedule = "Lunes a Viernes 10:00 a 18:00";
+  isOpenNow = hour >= 10 && hour < 18;
+} else if (day === 6) {
+  todaySchedule = "Sabado 10:00 a 16:00";
+  isOpenNow = hour >= 10 && hour < 16;
+}
+---
+
+<Layout title={`Ubicacion | ${business?.name || "Podologos Via Morelos"}`}>
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Ubicacion</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">{business?.address || "Direccion no configurada todavia."}</p>
+
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <section class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-lg font-semibold">Como llegar</h2>
+          <span class={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${isOpenNow ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"}`}>
+            {isOpenNow ? "Hoy: Abierto" : "Hoy: Cerrado"}
+          </span>
+        </div>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{todaySchedule}</p>
+
+        <div class="mt-8 grid gap-2 text-sm text-slate-800 dark:text-slate-100">
+          <p><strong>Direccion:</strong> {business?.address || "-"}</p>
+          <p><strong>Telefono:</strong> {business?.phone || "-"}</p>
+          <p><strong>WhatsApp:</strong> {whatsappDigits || "-"}</p>
+          <p><strong>Horarios:</strong> {business?.hoursText || "Lunes a Viernes 10:00 a 18:00 · Sabado 10:00 a 16:00 · Domingo cerrado"}</p>
+          <p><strong>Zona:</strong> {zoneText}</p>
+          <p><strong>Referencias:</strong> {referencesText}</p>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-4 py-3 text-sm font-medium text-white hover:bg-sky-800" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+            Como llegar
+          </a>
+          {callHref && (
+            <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href={callHref}>
+              Llamar
+            </a>
+          )}
+          <button type="button" id="copy-address-btn" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">
+            Copiar direccion
+          </button>
+        </div>
+
+        <div class="mt-7 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Guia rapida</h3>
+          <ul class="mt-3 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+            {guideTips.map((tip: string) => (
+              <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{tip}</span></li>
+            ))}
+          </ul>
+
+          <div class="mt-5 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Selecciona tu servicio
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2" id="service-guide-filters">
+              {Object.entries(serviceGuideLabels).map(([key, label]) => (
+                <button
+                  type="button"
+                  data-service-guide-filter={key}
+                  class={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                    key === defaultServiceGuideKey
+                      ? "border-sky-700 bg-sky-700 text-white"
+                      : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100" id="service-guide-title">
+                Si vienes a {serviceGuideLabels[defaultServiceGuideKey]}
+              </p>
+              <ul class="mt-2 grid gap-2 text-sm text-slate-700 dark:text-slate-300" id="service-guide-list">
+                {defaultServiceGuideTips.map((tip) => (
+                  <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{tip}</span></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p class="mt-3 text-sm text-slate-700 dark:text-slate-300"><strong>Estacionamiento:</strong> {parkingText}</p>
+          <p class="mt-1 text-sm text-slate-700 dark:text-slate-300"><strong>Acceso:</strong> {accessText}</p>
+        </div>
+      </section>
+
+      <aside class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
+        <h2 class="text-lg font-semibold">Mapa</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          Si el mapa no carga, usa el boton "Como llegar" o la foto de fachada para ubicar la entrada.
+        </p>
+
+        <a class="mt-3 inline-flex items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:opacity-90 dark:bg-white dark:text-slate-900" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+          Abrir ruta en Google Maps
+        </a>
+
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+          <iframe
+            title="Mapa"
+            class="h-[28rem] w-full"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(business?.address || "Via Morelos 232, Ecatepec")}&output=embed`}
+          ></iframe>
+        </div>
+
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+          <img src={facadeImage} alt="Fachada o entrada del consultorio" class="h-52 w-full object-cover" loading="lazy" />
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script
+  is:inline
+  define:vars={{
+    address: business?.address || "",
+    serviceGuides,
+    serviceGuideLabels,
+    defaultServiceGuideKey,
+  }}
+>
+  const copyButton = document.getElementById("copy-address-btn");
+  if (copyButton) {
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(String(address || ""));
+        copyButton.textContent = "Direccion copiada";
+      } catch {
+        copyButton.textContent = "No se pudo copiar";
+      }
+      setTimeout(() => {
+        copyButton.textContent = "Copiar direccion";
+      }, 1800);
+    });
+  }
+
+  const guideButtons = Array.from(document.querySelectorAll("[data-service-guide-filter]"));
+  const guideTitle = document.getElementById("service-guide-title");
+  const guideList = document.getElementById("service-guide-list");
+  let activeGuide = defaultServiceGuideKey;
+
+  const renderGuide = () => {
+    if (!guideTitle || !guideList) return;
+    const label = serviceGuideLabels?.[activeGuide] || "Servicio";
+    const tips = Array.isArray(serviceGuides?.[activeGuide]) ? serviceGuides[activeGuide] : [];
+
+    guideTitle.textContent = `Si vienes a ${label}`;
+    guideList.replaceChildren();
+    tips.forEach((tip) => {
+      const li = document.createElement("li");
+      li.className = "flex items-start gap-2";
+      const dot = document.createElement("span");
+      dot.className = "mt-1 h-2 w-2 rounded-full bg-sky-600";
+      const text = document.createElement("span");
+      text.textContent = String(tip || "");
+      li.appendChild(dot);
+      li.appendChild(text);
+      guideList.appendChild(li);
+    });
+  };
+
+  const updateGuideButtons = () => {
+    guideButtons.forEach((btn) => {
+      const isActive = btn.dataset.serviceGuideFilter === activeGuide;
+      btn.classList.toggle("border-sky-700", isActive);
+      btn.classList.toggle("bg-sky-700", isActive);
+      btn.classList.toggle("text-white", isActive);
+    });
+  };
+
+  guideButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeGuide = btn.dataset.serviceGuideFilter || defaultServiceGuideKey;
+      updateGuideButtons();
+      renderGuide();
+    });
+  });
+
+  updateGuideButtons();
+  renderGuide();
+</script>

@@ -1,0 +1,191 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { getServices } from "../../lib/sanity.js";
+import { clinic } from "../../config/clinic";
+import { normalizeServiceSlug } from "../../utils/prefill";
+import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
+
+type ServiceItem = {
+  title?: string;
+  slug?: string | { current?: string };
+  short?: string;
+  duration?: string;
+  priceFrom?: number;
+  category?: string;
+};
+
+const services: ServiceItem[] = (await getServices()) || [];
+const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const waNumber = clinic.whatsappNumber;
+const serviceCategories = [
+  { key: "all", label: "Todas" },
+  { key: "podologia", label: "Podologia" },
+  { key: "psicologia", label: "Psicologia" },
+  { key: "optica", label: "Optica" },
+  { key: "quiropractica", label: "Quiropractica" },
+];
+
+function moneyMXN(n: number | string | null | undefined) {
+  const num = Number(n);
+  if (Number.isNaN(num) || num <= 0) return "";
+  try {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+      maximumFractionDigits: 0,
+    }).format(num);
+  } catch {
+    return `$${num}`;
+  }
+}
+---
+
+<Layout title="Servicios | Podologos Via Morelos Tulpetlac">
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Servicios</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">Conoce que incluye cada servicio y su precio desde.</p>
+
+    {services.length === 0 && (
+      <div class="mt-8 rounded-2xl border border-slate-200 p-6 text-slate-600 dark:border-slate-800 dark:text-slate-300">
+        Pronto compartiremos mas servicios. Mientras tanto, puedes agendar tu cita.
+      </div>
+    )}
+
+    {services.length > 0 && (
+      <div class="mt-6 flex flex-wrap gap-2" id="service-filters">
+        {serviceCategories.map((cat) => (
+          <button
+            type="button"
+            data-service-filter={cat.key}
+            class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {services.map((s: ServiceItem) => {
+        const rawSlug = typeof s.slug === "string" ? s.slug : s.slug?.current;
+        const cleanSlug = typeof rawSlug === "string" ? rawSlug.trim() : "";
+        const hasValidSlug = validSlugRe.test(cleanSlug);
+        const detailHref = hasValidSlug ? `/servicios/${cleanSlug}` : "/servicios";
+        const serviceLabel = s.title || "Servicio";
+        const serviceCategory = normalizeServiceSlug(s.category || s.title || cleanSlug);
+        const agendarHref = serviceCategory ? `/agendar?service=${encodeURIComponent(serviceCategory)}` : "/agendar";
+        const waHref = buildWhatsAppUrl(
+          buildContactMessage({
+            service: serviceLabel,
+            reason: "Quiero informacion y agendar este servicio.",
+          }),
+          waNumber
+        );
+
+        return (
+          <article data-service-card data-category={serviceCategory || "general"} class="rounded-3xl border border-slate-200 p-6 dark:border-slate-800">
+            <h2 class="text-lg font-semibold">{serviceLabel}</h2>
+
+            {s.short && <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{s.short}</p>}
+
+            <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+              {s.duration && (
+                <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
+                  Duracion {s.duration}
+                </span>
+              )}
+
+              {!!moneyMXN(s.priceFrom) && (
+                <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
+                  Desde {moneyMXN(s.priceFrom)}
+                </span>
+              )}
+            </div>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a
+                class="inline-flex flex-1 items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
+                href={detailHref}
+              >
+                Ver
+              </a>
+
+              <a
+                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                href="/precios"
+              >
+                Precios
+              </a>
+
+              <a
+                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                href={agendarHref}
+              >
+                Agendar este servicio
+              </a>
+
+              <a
+                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                href={waHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <p id="services-empty" class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+      No hay servicios en esa categoria todavia.
+    </p>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script is:inline>
+  const serviceFilterButtons = Array.from(document.querySelectorAll("[data-service-filter]"));
+  const serviceCards = Array.from(document.querySelectorAll("[data-service-card]"));
+  const servicesEmpty = document.getElementById("services-empty");
+  let activeServiceFilter = "all";
+
+  const updateServiceFilterUI = () => {
+    serviceFilterButtons.forEach((btn) => {
+      const isActive = btn.dataset.serviceFilter === activeServiceFilter;
+      btn.classList.toggle("bg-sky-700", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("border-sky-700", isActive);
+    });
+  };
+
+  const applyServiceFilter = () => {
+    let visibleCount = 0;
+
+    serviceCards.forEach((card) => {
+      const category = card.dataset.category || "general";
+      const visible = activeServiceFilter === "all" || category === activeServiceFilter;
+      card.classList.toggle("hidden", !visible);
+      if (visible) visibleCount += 1;
+    });
+
+    if (servicesEmpty) servicesEmpty.classList.toggle("hidden", visibleCount > 0);
+  };
+
+  serviceFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeServiceFilter = btn.dataset.serviceFilter || "all";
+      updateServiceFilterUI();
+      applyServiceFilter();
+    });
+  });
+
+  updateServiceFilterUI();
+  applyServiceFilter();
+</script>

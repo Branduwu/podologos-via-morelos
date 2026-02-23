@@ -1,0 +1,169 @@
+---
+import { getBusinessInfo } from "../lib/sanity.js";
+
+const business = await getBusinessInfo();
+
+const businessName = business?.name || "Podologos Via Morelos";
+const businessArea = business?.area || "Tulpetlac, Ecatepec";
+const address = business?.address || "Direccion pendiente";
+const phone = business?.phone || "Telefono pendiente";
+const hours = business?.hoursText || "Horario pendiente";
+const logoUrl = business?.logoImageUrl || "/default-logo-clinica.svg";
+
+const facebookUrl = business?.facebookUrl || "";
+const instagramUrl = business?.instagramUrl || "";
+const tiktokUrl = business?.tiktokUrl || "";
+
+const socialLinks = [
+  { key: "facebook", label: "Facebook", url: facebookUrl },
+  { key: "instagram", label: "Instagram", url: instagramUrl },
+  { key: "tiktok", label: "TikTok", url: tiktokUrl },
+];
+
+const navItems = [
+  { href: "/", label: "Inicio" },
+  { href: "/servicios", label: "Servicios" },
+  { href: "/especialistas", label: "Especialistas" },
+  { href: "/precios", label: "Precios" },
+  { href: "/ubicacion", label: "Ubicacion" },
+  { href: "/promociones", label: "Promociones" },
+  { href: "/galeria", label: "Fotos y videos" },
+  { href: "/nosotros", label: "Nosotros" },
+  { href: "/faq", label: "FAQ" },
+  { href: "/contacto", label: "Contacto" },
+  { href: "/agendar", label: "Agenda tu cita" },
+];
+
+const currentPath = (Astro.url?.pathname || "/").replace(/\/+$/, "") || "/";
+const isActive = (href: string) => {
+  const cleanHref = href.replace(/\/+$/, "") || "/";
+  if (cleanHref === "/") return currentPath === "/";
+  return currentPath === cleanHref || currentPath.startsWith(`${cleanHref}/`);
+};
+---
+
+<header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+  <div class="hidden border-b border-slate-200 bg-slate-50/90 md:block dark:border-slate-800 dark:bg-slate-900/60">
+    <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-2 text-[13px] text-slate-600 dark:text-slate-300">
+      <p id="today-hours" class="truncate md:-ml-4">{hours}</p>
+      <p class="hidden truncate lg:block">{address}</p>
+      <p class="font-semibold text-sky-700 md:-mr-2 dark:text-sky-300">Tel: {phone}</p>
+    </div>
+  </div>
+
+  <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3">
+    <a href="/" class="flex items-center gap-3 md:-ml-16">
+      <img src={logoUrl} alt={businessName} class="h-11 w-auto rounded-md object-contain" loading="eager" />
+      <div>
+        <p class="text-[1.08rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">{businessName}</p>
+        <p class="text-sm font-medium text-slate-600 dark:text-slate-300">{businessArea}</p>
+      </div>
+    </a>
+
+    <div class="hidden items-center gap-2 md:ml-auto md:flex md:-mr-4">
+      <div class="ml-1 flex items-center gap-2">
+        {socialLinks.map((social) => {
+          const configured = Boolean(social.url);
+          const sharedClass = configured
+            ? "rounded-full border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            : "rounded-full border border-slate-200 p-1.5 text-slate-400 opacity-70 cursor-not-allowed dark:border-slate-700 dark:text-slate-500";
+
+          return (
+            <a
+              class={sharedClass}
+              href={configured ? social.url : "#"}
+              target={configured ? "_blank" : undefined}
+              rel={configured ? "noopener noreferrer" : undefined}
+              aria-label={social.label}
+              title={configured ? social.label : `Configura ${social.label} en CMS > Informacion del negocio > Redes`}
+              aria-disabled={configured ? "false" : "true"}
+              tabindex={configured ? "0" : "-1"}
+            >
+              {social.key === "facebook" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M13 9h3V6h-3c-2.8 0-5 2.2-5 5v2H6v3h2v5h3v-5h3l1-3h-4v-2c0-1.1.9-2 2-2z"/></svg>}
+              {social.key === "instagram" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>}
+              {social.key === "tiktok" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M14 3c.4 1.7 1.8 3 3.5 3.2V9c-1.4-.1-2.6-.6-3.5-1.4V14a6 6 0 1 1-5.4-6v2.8a3.2 3.2 0 1 0 2.6 3.2V3H14z"/></svg>}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="ml-auto inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 md:hidden dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+      data-mobile-menu-button
+      aria-expanded="false"
+      aria-controls="mobile-nav-panel"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"></path>
+      </svg>
+      Menu
+    </button>
+  </div>
+
+  <div class="hidden border-t border-slate-200 px-4 py-3 md:block dark:border-slate-800">
+    <nav class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[15px] font-medium">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          aria-current={isActive(item.href) ? "page" : undefined}
+          class={`nav-link ${isActive(item.href) ? "text-sky-700 dark:text-sky-300 after:scale-x-100 font-semibold" : "hover:text-sky-700 dark:hover:text-sky-300"}`}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+
+  <div id="mobile-nav-panel" class="hidden border-t border-sky-100 bg-white px-4 pb-4 pt-3 md:hidden dark:border-slate-800 dark:bg-slate-950">
+    <p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Navegacion</p>
+    <nav class="grid gap-1 text-sm font-medium">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          aria-current={isActive(item.href) ? "page" : undefined}
+          class={`rounded-lg px-3 py-2 ${isActive(item.href) ? "bg-sky-100 text-sky-800 dark:bg-slate-800 dark:text-sky-300" : "hover:bg-sky-50 dark:hover:bg-slate-900"}`}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+  </div>
+</header>
+
+<script is:inline>
+  (() => {
+    const todayHoursEl = document.getElementById("today-hours");
+    const button = document.querySelector("[data-mobile-menu-button]");
+    const panel = document.getElementById("mobile-nav-panel");
+    if (!button || !panel) return;
+
+    if (todayHoursEl) {
+      const day = new Date().getDay();
+      const todayText =
+        day >= 1 && day <= 5
+          ? "Hoy: Lunes - Viernes 10 a.m. - 6 p.m."
+          : day === 6
+            ? "Hoy: Sabado 10 a.m. - 4 p.m."
+            : "Hoy: Domingo Cerrado";
+      todayHoursEl.textContent = todayText;
+    }
+
+    const closeMenu = () => {
+      panel.classList.add("hidden");
+      button.setAttribute("aria-expanded", "false");
+    };
+
+    button.addEventListener("click", () => {
+      const willOpen = panel.classList.contains("hidden");
+      panel.classList.toggle("hidden");
+      button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
+
+    panel.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
+  })();
+</script>

@@ -1,0 +1,189 @@
+@config "../../tailwind.config.js";
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --brand-primary: #0369a1;
+    --brand-primary-strong: #075985;
+    --brand-soft: #e0f2fe;
+  }
+
+  body {
+    font-family: "Source Sans 3", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    background-color: #f1f5f9;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+
+  main {
+    flex: 1 0 auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    transition: color 180ms ease, transform 180ms ease;
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.28rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 220ms ease;
+    opacity: 0.9;
+  }
+
+  .nav-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 180ms ease, transform 180ms ease;
+  }
+
+  .footer-link::before {
+    content: "";
+    width: 0.32rem;
+    height: 0.32rem;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .footer-link:hover,
+  .footer-link:focus-visible {
+    transform: translateX(2px);
+  }
+
+  .footer-link:hover::before,
+  .footer-link:focus-visible::before {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+
+  .rounded-2xl {
+    border-radius: 1.15rem;
+  }
+
+  .rounded-3xl {
+    border-radius: 1.5rem;
+  }
+
+  .border {
+    border-width: 1.2px;
+  }
+
+  .type-hero-eyebrow {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .type-hero-title {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .type-hero-subtitle {
+    font-size: clamp(1.03rem, 1.4vw, 1.28rem);
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  .type-section-title {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .type-section-subtitle {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+
+  .type-card-title {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.2rem;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .type-card-body {
+    font-size: 1rem;
+    line-height: 1.62;
+    font-weight: 500;
+  }
+
+  .type-meta {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .type-faq-question {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.12rem;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .type-faq-answer {
+    font-size: 1rem;
+    line-height: 1.68;
+    font-weight: 500;
+  }
+
+  .type-footer-title {
+    font-family: "Manrope", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .type-footer-body {
+    font-size: 0.96rem;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+}

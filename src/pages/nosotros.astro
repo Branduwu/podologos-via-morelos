@@ -1,0 +1,190 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getAboutSection, getBusinessInfo, getServices, getSpecialists } from "../lib/sanity.js";
+
+type AboutSection = {
+  title?: string;
+  intro?: string;
+  secondary?: string;
+  keyPoints?: string[];
+  specialistsTitle?: string;
+  specialistsSubtitle?: string;
+  servicesTitle?: string;
+  servicesSubtitle?: string;
+  mainImageUrl?: string;
+  galleryImageUrls?: string[];
+};
+
+type Specialist = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  shortBio?: string;
+  focusAreas?: string[];
+  ctaText?: string;
+  ctaUrl?: string;
+  useWhatsAppButton?: boolean;
+  whatsAppMessage?: string;
+  photoUrl?: string;
+};
+
+const business = await getBusinessInfo();
+const about: AboutSection | null = await getAboutSection();
+const services = (await getServices()) || [];
+const specialists: Specialist[] = (await getSpecialists()) || [];
+
+const waNumber = (business?.whatsappCitasNumber || "").replace(/\D/g, "");
+
+const title = about?.title || "Nosotros";
+const intro =
+  about?.intro ||
+  "Somos un centro integral de salud en Tulpetlac con atencion cercana, profesional y enfocada en resultados reales para cada paciente.";
+const secondary =
+  about?.secondary ||
+  "Integramos podologia, psicologia, optica y quiropractica para ayudarte a cuidar tu bienestar en un solo lugar.";
+const mainImage =
+  about?.mainImageUrl ||
+  "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1400&q=80";
+const points = Array.isArray(about?.keyPoints) ? about.keyPoints.filter(Boolean).slice(0, 8) : [];
+const gallery = Array.isArray(about?.galleryImageUrls) ? about.galleryImageUrls.filter(Boolean).slice(0, 6) : [];
+const specialistsTitle = about?.specialistsTitle || "Nuestros especialistas";
+const specialistsSubtitle =
+  about?.specialistsSubtitle || "Conoce a las personas que atienden cada especialidad en nuestra clinica.";
+const servicesTitle = about?.servicesTitle || "Especialidades que atendemos";
+const servicesSubtitle = about?.servicesSubtitle || "Atendemos diferentes necesidades de salud con enfoque integral.";
+
+function specialistLink(specialist: Specialist) {
+  const shouldUseWhatsApp = specialist.useWhatsAppButton !== false;
+
+  if (shouldUseWhatsApp && waNumber) {
+    const message =
+      specialist.whatsAppMessage?.trim() ||
+      `Hola, quiero agendar una cita con ${specialist.name || "el especialista"}.`;
+    return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+  }
+
+  return specialist.ctaUrl || "/agendar";
+}
+
+function specialistProfileHref(specialist: Specialist) {
+  return `/especialistas/${encodeURIComponent((specialist.slug || specialist._id || "").trim())}`;
+}
+---
+
+<Layout title={`Nosotros | ${business?.name || "Podologos Via Morelos"}`}>
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <section class="grid gap-8 rounded-3xl border border-sky-100 bg-white p-8 md:grid-cols-[1.1fr,0.9fr] md:items-center dark:border-slate-800 dark:bg-slate-950">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Conocenos</p>
+        <h1 class="mt-2 text-4xl font-bold tracking-tight md:text-5xl">{title}</h1>
+        <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{intro}</p>
+        <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{secondary}</p>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800" href="/agendar">Agenda tu cita</a>
+          <a class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900" href="/servicios">Nuestros servicios</a>
+        </div>
+      </div>
+
+      <div>
+        <img class="h-80 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[31rem] dark:ring-slate-700" src={mainImage} alt="Equipo y atencion" loading="eager" />
+      </div>
+    </section>
+
+    {points.length > 0 && (
+      <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+        <h2 class="text-2xl font-bold tracking-tight">Por que elegirnos</h2>
+        <ul class="mt-4 grid gap-3 text-base text-slate-700 sm:grid-cols-2 dark:text-slate-300">
+          {points.map((point) => (
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{point}</span></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+      <h2 class="text-2xl font-bold tracking-tight">{specialistsTitle}</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialistsSubtitle}</p>
+
+      {specialists.length === 0 ? (
+        <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Pronto compartiremos los perfiles de nuestros especialistas.
+        </div>
+      ) : (
+        <div class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {specialists.map((specialist) => (
+            <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950">
+              <img
+                class="h-52 w-full object-cover ring-1 ring-slate-200/70 transition duration-300 hover:opacity-95 dark:ring-slate-700/70"
+                src={specialist.photoUrl || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1000&q=80"}
+                alt={specialist.name || "Especialista"}
+                loading="lazy"
+              />
+              <div class="p-4">
+                <p class="text-lg font-bold">{specialist.name || "Especialista"}</p>
+                <p class="mt-1 text-sm font-semibold text-sky-700 dark:text-sky-300">{specialist.specialty || "Especialidad"}</p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialist.shortBio || "Perfil disponible pronto."}</p>
+
+                {Array.isArray(specialist.focusAreas) && specialist.focusAreas.length > 0 && (
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    {specialist.focusAreas.slice(0, 4).map((area) => (
+                      <span class="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">{area}</span>
+                    ))}
+                  </div>
+                )}
+
+                <div class="mt-4 flex gap-2">
+                  <a
+                    class="inline-flex flex-1 items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+                    href={specialistLink(specialist)}
+                    target={specialist.useWhatsAppButton !== false && waNumber ? "_blank" : undefined}
+                    rel={specialist.useWhatsAppButton !== false && waNumber ? "noopener noreferrer" : undefined}
+                  >
+                    {specialist.ctaText || "Agendar"}
+                  </a>
+                  <a
+                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+                    href={specialistProfileHref(specialist)}
+                  >
+                    Perfil
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+      <h2 class="text-2xl font-bold tracking-tight">{servicesTitle}</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{servicesSubtitle}</p>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {services.map((service: { title?: string; short?: string }) => (
+          <article class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-base font-semibold">{service.title || "Servicio"}</p>
+            {service.short && <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">{service.short}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
+
+    {gallery.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-2xl font-bold tracking-tight">Instalaciones y atencion</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {gallery.map((img, idx) => (
+            <img class="h-52 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Foto ${idx + 1} de nosotros`} loading="lazy" />
+          ))}
+        </div>
+      </section>
+    )}
+  </main>
+
+  <Footer />
+</Layout>

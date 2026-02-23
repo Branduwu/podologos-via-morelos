@@ -1,0 +1,359 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getPromotions } from "../lib/sanity.js";
+
+type Promotion = {
+  _id: string;
+  slug?: string;
+  title: string;
+  label?: string;
+  shortDescription?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  featured?: boolean;
+  pinned?: boolean;
+  appliesTo: string[];
+  serviceCategories?: string[];
+  categories: string[];
+  imageUrl?: string;
+};
+
+const promos = (await getPromotions()) || [];
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const FILTER_OPTIONS = [
+  { label: "Todas", value: "todas" },
+  { label: "Podologia", value: "podologia" },
+  { label: "Psicologia", value: "psicologia" },
+  { label: "Optica", value: "optica" },
+  { label: "Quiropractica", value: "quiropractica" },
+];
+
+function normalizeCategory(value: string | null | undefined) {
+  const raw = String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+  if (!raw) return "";
+  if (raw.includes("podolog")) return "podologia";
+  if (raw.includes("psicolog")) return "psicologia";
+  if (raw.includes("optic") || raw.includes("optometr")) return "optica";
+  if (raw.includes("quiropr")) return "quiropractica";
+  return "";
+}
+
+const normalized: Promotion[] = promos.map((p: Partial<Promotion>, idx: number) => ({
+  ...p,
+  pinned: Boolean(p.pinned),
+  featured: Boolean(p.featured),
+  appliesTo: Array.isArray(p.appliesTo) ? p.appliesTo : [],
+  serviceCategories: Array.isArray(p.serviceCategories) ? p.serviceCategories : [],
+  categories: Array.from(
+    new Set(
+      [...(Array.isArray(p.appliesTo) ? p.appliesTo : []), ...(Array.isArray(p.serviceCategories) ? p.serviceCategories : [])]
+        .map(normalizeCategory)
+        .filter(Boolean)
+    )
+  ),
+  imageUrl: p.imageUrl || "",
+  shortDescription: p.shortDescription || "",
+  description: p.description || "",
+  title: p.title || "Promocion",
+  _id: p._id || `promo-${idx}`,
+}));
+
+const ordered = [...normalized].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+const featured = ordered.filter((p) => p.featured);
+const regular = ordered.filter((p) => !p.featured);
+
+function fmt(d: string | Date | null | undefined) {
+  if (!d) return "Sin fecha";
+  try {
+    return new Date(d).toLocaleDateString("es-MX", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch {
+    return String(d);
+  }
+}
+
+function excerpt(p: Promotion) {
+  return (p.shortDescription || p.description || "").trim();
+}
+
+function promoStatus(p: Promotion) {
+  const start = p.startDate ? new Date(p.startDate) : null;
+  const end = p.endDate ? new Date(p.endDate) : null;
+  if (start) start.setHours(0, 0, 0, 0);
+  if (end) end.setHours(0, 0, 0, 0);
+
+  if (start && today < start) return "Proxima";
+  if (end && today > end) return "Finalizada";
+  return "Vigente";
+}
+
+function promotionHref(p: Promotion) {
+  return `/promociones/${encodeURIComponent((p.slug || p._id || "").trim())}`;
+}
+---
+
+<Layout title="Promociones | Podologos Via Morelos Tulpetlac">
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="type-section-title">Promociones</h1>
+    <p class="type-section-subtitle mt-2 text-slate-600 dark:text-slate-300">
+      Promociones activas sujetas a disponibilidad.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {FILTER_OPTIONS.map((opt, idx) => (
+        <button
+          type="button"
+          data-promo-filter={opt.value}
+          class:list={[
+            "rounded-full border px-4 py-2 text-sm font-semibold transition",
+            idx === 0
+              ? "border-sky-600 bg-sky-600 text-white"
+              : "border-slate-300 bg-white text-slate-700 hover:border-sky-500 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-sky-400 dark:hover:text-sky-300",
+          ]}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+
+    {normalized.length === 0 && (
+      <div class="mt-8 rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+        <p class="font-medium">Pronto compartiremos nuevas promociones.</p>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          Mientras tanto, puedes agendar tu cita para conocer promociones vigentes.
+        </p>
+        <a
+          class="mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-slate-900"
+          href="/agendar"
+        >
+          Agendar cita
+        </a>
+      </div>
+    )}
+
+    <section class="mt-10">
+      <div class="flex items-center justify-between gap-4">
+        <h2 class="type-card-title">Promociones recomendadas</h2>
+        <a class="text-sm font-medium hover:underline" href="/agendar">Agendar con promo</a>
+      </div>
+
+      {featured.length === 0 ? (
+        <div class="mt-4 rounded-2xl border border-slate-200 p-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+          Aun no hay promociones recomendadas por ahora.
+        </div>
+      ) : (
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map((p) => (
+            <article
+              data-promo-card
+              data-promo-categories={p.categories.join(",")}
+              class="overflow-hidden rounded-3xl border border-slate-200 shadow-sm dark:border-slate-800"
+            >
+              {p.imageUrl ? (
+                <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl} alt={p.title} loading="lazy" />
+                </div>
+              ) : (
+                <div class="flex promo-media items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                  Sin imagen
+                </div>
+              )}
+
+              <div class="p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="type-card-title">{p.title}</h3>
+                  <span class="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-slate-900">
+                    {promoStatus(p)}
+                  </span>
+                </div>
+
+                {excerpt(p) && <p class="type-card-body mt-3 text-slate-600 dark:text-slate-300">{excerpt(p)}</p>}
+
+                <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
+                  Vigencia: {fmt(p.startDate)} -> {fmt(p.endDate)}
+                </p>
+
+                {p.appliesTo.length > 0 && (
+                  <div class="mt-4">
+                    <p class="type-meta text-slate-500 dark:text-slate-400">Aplica a:</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      {p.appliesTo.map((tag: string) => (
+                        <span class="rounded-full border border-slate-200 px-3 py-1 text-xs dark:border-slate-800">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div class="mt-6 flex gap-2">
+                  <a class="inline-flex flex-1 items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900" href="/agendar">
+                    Agendar
+                  </a>
+                  <a class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900" href={promotionHref(p)}>
+                    Ver detalle
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="mt-12">
+      <h2 class="type-card-title">Mas promociones</h2>
+
+      {regular.length === 0 ? (
+        <div class="mt-4 rounded-2xl border border-slate-200 p-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+          Por ahora solo tenemos promociones recomendadas.
+        </div>
+      ) : (
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {regular.map((p) => (
+            <article
+              data-promo-card
+              data-promo-categories={p.categories.join(",")}
+              class="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800"
+            >
+              {p.imageUrl ? (
+                <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl} alt={p.title} loading="lazy" />
+                </div>
+              ) : (
+                <div class="flex promo-media items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                  Sin imagen
+                </div>
+              )}
+
+              <div class="p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="type-card-title">{p.title}</h3>
+                  <span class="rounded-full border border-slate-200 px-2.5 py-1 text-xs dark:border-slate-800">
+                    {promoStatus(p)}
+                  </span>
+                </div>
+
+                {excerpt(p) && <p class="type-card-body mt-3 text-slate-600 dark:text-slate-300">{excerpt(p)}</p>}
+
+                <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
+                  Vigencia: {fmt(p.startDate)} -> {fmt(p.endDate)}
+                </p>
+
+                {p.appliesTo.length > 0 && (
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {p.appliesTo.map((tag: string) => (
+                      <span class="rounded-full border border-slate-200 px-3 py-1 text-xs dark:border-slate-800">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div class="mt-5 flex gap-3">
+                  <a class="inline-flex text-sm font-medium hover:underline" href="/agendar">Agendar</a>
+                  <a class="inline-flex text-sm font-medium text-sky-700 hover:underline dark:text-sky-300" href={promotionHref(p)}>Ver detalle</a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <div data-promo-empty class="mt-8 hidden rounded-2xl border border-slate-200 p-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+      No hay promociones para esta categoria por ahora.
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .promo-media {
+    aspect-ratio: 4 / 3;
+  }
+  .promo-media--portrait {
+    aspect-ratio: 3 / 4;
+  }
+  .promo-media--landscape {
+    aspect-ratio: 4 / 3;
+  }
+</style>
+
+<script is:inline>
+  const filterButtons = Array.from(document.querySelectorAll("[data-promo-filter]"));
+  const promoCards = Array.from(document.querySelectorAll("[data-promo-card]"));
+  const emptyState = document.querySelector("[data-promo-empty]");
+
+  const setFilter = (category) => {
+    let visibleCount = 0;
+
+    promoCards.forEach((card) => {
+      const categories = String(card.getAttribute("data-promo-categories") || "")
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+
+      const visible = category === "todas" || categories.includes(category);
+      card.classList.toggle("hidden", !visible);
+      if (visible) visibleCount += 1;
+    });
+
+    if (emptyState) {
+      emptyState.classList.toggle("hidden", visibleCount > 0);
+    }
+
+    filterButtons.forEach((btn) => {
+      const isActive = btn.getAttribute("data-promo-filter") === category;
+      btn.classList.toggle("border-sky-600", isActive);
+      btn.classList.toggle("bg-sky-600", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("border-slate-300", !isActive);
+      btn.classList.toggle("bg-white", !isActive);
+      btn.classList.toggle("text-slate-700", !isActive);
+    });
+  };
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const category = btn.getAttribute("data-promo-filter") || "todas";
+      setFilter(category);
+    });
+  });
+
+  setFilter("todas");
+
+  const promoImages = Array.from(document.querySelectorAll("[data-promo-image]"));
+  promoImages.forEach((img) => {
+    const media = img.closest("[data-promo-media]");
+    if (!media) return;
+
+    const applyRatio = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const isPortrait = img.naturalHeight > img.naturalWidth;
+      media.classList.toggle("promo-media--portrait", isPortrait);
+      media.classList.toggle("promo-media--landscape", !isPortrait);
+    };
+
+    if (img.complete) {
+      applyRatio();
+    } else {
+      img.addEventListener("load", applyRatio, { once: true });
+    }
+  });
+</script>

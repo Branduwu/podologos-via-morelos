@@ -1,0 +1,202 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { clinic } from "../../config/clinic";
+import { sanityClient } from "../../lib/sanity.js";
+import { normalizeServiceSlug } from "../../utils/prefill";
+import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
+
+type ServiceDetail = {
+  title?: string;
+  category?: string;
+  short?: string;
+  long?: string;
+  includes?: string[];
+  duration?: string;
+  priceFrom?: number;
+};
+
+type ServiceSlugRow = { slug?: string };
+
+const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const routeParams = Astro.params as Record<string, string | undefined>;
+const slug = routeParams.slug;
+const slugString = (typeof slug === "string" ? slug : "").trim();
+
+const service: ServiceDetail | null =
+      slugString && validSlugRe.test(slugString)
+    ? await sanityClient.fetch(
+        `
+        *[_type=="service" && slug.current==$slug && (!defined(active) || active == true)][0]{
+          title,
+          category,
+          short,
+          long,
+          includes,
+          duration,
+          priceFrom
+        }
+      `,
+        { slug: slugString },
+      )
+    : null;
+
+function moneyMXN(n: number | null | undefined) {
+  if (typeof n !== "number") return "";
+  try {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+      maximumFractionDigits: 0,
+    }).format(n);
+  } catch {
+    return `$${n}`;
+  }
+}
+
+export async function getStaticPaths() {
+  const staticPathSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  let items: ServiceSlugRow[] = [];
+  try {
+    items = await sanityClient.fetch(`
+      *[_type=="service" && defined(slug.current) && (!defined(active) || active == true)]{
+        "slug": slug.current
+      }
+    `);
+  } catch (error) {
+    console.error("[servicios/[slug]] getStaticPaths failed", error);
+    return [];
+  }
+
+  return items
+    .filter((it: ServiceSlugRow) => typeof it.slug === "string" && staticPathSlugRe.test(it.slug.trim()))
+    .map((it: ServiceSlugRow) => ({
+      params: { slug: it.slug!.trim() },
+    }));
+}
+
+const waHref = service?.title
+  ? buildWhatsAppUrl(
+      buildContactMessage({
+        service: service.title,
+        reason: "Quiero informacion y agendar este servicio.",
+      }),
+      clinic.whatsappNumber
+    )
+  : "";
+
+const serviceKey = normalizeServiceSlug(service?.category || service?.title || slugString);
+const agendarServiceHref = serviceKey ? `/agendar?service=${encodeURIComponent(serviceKey)}` : "/agendar";
+---
+
+<Layout title={`${service?.title || "Servicio"} | Podologos Via Morelos`}>
+  <Header />
+
+  <main class="mx-auto max-w-4xl px-4 py-10">
+    {!service ? (
+      <div class="rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+        <p class="font-semibold">Servicio no encontrado.</p>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          Vuelve a la lista de servicios y selecciona uno valido.
+        </p>
+
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a
+            class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
+            href="/servicios"
+          >
+            Volver a Servicios
+          </a>
+          <a
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+            href="/agendar"
+          >
+            Agendar
+          </a>
+        </div>
+      </div>
+    ) : (
+      <>
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight md:text-4xl">{service.title}</h1>
+            {service.short && <p class="mt-3 text-slate-600 dark:text-slate-300">{service.short}</p>}
+          </div>
+
+          <a
+            class="hidden items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900 md:inline-flex"
+            href="/servicios"
+          >
+            Volver
+          </a>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-2 text-sm">
+          {service.duration && (
+            <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
+              Duracion {service.duration}
+            </span>
+          )}
+          {typeof service.priceFrom === "number" && (
+            <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
+              Desde {moneyMXN(service.priceFrom)}
+            </span>
+          )}
+        </div>
+
+        {service.long && (
+          <div class="mt-8 rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+            <h2 class="text-lg font-semibold">Descripcion</h2>
+            <p class="mt-3 whitespace-pre-line text-slate-600 dark:text-slate-300">{service.long}</p>
+          </div>
+        )}
+
+        {Array.isArray(service.includes) && service.includes.length > 0 && (
+          <div class="mt-8 rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+            <h2 class="text-lg font-semibold">Incluye</h2>
+            <ul class="mt-3 list-disc space-y-1 pl-5 text-slate-600 dark:text-slate-300">
+              {service.includes.map((x: string) => <li>{x}</li>)}
+            </ul>
+          </div>
+        )}
+
+        <div class="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <a
+            class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
+            href={agendarServiceHref}
+          >
+            Agendar este servicio
+          </a>
+
+          <a
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+            href="/precios"
+          >
+            Ver precios
+          </a>
+
+          {waHref && (
+            <a
+              class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          )}
+
+          <a
+            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+            href="/servicios"
+          >
+            Volver a servicios
+          </a>
+        </div>
+      </>
+    )}
+  </main>
+
+  <Footer />
+</Layout>

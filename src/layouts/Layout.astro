@@ -1,0 +1,150 @@
+﻿---
+import "../styles/global.css";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import { getBusinessInfo } from "../lib/sanity.js";
+
+const {
+  title = "Podologos Via Morelos Tulpetlac",
+  description = "Podologia, Psicologia, Optica y Quiropractica en Tulpetlac y alrededores.",
+  image,
+} = Astro.props;
+
+const business = await getBusinessInfo();
+const waNumber = (business?.whatsappCitasNumber || "").replace(/\D/g, "");
+const waMessage = encodeURIComponent(
+  business?.whatsappDefaultMessage || "Hola, quiero agendar una cita."
+);
+const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMessage}` : null;
+const siteUrl = Astro.site || new URL("http://localhost:4321");
+const canonical = new URL(Astro.url?.pathname || "/", siteUrl).toString();
+const ogImage = image || business?.homeHeroImageUrl || "/default-logo-clinica.svg";
+const ogImageUrl = ogImage.startsWith("http") ? ogImage : new URL(ogImage, siteUrl).toString();
+
+const localBusinessLd = {
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  name: business?.name || "Podologos Via Morelos Tulpetlac",
+  image: business?.logoImageUrl || ogImageUrl,
+  telephone: business?.phone || undefined,
+  address: business?.address
+    ? { "@type": "PostalAddress", streetAddress: business.address, addressCountry: "MX" }
+    : undefined,
+  openingHours: business?.hoursText || undefined,
+  sameAs: [business?.facebookUrl, business?.instagramUrl, business?.tiktokUrl].filter(Boolean),
+  url: canonical,
+};
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <link id="theme-favicon" rel="icon" type="image/svg+xml" href="/favicon-light.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    />
+
+    <script is:inline>
+      (() => {
+        const key = "theme";
+        const saved = localStorage.getItem(key);
+        const theme = saved ?? "light";
+        if (theme === "dark") document.documentElement.classList.add("dark");
+        document.documentElement.classList.add("h-full");
+
+        const favicon = document.getElementById("theme-favicon");
+        if (favicon) favicon.setAttribute("href", theme === "dark" ? "/favicon-dark.svg" : "/favicon-light.svg");
+      })();
+    </script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(localBusinessLd)}></script>
+  </head>
+
+  <body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <a href="#contenido-principal" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[120] focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900">
+      Saltar al contenido principal
+    </a>
+    <ThemeToggle />
+    <div class="flex min-h-screen flex-col">
+      <slot />
+    </div>
+    {waLink && (
+      <a
+        href={waLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="fixed bottom-5 right-4 z-[70] inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-100 transition hover:scale-105 hover:bg-emerald-600 dark:ring-emerald-900/30"
+        aria-label="Abrir WhatsApp"
+        title="Enviar WhatsApp"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 10.5a5 5 0 0 0 5 5h.5l2.8 2.8a1 1 0 0 0 1.7-.7V15.5A5.5 5.5 0 0 0 18 5h-6.5A4.5 4.5 0 0 0 7 9.5v1Z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 8.5c0 1.7 1.3 3 3 3"/>
+        </svg>
+      </a>
+    )}
+
+    <button
+      id="scroll-to-top"
+      type="button"
+      class="fixed bottom-24 right-4 z-[69] hidden h-12 w-12 items-center justify-center rounded-full bg-sky-700 text-white shadow-lg transition hover:scale-105 hover:bg-sky-800"
+      aria-label="Volver arriba"
+      title="Volver arriba"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m18 15-6-6-6 6" />
+      </svg>
+    </button>
+
+    <script is:inline>
+      (() => {
+        const key = "theme";
+
+        document.addEventListener("click", (e) => {
+          const btn = e.target?.closest?.("[data-theme-toggle]");
+          if (!btn) return;
+
+          const isDark = document.documentElement.classList.toggle("dark");
+          document.documentElement.classList.add("h-full");
+          localStorage.setItem(key, isDark ? "dark" : "light");
+          const favicon = document.getElementById("theme-favicon");
+          if (favicon) favicon.setAttribute("href", isDark ? "/favicon-dark.svg" : "/favicon-light.svg");
+        });
+
+        const main = document.querySelector("main");
+        if (main && !main.id) main.id = "contenido-principal";
+
+        const scrollButton = document.getElementById("scroll-to-top");
+        if (scrollButton) {
+          const toggleScrollButton = () => {
+            const shouldShow = window.scrollY > 320;
+            scrollButton.classList.toggle("hidden", !shouldShow);
+            scrollButton.classList.toggle("inline-flex", shouldShow);
+          };
+
+          window.addEventListener("scroll", toggleScrollButton, { passive: true });
+          toggleScrollButton();
+
+          scrollButton.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

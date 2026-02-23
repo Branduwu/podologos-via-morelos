@@ -1,0 +1,178 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getPrices } from "../lib/sanity.js";
+
+type PriceRow = {
+  serviceTitle?: string;
+  category?: string;
+  priceFrom?: number;
+  duration?: string;
+  note?: string;
+};
+
+const prices: PriceRow[] = (await getPrices()) || [];
+
+const priceCategories = [
+  { key: "all", label: "Todas" },
+  { key: "podologia", label: "Podologia" },
+  { key: "psicologia", label: "Psicologia" },
+  { key: "optica", label: "Optica" },
+  { key: "quiropractica", label: "Quiropractica" },
+];
+
+function normalizeText(value: string) {
+  return (value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function priceCategoryKey(price: PriceRow) {
+  const fromCms = normalizeText(price.category || "");
+  if (["podologia", "psicologia", "optica", "quiropractica"].includes(fromCms)) return fromCms;
+  const text = normalizeText(`${price.serviceTitle || ""} ${price.note || ""}`);
+  if (!text) return "general";
+  if (text.includes("podolog")) return "podologia";
+  if (text.includes("psicolog")) return "psicologia";
+  if (text.includes("optomet") || text.includes("optic")) return "optica";
+  if (text.includes("quiropr") || text.includes("quiro")) return "quiropractica";
+  return "general";
+}
+
+function moneyMXN(n: number | string | null | undefined) {
+  const num = Number(n);
+  if (Number.isNaN(num) || num <= 0) return "-";
+  try {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+      maximumFractionDigits: 0,
+    }).format(num);
+  } catch {
+    return `$${num}`;
+  }
+}
+---
+
+<Layout title="Precios | Podologos Via Morelos Tulpetlac">
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <div class="max-w-4xl">
+      <h1 class="text-left text-3xl font-bold tracking-tight md:text-4xl">Precios</h1>
+      <p class="mt-2 text-left text-slate-600 dark:text-slate-300">
+        Precios desde (pueden variar segun valoracion). Agenda para confirmar.
+      </p>
+
+      {prices.length === 0 ? (
+        <div class="mt-8 rounded-2xl border border-slate-200 p-6 text-left text-slate-600 dark:border-slate-800 dark:text-slate-300">
+          Aun no hay precios cargados en el CMS.
+        </div>
+      ) : (
+        <>
+          <div class="mt-6 flex flex-wrap gap-2" id="price-filters">
+            {priceCategories.map((cat) => (
+              <button
+                type="button"
+                data-price-filter={cat.key}
+                class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          <div class="mt-8 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                <tr>
+                  <th class="px-4 py-3 text-left font-medium">Servicio</th>
+                  <th class="px-4 py-3 text-left font-medium">Desde</th>
+                  <th class="px-4 py-3 text-left font-medium">Duracion</th>
+                  <th class="px-4 py-3 text-left font-medium">Nota</th>
+                  <th class="px-4 py-3 text-left font-medium">Accion</th>
+                </tr>
+              </thead>
+              <tbody id="prices-table-body">
+                {prices.map((p: PriceRow) => (
+                  <tr data-price-row data-category={priceCategoryKey(p)} class="border-t border-slate-200 dark:border-slate-800">
+                    <td class="px-4 py-3 font-medium">{p.serviceTitle || "-"}</td>
+                    <td class="px-4 py-3">{moneyMXN(p.priceFrom)}</td>
+                    <td class="px-4 py-3">{p.duration || "-"}</td>
+                    <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{p.note || ""}</td>
+                    <td class="px-4 py-3">
+                      <a
+                        class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-800"
+                        href={`/agendar?servicio=${encodeURIComponent(p.serviceTitle || "")}`}
+                      >
+                        Quiero este servicio
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      <p id="prices-empty" class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        No hay precios en esa categoria todavia.
+      </p>
+
+      <div class="mt-8">
+        <a
+          class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:opacity-90 dark:bg-white dark:text-slate-900"
+          href="/agendar"
+        >
+          Agendar cita
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script is:inline>
+  const priceFilterButtons = Array.from(document.querySelectorAll("[data-price-filter]"));
+  const priceRows = Array.from(document.querySelectorAll("[data-price-row]"));
+  const pricesEmpty = document.getElementById("prices-empty");
+  let activePriceFilter = "all";
+
+  const updatePriceFilterUI = () => {
+    priceFilterButtons.forEach((btn) => {
+      const isActive = btn.dataset.priceFilter === activePriceFilter;
+      btn.classList.toggle("bg-sky-700", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("border-sky-700", isActive);
+    });
+  };
+
+  const applyPriceFilter = () => {
+    let visibleCount = 0;
+
+    priceRows.forEach((row) => {
+      const category = row.dataset.category || "general";
+      const visible = activePriceFilter === "all" || category === activePriceFilter;
+      row.classList.toggle("hidden", !visible);
+      if (visible) visibleCount += 1;
+    });
+
+    if (pricesEmpty) pricesEmpty.classList.toggle("hidden", visibleCount > 0);
+  };
+
+  priceFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activePriceFilter = btn.dataset.priceFilter || "all";
+      updatePriceFilterUI();
+      applyPriceFilter();
+    });
+  });
+
+  updatePriceFilterUI();
+  applyPriceFilter();
+</script>

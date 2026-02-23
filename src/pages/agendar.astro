@@ -1,0 +1,481 @@
+﻿---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { clinic } from "../config/clinic";
+import { getBusinessInfo, getServices, getSpecialists } from "../lib/sanity.js";
+import { getPrefillFromUrl, normalizeServiceSlug } from "../utils/prefill";
+
+type ServiceItem = {
+  title?: string;
+  category?: string;
+  slug?: string | { current?: string };
+};
+
+type Specialist = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  specialtyCategory?: string;
+  active?: boolean;
+};
+
+const business = await getBusinessInfo();
+const services: ServiceItem[] = (await getServices()) || [];
+const specialists: Specialist[] = (await getSpecialists()) || [];
+
+const whatsappNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
+const address = business?.address || clinic.address;
+const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sabado 10:00 a 16:00 · Domingo cerrado";
+
+const categoryMap = new Map<string, string>();
+for (const c of clinic.serviceCategories) categoryMap.set(c.key, c.label);
+for (const s of services) {
+  const key = normalizeServiceSlug(s?.category || "");
+  if (key && !categoryMap.has(key)) categoryMap.set(key, s?.category || key);
+}
+for (const sp of specialists) {
+  const key = normalizeServiceSlug(sp?.specialtyCategory || "");
+  if (key && !categoryMap.has(key)) categoryMap.set(key, sp?.specialtyCategory || key);
+}
+
+const serviceOptions = Array.from(categoryMap.entries()).map(([key, label]) => ({ key, label }));
+
+const specialistOptions = specialists
+  .filter((sp) => Boolean((sp?.slug || sp?._id || "").trim()))
+  .map((sp) => ({
+    slug: String(sp?.slug || sp?._id || "").trim(),
+    name: sp?.name || "Especialista",
+    category: normalizeServiceSlug(sp?.specialtyCategory || ""),
+    specialty: sp?.specialty || "",
+  }));
+
+const prefill = getPrefillFromUrl(Astro.url);
+---
+
+<Layout title="Agendar | Podologo Plus Care">
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10" id="contenido-principal">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Agenda tu cita</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">Completa tus datos. El formulario no guarda informacion, solo genera tu solicitud por WhatsApp.</p>
+
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+        <h2 class="text-lg font-semibold">Datos de la cita</h2>
+
+        <form id="appointment-form" class="mt-4 grid gap-4" novalidate>
+          <div class="grid gap-2">
+            <label class="text-sm font-medium" for="name">Nombre</label>
+            <input id="name" name="name" required minlength="2" maxlength="80" autocomplete="name" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Tu nombre completo" />
+          </div>
+
+          <div class="grid gap-2">
+            <label class="text-sm font-medium" for="phone">Telefono</label>
+            <input id="phone" name="phone" type="tel" required autocomplete="tel" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Ej. 55 2538 8683" />
+            <p class="text-xs text-slate-500 dark:text-slate-400">Acepta espacios o guiones. Se valida entre 10 y 15 digitos.</p>
+            <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">El telefono debe tener entre 10 y 15 digitos.</p>
+          </div>
+
+          <div class="grid gap-2">
+            <label class="text-sm font-medium" for="service">Servicio</label>
+            <select id="service" name="service" required class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950">
+              <option value="" selected disabled>Selecciona servicio...</option>
+              {serviceOptions.map((s) => (
+                <option value={s.key}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="grid gap-2">
+            <label class="text-sm font-medium" for="specialist">Especialista (opcional)</label>
+            <select id="specialist" name="specialist" disabled class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950">
+              <option value="">Sin preferencia (el que este disponible)</option>
+            </select>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div class="grid gap-2 sm:col-span-2">
+              <label class="text-sm font-medium" for="date">Fecha (opcional)</label>
+              <input id="date" name="date" type="date" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" />
+              <p id="date-readable" class="text-xs text-slate-500 dark:text-slate-400"></p>
+            </div>
+            <div class="grid gap-2">
+              <label class="text-sm font-medium" for="timeSlot">Hora exacta</label>
+              <select id="timeSlot" name="timeSlot" disabled class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950">
+                <option value="">Selecciona hora</option>
+              </select>
+              <p id="time-help" class="text-xs text-slate-500 dark:text-slate-400">Si prefieres, deja vacio y usa el turno.</p>
+            </div>
+          </div>
+
+          <div class="grid gap-2">
+            <label class="text-sm font-medium" for="shift">Turno (si no eliges hora)</label>
+            <select id="shift" name="shift" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950">
+              <option value="">Por definir</option>
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
+            </select>
+          </div>
+
+          <div class="grid gap-2">
+            <label class="text-sm font-medium" for="notes">Motivo o notas (opcional)</label>
+            <textarea id="notes" name="notes" rows="3" maxlength="300" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Describe brevemente tu motivo"></textarea>
+          </div>
+
+          <a id="send-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="pointer-events-none rounded-xl bg-slate-400 px-4 py-3 text-center text-sm font-semibold text-white">
+            Completa los campos para enviar por WhatsApp
+          </a>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400">Validamos horario: L-V 10:00-18:00, Sabado 10:00-16:00, Domingo cerrado.</p>
+        </form>
+      </section>
+
+      <aside class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+        <h2 class="text-lg font-semibold">Informacion</h2>
+        <p class="mt-2 text-slate-700 dark:text-slate-200">{address}</p>
+        <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">Horarios: {hoursText}</p>
+
+        <ul class="mt-5 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Confirmacion por WhatsApp.</span></li>
+          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Duracion aproximada: 30 a 60 minutos.</span></li>
+          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Higiene y protocolos de atencion profesional.</span></li>
+        </ul>
+
+        <div class="mt-6">
+          <a class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-300" href="/ubicacion">Ver ubicacion</a>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script
+  id="agendar-config"
+  type="application/json"
+  is:inline
+  set:html={JSON.stringify({
+    whatsappNumber,
+    serviceOptions,
+    specialistOptions,
+    prefill,
+  })}
+></script>
+
+<script>
+  import { buildAppointmentMessage, buildWhatsAppUrl } from "../utils/whatsapp";
+  import { formatDateMX, isSunday, isValidPhone, isValidPhoneInput, isWithinSchedule, sanitizePhone } from "../utils/validation";
+
+  type SpecialistOption = {
+    slug: string;
+    name: string;
+    category: string;
+    specialty?: string;
+  };
+
+  type ClientConfig = {
+    whatsappNumber?: string;
+    prefill?: { service?: string; specialist?: string };
+    specialistOptions?: SpecialistOption[];
+  };
+
+  const configEl = document.getElementById("agendar-config");
+  const config = JSON.parse(configEl?.textContent || "{}") as ClientConfig;
+
+  const form = document.getElementById("appointment-form") as HTMLFormElement | null;
+  const sendBtn = document.getElementById("send-whatsapp") as HTMLAnchorElement | null;
+  const nameInput = document.getElementById("name") as HTMLInputElement | null;
+  const phoneInput = document.getElementById("phone") as HTMLInputElement | null;
+  const serviceSelect = document.getElementById("service") as HTMLSelectElement | null;
+  const specialistSelect = document.getElementById("specialist") as HTMLSelectElement | null;
+  const dateInput = document.getElementById("date") as HTMLInputElement | null;
+  const timeSlotSelect = document.getElementById("timeSlot") as HTMLSelectElement | null;
+  const shiftSelect = document.getElementById("shift") as HTMLSelectElement | null;
+  const notesInput = document.getElementById("notes") as HTMLTextAreaElement | null;
+  const dateReadable = document.getElementById("date-readable") as HTMLParagraphElement | null;
+  const phoneError = document.getElementById("phone-error") as HTMLParagraphElement | null;
+  const timeHelp = document.getElementById("time-help") as HTMLParagraphElement | null;
+
+  if (!form || !sendBtn || !nameInput || !phoneInput || !serviceSelect || !specialistSelect || !dateInput || !timeSlotSelect || !shiftSelect || !notesInput) {
+    throw new Error("No se encontraron elementos del formulario de agendar");
+  }
+
+  const specialistItems: SpecialistOption[] = Array.isArray(config.specialistOptions)
+    ? config.specialistOptions
+    : [];
+  const prefill = config.prefill || {};
+  const waNumber = String(config.whatsappNumber || "").replace(/\D/g, "");
+  const scheduleByDay: Record<number, { open: string; close: string } | null> = {
+    0: null,
+    1: { open: "10:00", close: "18:00" },
+    2: { open: "10:00", close: "18:00" },
+    3: { open: "10:00", close: "18:00" },
+    4: { open: "10:00", close: "18:00" },
+    5: { open: "10:00", close: "18:00" },
+    6: { open: "10:00", close: "16:00" },
+  };
+
+  const setFieldErrorStyle = (input: HTMLElement, hasError: boolean) => {
+    input.classList.toggle("border-rose-500", hasError);
+    input.classList.toggle("ring-1", hasError);
+    input.classList.toggle("ring-rose-300", hasError);
+    input.classList.toggle("dark:ring-rose-500/40", hasError);
+  };
+
+  const validatePhoneField = () => {
+    const hasValue = phoneInput.value.trim().length > 0;
+    const valid = isValidPhoneInput(phoneInput.value || "");
+    const hasError = hasValue && !valid;
+    setFieldErrorStyle(phoneInput, hasError);
+    if (phoneError) phoneError.classList.toggle("hidden", !hasError);
+    return valid;
+  };
+
+  const buildTimeSlots = (open: string, close: string): string[] => {
+    const [openH, openM] = open.split(":").map((x) => Number(x));
+    const [closeH, closeM] = close.split(":").map((x) => Number(x));
+    const start = openH * 60 + openM;
+    const end = closeH * 60 + closeM;
+    const slots: string[] = [];
+    for (let minutes = start; minutes <= end; minutes += 30) {
+      const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+      const m = String(minutes % 60).padStart(2, "0");
+      slots.push(`${h}:${m}`);
+    }
+    return slots;
+  };
+
+  const updateTimeLimitsByDate = () => {
+    const previousValue = timeSlotSelect.value;
+    timeSlotSelect.innerHTML = "";
+    const baseOption = document.createElement("option");
+    baseOption.value = "";
+    baseOption.textContent = "Selecciona hora";
+    timeSlotSelect.appendChild(baseOption);
+
+    if (!dateInput.value) {
+      timeSlotSelect.disabled = true;
+      if (timeHelp) {
+        timeHelp.textContent = "Si prefieres, deja vacio y usa el turno.";
+        timeHelp.classList.remove("text-rose-600", "dark:text-rose-400");
+        timeHelp.classList.add("text-slate-500", "dark:text-slate-400");
+      }
+      return;
+    }
+
+    const date = new Date(`${dateInput.value}T12:00:00`);
+    const day = date.getDay();
+    const schedule = scheduleByDay[day];
+
+    if (!schedule) {
+      timeSlotSelect.disabled = true;
+      if (timeHelp) {
+        timeHelp.textContent = "Domingo cerrado. Selecciona otro dia.";
+        timeHelp.classList.remove("text-slate-500", "dark:text-slate-400");
+        timeHelp.classList.add("text-rose-600", "dark:text-rose-400");
+      }
+      return;
+    }
+
+    const slots = buildTimeSlots(schedule.open, schedule.close);
+    slots.forEach((slot) => {
+      const option = document.createElement("option");
+      option.value = slot;
+      option.textContent = slot;
+      timeSlotSelect.appendChild(option);
+    });
+    timeSlotSelect.disabled = false;
+
+    if (slots.includes(previousValue)) {
+      timeSlotSelect.value = previousValue;
+    } else {
+      timeSlotSelect.value = "";
+    }
+
+    if (timeHelp) {
+      timeHelp.textContent = `Horario disponible: ${schedule.open} a ${schedule.close}.`;
+      timeHelp.classList.remove("text-rose-600", "dark:text-rose-400");
+      timeHelp.classList.add("text-slate-500", "dark:text-slate-400");
+    }
+  };
+
+  const renderSpecialists = (serviceKey: string, preferredSpecialist: string = "") => {
+    const filtered = specialistItems.filter((sp: SpecialistOption) => sp.category === serviceKey);
+    specialistSelect.innerHTML = "";
+
+    const baseOption = document.createElement("option");
+    baseOption.value = "";
+    baseOption.textContent = "Sin preferencia (el que este disponible)";
+    specialistSelect.appendChild(baseOption);
+
+    filtered.forEach((sp: SpecialistOption) => {
+      const opt = document.createElement("option");
+      opt.value = sp.slug;
+      opt.textContent = sp.name;
+      specialistSelect.appendChild(opt);
+    });
+
+    specialistSelect.disabled = !serviceKey;
+    if (preferredSpecialist && filtered.some((sp: SpecialistOption) => sp.slug === preferredSpecialist)) {
+      specialistSelect.value = preferredSpecialist;
+    } else {
+      specialistSelect.value = "";
+    }
+  };
+
+  const applyPrefill = () => {
+    let serviceValue = "";
+    if (prefill.service) {
+      const matchService = Array.from(serviceSelect.options).find(
+        (opt: HTMLOptionElement) => opt.value === prefill.service
+      );
+      if (matchService) serviceValue = prefill.service;
+    }
+
+    if (!serviceValue && prefill.specialist) {
+      const specialistMatch = specialistItems.find((sp: SpecialistOption) => sp.slug === prefill.specialist);
+      if (specialistMatch?.category) serviceValue = specialistMatch.category;
+    }
+
+    if (serviceValue) {
+      serviceSelect.value = serviceValue;
+    }
+
+    renderSpecialists(serviceSelect.value, prefill.specialist);
+  };
+
+  const updateDatePreview = () => {
+    if (!dateReadable) return;
+    dateReadable.textContent = dateInput.value ? `Fecha seleccionada: ${formatDateMX(dateInput.value)}` : "Si no eliges fecha, se enviara como por definir.";
+  };
+
+  const validateSchedule = () => {
+    dateInput.setCustomValidity("");
+    timeSlotSelect.setCustomValidity("");
+    setFieldErrorStyle(dateInput, false);
+    setFieldErrorStyle(timeSlotSelect, false);
+    const selectedTime = timeSlotSelect.value;
+
+    if (dateInput.value && isSunday(dateInput.value)) {
+      dateInput.setCustomValidity("Los domingos no hay atencion.");
+      setFieldErrorStyle(dateInput, true);
+      return false;
+    }
+
+    if (selectedTime && !dateInput.value) {
+      dateInput.setCustomValidity("Selecciona fecha para validar la hora.");
+      setFieldErrorStyle(dateInput, true);
+      return false;
+    }
+
+    if (dateInput.value && selectedTime && !isWithinSchedule(dateInput.value, selectedTime)) {
+      timeSlotSelect.setCustomValidity("La hora esta fuera de horario para ese dia.");
+      setFieldErrorStyle(timeSlotSelect, true);
+      return false;
+    }
+
+    return true;
+  };
+
+  const setDisabledCta = (text: string) => {
+    sendBtn.classList.add("pointer-events-none", "bg-slate-400", "hover:bg-slate-400");
+    sendBtn.classList.remove("bg-sky-700", "hover:bg-sky-800");
+    sendBtn.textContent = text;
+    sendBtn.setAttribute("href", "#");
+  };
+
+  const setEnabledCta = (href: string) => {
+    sendBtn.classList.remove("pointer-events-none", "bg-slate-400", "hover:bg-slate-400");
+    sendBtn.classList.add("bg-sky-700", "hover:bg-sky-800");
+    sendBtn.textContent = "Enviar solicitud por WhatsApp";
+    sendBtn.setAttribute("href", href);
+  };
+
+  const updateCta = () => {
+    validatePhoneField();
+    updateTimeLimitsByDate();
+    updateDatePreview();
+
+    if (!waNumber) {
+      setDisabledCta("WhatsApp no configurado");
+      return;
+    }
+
+    if (!validateSchedule()) {
+      setDisabledCta("Completa los campos para enviar por WhatsApp");
+      return;
+    }
+
+    const name = String(nameInput.value || "").trim();
+    const phone = sanitizePhone(String(phoneInput.value || ""));
+    const service = String(serviceSelect.value || "").trim();
+
+    if (!name || !service || !isValidPhoneInput(phoneInput.value || "") || !isValidPhone(phone)) {
+      setDisabledCta("Completa los campos para enviar por WhatsApp");
+      return;
+    }
+
+    const specialistValue = String(specialistSelect.value || "").trim();
+    const specialistName = specialistValue
+      ? (specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)?.name || specialistValue)
+      : "Sin preferencia";
+
+    const message = buildAppointmentMessage({
+      name,
+      phone,
+      service: serviceSelect.options[serviceSelect.selectedIndex]?.text || service,
+      specialist: specialistName,
+      date: dateInput.value || undefined,
+      time: timeSlotSelect.value || undefined,
+      shift: String(shiftSelect.value || "") || undefined,
+      notes: String(notesInput.value || "") || undefined,
+    });
+
+    const href = buildWhatsAppUrl(message, waNumber);
+    setEnabledCta(href);
+  };
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  dateInput.min = `${yyyy}-${mm}-${dd}`;
+
+  applyPrefill();
+  updateTimeLimitsByDate();
+  updateDatePreview();
+  updateCta();
+
+  serviceSelect.addEventListener("change", () => {
+    renderSpecialists(serviceSelect.value, "");
+    updateCta();
+  });
+
+  [nameInput, phoneInput, specialistSelect, dateInput, timeSlotSelect, shiftSelect, notesInput].forEach((el) => {
+    if (!el) return;
+    el.addEventListener("input", updateCta);
+    el.addEventListener("change", updateCta);
+  });
+
+  dateInput.addEventListener("change", () => {
+    updateTimeLimitsByDate();
+    updateCta();
+  });
+
+  shiftSelect.addEventListener("change", () => {
+    if (shiftSelect.value && timeSlotSelect.value) {
+      timeSlotSelect.value = "";
+    }
+    updateCta();
+  });
+
+  sendBtn.addEventListener("click", (event) => {
+    if (sendBtn.getAttribute("href") === "#") {
+      event.preventDefault();
+      form.reportValidity();
+    }
+  });
+</script>

@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const updatedAt = "22 de febrero de 2026";
+---
+
+<Layout title="Aviso de privacidad | Podologos Via Morelos Tulpetlac" description="Aviso de privacidad para atencion y contacto de pacientes.">
+  <Header />
+
+  <main class="mx-auto max-w-4xl px-4 py-10">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Aviso de privacidad</h1>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Ultima actualizacion: {updatedAt}</p>
+
+    <div class="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+      <p>Este sitio solicita datos de contacto para responder dudas y gestionar citas. Los datos se usan solo para atencion al paciente y seguimiento de servicios.</p>
+      <p>Datos que se pueden solicitar: nombre, telefono, servicio de interes, fecha y hora preferida, y notas opcionales de atencion.</p>
+      <p>Los datos no se venden a terceros. Solo se comparten cuando sea necesario para la operacion del servicio (por ejemplo, plataformas de mensajeria y hospedaje web).</p>
+      <p>Para solicitar correccion o eliminacion de tus datos, contactanos por WhatsApp o por telefono.</p>
+      <p>Este documento es informativo y puede ajustarse para cumplir requisitos legales especificos en Mexico segun tu operacion final.</p>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

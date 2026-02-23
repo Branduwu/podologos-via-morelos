@@ -1,0 +1,269 @@
+---
+const { platform, url, title = "Video" } = Astro.props as {
+  platform: "youtube" | "tiktok" | "facebook";
+  url: string;
+  title?: string;
+  linkOnly?: boolean;
+  linkText?: string;
+  previewImage?: string;
+};
+
+function safeUrl(u: string) {
+  try {
+    return new URL(u);
+  } catch {
+    return null;
+  }
+}
+
+function getYouTubeId(u: string) {
+  const parsed = safeUrl(u);
+  if (!parsed) return null;
+  const host = parsed.hostname.replace("www.", "");
+
+  if (host === "youtu.be") return parsed.pathname.split("/").filter(Boolean)[0] || null;
+  if (host === "youtube.com") {
+    const v = parsed.searchParams.get("v");
+    if (v) return v;
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    if (parts[0] === "shorts" && parts[1]) return parts[1];
+    if (parts[0] === "embed" && parts[1]) return parts[1];
+  }
+  return null;
+}
+
+function isValidYouTubeId(id: string | null) {
+  return typeof id === "string" && /^[a-zA-Z0-9_-]{11}$/.test(id);
+}
+
+function getTikTokId(u: string) {
+  const parsed = safeUrl(u);
+  if (!parsed) return null;
+  const host = parsed.hostname.replace("www.", "");
+  if (host !== "tiktok.com") return null;
+
+  const parts = parsed.pathname.split("/").filter(Boolean);
+  const videoIndex = parts.findIndex((x) => x === "video");
+  if (videoIndex >= 0 && parts[videoIndex + 1]) return parts[videoIndex + 1];
+  return null;
+}
+
+function isValidTikTokId(id: string | null) {
+  return typeof id === "string" && /^\d{8,25}$/.test(id);
+}
+
+function isAllowed(inputPlatform: string, u: string) {
+  const parsed = safeUrl(u);
+  if (!parsed) return false;
+  const host = parsed.hostname.replace("www.", "");
+  const isFacebookHost = host === "fb.watch" || host === "facebook.com" || host.endsWith(".facebook.com");
+
+  if (inputPlatform === "youtube") return host === "youtube.com" || host === "youtu.be";
+  if (inputPlatform === "tiktok") return host === "tiktok.com";
+  if (inputPlatform === "facebook") return isFacebookHost;
+  return false;
+}
+
+function isFacebookEmbeddableUrl(u: string) {
+  const parsed = safeUrl(u);
+  if (!parsed) return false;
+  const host = parsed.hostname.replace("www.", "");
+  if (host === "fb.watch") return true;
+  if (!(host === "facebook.com" || host.endsWith(".facebook.com"))) return false;
+  const path = parsed.pathname || "";
+  return path.includes("/videos/") || path.startsWith("/plugins/video.php");
+}
+
+const allowed = isAllowed(platform, url);
+const ytIdRaw = platform === "youtube" ? getYouTubeId(url) : null;
+const ytId = isValidYouTubeId(ytIdRaw) ? ytIdRaw : null;
+const ytThumb = ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "";
+const ytEmbedSrc = ytId ? `https://www.youtube-nocookie.com/embed/${ytId}?rel=0&modestbranding=1` : "";
+
+const ttIdRaw = platform === "tiktok" ? getTikTokId(url) : null;
+const ttId = isValidTikTokId(ttIdRaw) ? ttIdRaw : null;
+const ttEmbedSrc = ttId ? `https://www.tiktok.com/embed/v2/${ttId}` : "";
+
+const parsedUrl = safeUrl(url);
+const isFacebookPluginUrl =
+  platform === "facebook" &&
+  parsedUrl &&
+  (parsedUrl.hostname.replace("www.", "") === "facebook.com" ||
+    parsedUrl.hostname.replace("www.", "").endsWith(".facebook.com")) &&
+  parsedUrl.pathname.startsWith("/plugins/video.php");
+
+const fbEmbedSrc = isFacebookPluginUrl
+  ? url
+  : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=560`;
+const fbEmbeddable = isFacebookEmbeddableUrl(url);
+const manualLinkOnly = Boolean(Astro.props.linkOnly);
+const ctaText = Astro.props.linkText || (platform === "facebook" ? "Abrir en Facebook" : platform === "tiktok" ? "Abrir en TikTok" : "Abrir video");
+const previewImage = Astro.props.previewImage || "";
+---
+
+{!allowed ? (
+  <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-100">
+    Enlace no permitido. Usa un link valido de YouTube, TikTok o Facebook.
+  </div>
+) : manualLinkOnly ? (
+  <div class="space-y-3">
+    {previewImage ? (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group block overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800"
+      >
+        <img src={previewImage} alt={title} class="h-56 w-full object-cover transition group-hover:scale-[1.02]" loading="lazy" />
+      </a>
+    ) : (
+      <div class="rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+        <p class="font-medium">{title}</p>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          Configurado como solo enlace.
+        </p>
+      </div>
+    )}
+    <a
+      class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {ctaText}
+    </a>
+  </div>
+) : platform === "youtube" && ytId ? (
+  <div class="space-y-3">
+    <div
+      class="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800"
+      data-yt-wrap
+      data-yt-src={ytEmbedSrc}
+    >
+      <img src={ytThumb} alt={title} loading="lazy" class="h-56 w-full object-cover" />
+      <button
+        type="button"
+        data-yt-play
+        class="absolute inset-0 flex items-center justify-center bg-black/25 opacity-100 transition group-hover:bg-black/35"
+        aria-label="Reproducir aqui"
+      >
+        <span class="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-slate-900">
+          Reproducir aqui
+        </span>
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+      <p class="text-xs text-slate-500 dark:text-slate-400">Si YouTube bloquea el embed, abrelo directo.</p>
+      <a
+        class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Abrir en YouTube
+      </a>
+    </div>
+
+    <script is:inline>
+      (() => {
+        document.addEventListener("click", (e) => {
+          const btn = e.target?.closest?.("[data-yt-play]");
+          if (!btn) return;
+          const wrap = btn.closest("[data-yt-wrap]");
+          if (!wrap) return;
+          const src = wrap.getAttribute("data-yt-src");
+          if (!src) return;
+
+          const container = document.createElement("div");
+          container.className = "aspect-video w-full";
+          const iframe = document.createElement("iframe");
+          iframe.className = "h-full w-full";
+          iframe.src = src;
+          iframe.title = "YouTube video player";
+          iframe.loading = "lazy";
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+          iframe.setAttribute("allowfullscreen", "");
+          container.appendChild(iframe);
+          wrap.replaceChildren(container);
+        });
+      })();
+    </script>
+  </div>
+) : platform === "facebook" && fbEmbeddable ? (
+  <div class="space-y-3">
+    <div class="aspect-video overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+      <iframe
+        class="h-full w-full"
+        title={title}
+        loading="lazy"
+        src={fbEmbedSrc}
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <a
+      class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Abrir en Facebook
+    </a>
+  </div>
+) : platform === "facebook" ? (
+  <div class="space-y-3">
+    <div class="rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+      <p class="font-medium">{title}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Esta URL de Facebook no permite embed estable. Abrela directamente.
+      </p>
+    </div>
+    <a
+      class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {ctaText}
+    </a>
+  </div>
+) : ttId ? (
+  <div class="space-y-3">
+    <div class="mx-auto aspect-[9/16] max-w-[360px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+      <iframe
+        class="h-full w-full"
+        title={title}
+        loading="lazy"
+        src={ttEmbedSrc}
+        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <a
+      class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {ctaText}
+    </a>
+  </div>
+) : (
+  <div class="space-y-3">
+    <div class="rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+      <p class="font-medium">{title}</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        La URL de TikTok no tiene formato valido de video. Usa un link tipo /@usuario/video/ID.
+      </p>
+    </div>
+    <a
+      class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {ctaText}
+    </a>
+  </div>
+)}

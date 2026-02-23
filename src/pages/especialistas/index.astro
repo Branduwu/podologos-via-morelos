@@ -1,0 +1,207 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { getBusinessInfo, getSpecialists } from "../../lib/sanity.js";
+import { normalizeServiceSlug } from "../../utils/prefill";
+import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
+
+type Specialist = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  specialtyCategory?: string;
+  shortBio?: string;
+  focusAreas?: string[];
+  photoUrl?: string;
+};
+
+const business = await getBusinessInfo();
+const specialists: Specialist[] = (await getSpecialists()) || [];
+
+function specialistHref(specialist: Specialist) {
+  return `/especialistas/${encodeURIComponent((specialist?.slug || specialist?._id || "").trim())}`;
+}
+
+const specialistCategories = [
+  { key: "all", label: "Todas" },
+  { key: "podologia", label: "Podologia" },
+  { key: "psicologia", label: "Psicologia" },
+  { key: "optica", label: "Optica" },
+  { key: "quiropractica", label: "Quiropractica" },
+];
+
+function normalizeText(value: string) {
+  return (value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function specialistCategoryKey(specialty: string | undefined) {
+  const text = normalizeText(specialty || "");
+  if (!text) return "general";
+  if (text.includes("podolog")) return "podologia";
+  if (text.includes("psicolog")) return "psicologia";
+  if (text.includes("optomet") || text.includes("optic")) return "optica";
+  if (text.includes("quiropr") || text.includes("quiro")) return "quiropractica";
+  return "general";
+}
+
+function specialistCategoryFromData(specialist: Specialist) {
+  const fromCms = normalizeText(specialist.specialtyCategory || "");
+  if (["podologia", "psicologia", "optica", "quiropractica"].includes(fromCms)) return fromCms;
+  return specialistCategoryKey(specialist.specialty);
+}
+
+const waNumber = String(business?.whatsappCitasNumber || "").replace(/\D/g, "");
+
+function agendarSpecialistHref(specialist: Specialist) {
+  const service = normalizeServiceSlug(specialist.specialtyCategory || specialist.specialty || "");
+  const slug = (specialist.slug || specialist._id || "").trim();
+  const params = new URLSearchParams();
+  if (service) params.set("service", service);
+  if (slug) params.set("specialist", slug);
+  const qs = params.toString();
+  return qs ? `/agendar?${qs}` : "/agendar";
+}
+
+function specialistWhatsAppHref(specialist: Specialist) {
+  return buildWhatsAppUrl(
+    buildContactMessage({
+      service: specialist.specialty || "Especialista",
+      reason: `Quiero agendar con ${specialist.name || "este especialista"}.`,
+    }),
+    waNumber
+  );
+}
+---
+
+<Layout title={`Especialistas | ${business?.name || "Podologos Via Morelos"}`} description="Conoce a nuestros especialistas y su enfoque de atencion.">
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+      <h1 class="max-w-4xl text-left text-3xl font-bold tracking-tight md:text-4xl">Especialistas</h1>
+      <p class="max-w-4xl mt-2 text-left text-slate-600 dark:text-slate-300">Conoce al equipo que te atiende en cada area.</p>
+
+      {specialists.length === 0 ? (
+        <div class="mt-6 max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          Pronto compartiremos perfiles de especialistas.
+        </div>
+      ) : (
+        <>
+          <div class="mt-6 flex flex-wrap gap-2" id="specialist-filters">
+            {specialistCategories.map((cat) => (
+              <button
+                type="button"
+                data-specialist-filter={cat.key}
+                class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="specialists-list">
+          {specialists.map((specialist: Specialist) => (
+            <article
+              data-specialist-card
+              data-category={specialistCategoryFromData(specialist)}
+              class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
+            >
+              <img
+                class="h-56 w-full object-cover"
+                src={specialist.photoUrl || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1000&q=80"}
+                alt={specialist.name || "Especialista"}
+                loading="lazy"
+              />
+              <div class="p-5">
+                <h2 class="text-lg font-bold">{specialist.name || "Especialista"}</h2>
+                <p class="mt-1 text-sm font-semibold text-sky-700 dark:text-sky-300">{specialist.specialty || "Especialidad"}</p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialist.shortBio || "Perfil disponible pronto."}</p>
+
+                {Array.isArray(specialist.focusAreas) && specialist.focusAreas.length > 0 && (
+                  <ul class="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                    {specialist.focusAreas.slice(0, 4).map((area) => (
+                      <li class="truncate">- {area}</li>
+                    ))}
+                  </ul>
+                )}
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <a class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800" href={specialistHref(specialist)}>
+                    Ver perfil
+                  </a>
+                  <a
+                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+                    href={agendarSpecialistHref(specialist)}
+                  >
+                    Agendar con este especialista
+                  </a>
+                  {waNumber && (
+                    <a
+                      class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+                      href={specialistWhatsAppHref(specialist)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
+          </div>
+        </>
+      )}
+
+      <p id="specialists-empty" class="mt-6 hidden max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        No hay especialistas en esa categoria todavia.
+      </p>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script is:inline>
+  const specialistFilterButtons = Array.from(document.querySelectorAll("[data-specialist-filter]"));
+  const specialistCards = Array.from(document.querySelectorAll("[data-specialist-card]"));
+  const specialistEmpty = document.getElementById("specialists-empty");
+  let activeSpecialistFilter = "all";
+
+  const updateSpecialistFilterUI = () => {
+    specialistFilterButtons.forEach((btn) => {
+      const isActive = btn.dataset.specialistFilter === activeSpecialistFilter;
+      btn.classList.toggle("bg-sky-700", isActive);
+      btn.classList.toggle("text-white", isActive);
+      btn.classList.toggle("border-sky-700", isActive);
+    });
+  };
+
+  const applySpecialistFilter = () => {
+    let visibleCount = 0;
+
+    specialistCards.forEach((card) => {
+      const category = card.dataset.category || "general";
+      const visible = activeSpecialistFilter === "all" || category === activeSpecialistFilter;
+      card.classList.toggle("hidden", !visible);
+      if (visible) visibleCount += 1;
+    });
+
+    if (specialistEmpty) specialistEmpty.classList.toggle("hidden", visibleCount > 0);
+  };
+
+  specialistFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeSpecialistFilter = btn.dataset.specialistFilter || "all";
+      updateSpecialistFilterUI();
+      applySpecialistFilter();
+    });
+  });
+
+  updateSpecialistFilterUI();
+  applySpecialistFilter();
+</script>

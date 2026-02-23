@@ -6,9 +6,25 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "lint": "eslint . --ext .js,.mjs --ignore-pattern dist --ignore-pattern node_modules --ignore-pattern cms/**",
+    "lint:cms": "npm --prefix cms run lint",
+    "quality": "npm run check && npm run lint && npm run lint:cms"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "@sanity/client": "^7.15.0",
+    "@sanity/image-url": "^2.0.3",
+    "@tailwindcss/vite": "^4.2.0",
+    "astro": "^5.17.1",
+    "tailwindcss": "^4.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@eslint/js": "^10.0.1",
+    "@sentry/astro": "^10.39.0",
+    "eslint": "^10.0.1",
+    "globals": "^17.3.0",
+    "typescript": "^5.9.3"
   }
 }

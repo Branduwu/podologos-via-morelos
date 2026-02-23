@@ -1,0 +1,188 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import VideoEmbed from "../components/VideoEmbed.astro";
+import { getGallery } from "../lib/sanity.js";
+
+type GalleryItem = {
+  _id?: string;
+  title: string;
+  category: string;
+  type: "image" | "video";
+  imageUrl?: string;
+  platform?: "youtube" | "tiktok" | "facebook";
+  url?: string;
+  linkOnly?: boolean;
+  linkText?: string;
+  linkPreviewImageUrl?: string;
+};
+
+const itemsRaw = (await getGallery()) || [];
+
+const items: GalleryItem[] = itemsRaw.map((it: Partial<GalleryItem>, idx: number) => ({
+  ...it,
+  _id: it._id || `item-${idx}`,
+  category: (it.category || "otros").toLowerCase(),
+  type: (it.type || (it.imageUrl ? "image" : "video")) as "image" | "video",
+  title: it.title || "Sin titulo",
+}));
+
+const images = items.filter((it) => it.type === "image");
+const videos = items.filter((it) => it.type === "video");
+const youtubeVideos = videos.filter((it) => it.platform === "youtube");
+const tiktokVideos = videos.filter((it) => it.platform === "tiktok");
+const facebookVideos = videos.filter((it) => it.platform === "facebook");
+
+const categoryLabel: Record<string, string> = {
+  podologia: "Podologia",
+  psicologia: "Psicologia",
+  optica: "Optica",
+  quiropractica: "Quiropractica",
+  instalaciones: "Instalaciones",
+  otros: "Otros",
+};
+---
+
+<Layout title="Galeria | Podologos Via Morelos Tulpetlac">
+  <Header />
+
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Galeria</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">
+      Fotos y videos de nuestros servicios e instalaciones.
+    </p>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#imagenes">Fotos</a>
+      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#youtube">Videos en YouTube</a>
+      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#tiktok">Videos en TikTok</a>
+      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#facebook">Videos en Facebook</a>
+    </div>
+
+    {items.length === 0 && (
+      <div class="mt-8 rounded-2xl border border-slate-200 p-6 text-slate-600 dark:border-slate-800 dark:text-slate-300">
+        Pronto compartiremos mas fotos y videos. Mientras tanto, puedes agendar tu cita.
+      </div>
+    )}
+
+    <section id="imagenes" class="mt-10">
+      <h2 class="text-xl font-semibold">Fotos</h2>
+      {images.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos fotos en esta seccion.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {images.map((it) => (
+            <article class="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {categoryLabel[it.category] || it.category}
+                </p>
+              </div>
+              {it.imageUrl ? (
+                <img class="aspect-[4/3] w-full object-cover" src={it.imageUrl} alt={it.title} loading="lazy" />
+              ) : (
+                <div class="flex aspect-[4/3] items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                  Sin imagen
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section id="youtube" class="mt-12">
+      <h2 class="text-xl font-semibold">Videos en YouTube</h2>
+      {youtubeVideos.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos videos en YouTube.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {youtubeVideos.map((it) => (
+            <article class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {categoryLabel[it.category] || it.category}
+                </p>
+              </div>
+              <div class="px-4 pb-4">
+                <VideoEmbed
+                  platform={it.platform}
+                  url={it.url}
+                  title={it.title}
+                  linkOnly={it.linkOnly}
+                  linkText={it.linkText}
+                  previewImage={it.linkPreviewImageUrl}
+                />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section id="tiktok" class="mt-12">
+      <h2 class="text-xl font-semibold">Videos en TikTok</h2>
+      {tiktokVideos.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos videos en TikTok.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {tiktokVideos.map((it) => (
+            <article class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {categoryLabel[it.category] || it.category}
+                </p>
+              </div>
+              <div class="px-4 pb-4">
+                <VideoEmbed
+                  platform={it.platform}
+                  url={it.url}
+                  title={it.title}
+                  linkOnly={it.linkOnly}
+                  linkText={it.linkText}
+                  previewImage={it.linkPreviewImageUrl}
+                />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section id="facebook" class="mt-12">
+      <h2 class="text-xl font-semibold">Videos en Facebook</h2>
+      {facebookVideos.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos videos en Facebook.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {facebookVideos.map((it) => (
+            <article class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {categoryLabel[it.category] || it.category}
+                </p>
+              </div>
+              <div class="px-4 pb-4">
+                <VideoEmbed
+                  platform={it.platform}
+                  url={it.url}
+                  title={it.title}
+                  linkOnly={it.linkOnly}
+                  linkText={it.linkText}
+                  previewImage={it.linkPreviewImageUrl}
+                />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  </main>
+
+  <Footer />
+</Layout>

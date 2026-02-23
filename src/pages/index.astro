@@ -1,17 +1,672 @@
 ---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getAboutSection, getBusinessInfo, getGallery, getPromotions } from "../lib/sanity.js";
 
+type HomePromo = {
+  _id?: string;
+  slug?: string;
+  title?: string;
+  label?: string;
+  shortDescription?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  pinned?: boolean;
+  imageUrl?: string;
+};
+
+type HomeGalleryItem = {
+  _id?: string;
+  title?: string;
+  category?: string;
+  type?: "image" | "video";
+  featured?: boolean;
+  imageUrl?: string;
+  platform?: "youtube" | "tiktok" | "facebook";
+  url?: string;
+  linkOnly?: boolean;
+  linkText?: string;
+  linkPreviewImageUrl?: string;
+  resolvedPreviewImageUrl?: string;
+};
+
+type AboutSection = {
+  title?: string;
+  intro?: string;
+  secondary?: string;
+  keyPoints?: string[];
+  ctaText?: string;
+  ctaUrl?: string;
+  secondaryCtaText?: string;
+  secondaryCtaUrl?: string;
+  mainImageUrl?: string;
+  galleryImageUrls?: string[];
+};
+
+const business = await getBusinessInfo();
+const about: AboutSection | null = await getAboutSection();
+const promos = (await getPromotions()) || [];
+const galleryItems = (await getGallery()) || [];
+
+const normalized: HomePromo[] = promos.map((p: HomePromo) => ({
+  ...p,
+  pinned: Boolean(p.pinned),
+  title: p.title || "Promocion",
+}));
+
+const homePromos = [...normalized].sort((a, b) => Number(b.pinned) - Number(a.pinned)).slice(0, 8);
+const featuredGallery: HomeGalleryItem[] = galleryItems.filter((it: HomeGalleryItem) => Boolean(it.featured));
+const homeGallery: HomeGalleryItem[] = featuredGallery.length > 0 ? featuredGallery : galleryItems;
+const homeGalleryPhotos: HomeGalleryItem[] = homeGallery.filter((it: HomeGalleryItem) => it.type !== "video");
+const rawHomeGalleryVideos: HomeGalleryItem[] = homeGallery.filter((it: HomeGalleryItem) => it.type === "video");
+
+const heroEyebrow = business?.homeHeroEyebrow || "Atencion integral";
+const heroTitle = business?.homeHeroTitle || "Cuidado profesional para tus pies y bienestar integral";
+const heroSubtitle =
+  business?.homeHeroSubtitle ||
+  "Atencion cercana en Tulpetlac, Ecatepec. Servicios de podologia, psicologia, optica y quiropractica.";
+const heroImageUrl =
+  business?.homeHeroImageUrl ||
+  "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1800&q=80";
+
+const heroPrimaryCtaText = business?.homePrimaryCtaText || "Agenda tu cita";
+const heroPrimaryCtaUrl = business?.homePrimaryCtaUrl || "/agendar";
+const heroSecondaryCtaText = business?.homeSecondaryCtaText || "Nuestros servicios";
+const heroSecondaryCtaUrl = business?.homeSecondaryCtaUrl || "/servicios";
+
+const promotionsTitle = business?.homePromotionsTitle || "Promociones vigentes";
+const promotionsSubtitle =
+  business?.homePromotionsSubtitle || "Aprovecha descuentos y paquetes especiales sujetos a disponibilidad.";
+const promotionsFallbackImage =
+  business?.homePromotionFallbackImageUrl ||
+  "https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?auto=format&fit=crop&w=1400&q=80";
+
+const aboutTitle = about?.title || "Nosotros";
+const aboutIntro =
+  about?.intro ||
+  "Somos un centro integral de salud en Tulpetlac enfocado en podologia, psicologia, optica y quiropractica con atencion cercana y profesional.";
+const aboutSecondary =
+  about?.secondary ||
+  "Nuestro objetivo es ayudarte a mejorar tu bienestar con tratamientos personalizados, explicaciones claras y seguimiento continuo.";
+const aboutGallery = Array.isArray(about?.galleryImageUrls) ? about?.galleryImageUrls.filter(Boolean).slice(0, 4) : [];
+const aboutMainImage =
+  about?.mainImageUrl ||
+  (aboutGallery[0] ||
+    "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?auto=format&fit=crop&w=1600&q=80");
+const aboutKeyPoints = Array.isArray(about?.keyPoints) ? about.keyPoints.filter(Boolean).slice(0, 6) : [];
+const aboutCtaText = about?.ctaText || "Agenda tu cita";
+const aboutCtaUrl = about?.ctaUrl || "/agendar";
+const aboutSecondaryCtaText = about?.secondaryCtaText || "Conocenos mas";
+const aboutSecondaryCtaUrl = about?.secondaryCtaUrl || "/nosotros";
+
+function fmt(d: string | Date | null | undefined) {
+  if (!d) return "Sin fecha";
+  try {
+    return new Date(d).toLocaleDateString("es-MX", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch {
+    return String(d);
+  }
+}
+
+function excerpt(p: HomePromo) {
+  return (p.shortDescription || p.description || "").trim();
+}
+
+function promotionHref(p: HomePromo) {
+  return `/promociones/${encodeURIComponent((p.slug || p._id || "").trim())}`;
+}
+
+function extractYouTubeId(url?: string) {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtu.be")) {
+      return parsed.pathname.replace("/", "");
+    }
+    if (parsed.hostname.includes("youtube.com")) {
+      const fromQuery = parsed.searchParams.get("v");
+      if (fromQuery) return fromQuery;
+      const pathParts = parsed.pathname.split("/").filter(Boolean);
+      const shortsIdx = pathParts.indexOf("shorts");
+      if (shortsIdx >= 0 && pathParts[shortsIdx + 1]) return pathParts[shortsIdx + 1];
+      const embedIdx = pathParts.indexOf("embed");
+      if (embedIdx >= 0 && pathParts[embedIdx + 1]) return pathParts[embedIdx + 1];
+      return "";
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+async function fetchOEmbedThumbnail(url?: string, platform?: string) {
+  if (!url) return "";
+  try {
+    if (platform === "tiktok") {
+      const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data?.thumbnail_url || "";
+    }
+    if (platform === "facebook") {
+      const res = await fetch(`https://www.facebook.com/plugins/video/oembed.json/?url=${encodeURIComponent(url)}`);
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data?.thumbnail_url || "";
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+const homeGalleryVideos: HomeGalleryItem[] = await Promise.all(
+  rawHomeGalleryVideos.map(async (it) => {
+    const localPreview = it.linkPreviewImageUrl || it.imageUrl || "";
+    const ytId = extractYouTubeId(it.url);
+    const ytPreview = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : "";
+    const remotePreview = await fetchOEmbedThumbnail(it.url, it.platform);
+    return {
+      ...it,
+      resolvedPreviewImageUrl: localPreview || ytPreview || remotePreview || "",
+    };
+  })
+);
+
+function getVideoPreviewSource(it: HomeGalleryItem) {
+  if (it.resolvedPreviewImageUrl) return it.resolvedPreviewImageUrl;
+  return "";
+}
+
+function getVideoAspectClass(it: HomeGalleryItem) {
+  if (it.platform === "tiktok") return "aspect-[9/16]";
+  if (it.platform === "facebook" || it.platform === "youtube") return "aspect-video";
+  return "aspect-video";
+}
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <Header />
+
+  <main class="pb-12">
+    <section class="relative overflow-hidden border-y border-sky-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
+      <img class="absolute inset-0 h-full w-full object-cover" src={heroImageUrl} alt="Consultorio medico" loading="eager" />
+      <div class="absolute inset-0 bg-gradient-to-r from-sky-950/78 via-sky-900/65 to-slate-900/52"></div>
+
+      <div class="relative mx-auto max-w-6xl px-4 py-16 text-white md:py-20">
+        <p class="type-hero-eyebrow text-sky-100">{heroEyebrow}</p>
+        <h1 class="type-hero-title mt-3 max-w-4xl">{heroTitle}</h1>
+        <p class="type-hero-subtitle mt-4 max-w-3xl text-sky-50">{heroSubtitle}</p>
+
+        <div class="mt-7 flex flex-wrap gap-3">
+          <a class="rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-700" href={heroPrimaryCtaUrl}>
+            {heroPrimaryCtaText}
+          </a>
+          <a class="rounded-xl border border-white/70 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15" href={heroSecondaryCtaUrl}>
+            {heroSecondaryCtaText}
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto mt-8 max-w-6xl px-4">
+      <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h2 class="type-section-title text-slate-900 dark:text-slate-100">{promotionsTitle}</h2>
+          <p class="type-section-subtitle text-slate-600 dark:text-slate-300">{promotionsSubtitle}</p>
+        </div>
+        <div class="flex flex-col items-start gap-2 md:items-end">
+          <a class="text-sm font-semibold text-sky-700 hover:underline dark:text-sky-300" href="/promociones">
+            Ver todas las promociones
+          </a>
+        </div>
+      </div>
+
+      {homePromos.length === 0 ? (
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          Pronto compartiremos promociones vigentes. Mientras tanto, puedes agendar tu cita.
+        </div>
+      ) : (
+        <div class="mt-5">
+          <div class="relative">
+            <button
+              type="button"
+              data-promo-carousel-prev
+              aria-label="Anterior"
+              class="absolute left-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white lg:inline-flex dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900"
+            >
+              <span aria-hidden="true">&lt;</span>
+            </button>
+
+            <button
+              type="button"
+              data-promo-carousel-next
+              aria-label="Siguiente"
+              class="absolute right-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white lg:inline-flex dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900"
+            >
+              <span aria-hidden="true">&gt;</span>
+            </button>
+
+          <div data-promo-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+            {homePromos.map((p, index) => (
+              <article data-promo-carousel-item={index} class="flex min-h-[29rem] min-w-[86%] snap-start flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg md:min-w-[48%] lg:min-w-[32%] dark:border-slate-800 dark:bg-slate-950">
+                <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700/70">
+                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl || promotionsFallbackImage} alt={p.title} loading="lazy" />
+                </div>
+
+                <div class="flex flex-1 flex-col p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="type-card-title">{p.title}</h3>
+                    {p.label && (
+                      <span class="rounded-full bg-sky-100 px-2 py-1 text-xs font-semibold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                        {p.label}
+                      </span>
+                    )}
+                  </div>
+
+                  <div class="mt-2 min-h-[4.8rem]">
+                    {excerpt(p) && (
+                      <p class="type-card-body overflow-hidden text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] dark:text-slate-300">
+                        {excerpt(p)}
+                      </p>
+                    )}
+                  </div>
+
+                  <p class="type-meta mt-3 text-slate-500 dark:text-slate-400">Vigencia: {fmt(p.startDate)} a {fmt(p.endDate)}</p>
+
+                  <div class="mt-auto flex gap-2 pt-4">
+                    <a class="inline-flex flex-1 items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800" href="/agendar">
+                      Agendar
+                    </a>
+                    <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900" href={promotionHref(p)}>
+                      Ver promocion
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          </div>
+
+          <div class="mt-3 flex flex-wrap justify-center gap-2" data-promo-carousel-dots>
+            {homePromos.map((_, index) => (
+              <button
+                type="button"
+                data-promo-carousel-dot={index}
+                aria-label={`Ir a promocion ${index + 1}`}
+                class="h-2.5 w-2.5 rounded-full bg-slate-300 transition hover:bg-sky-400 dark:bg-slate-700"
+              ></button>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+
+    <section class="mx-auto mt-12 max-w-6xl px-4">
+      <div class="grid gap-8 rounded-3xl border border-sky-100 bg-white p-8 md:grid-cols-[1.15fr,0.85fr] md:items-center dark:border-slate-800 dark:bg-slate-950 md:p-10">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Conocenos</p>
+          <h2 class="type-section-title mt-2">{aboutTitle}</h2>
+          <p class="type-section-subtitle mt-4 text-slate-700 dark:text-slate-300">{aboutIntro}</p>
+          <p class="type-section-subtitle mt-4 text-slate-700 dark:text-slate-300">{aboutSecondary}</p>
+
+          {aboutKeyPoints.length > 0 && (
+            <ul class="mt-6 grid gap-2 text-base text-slate-700 dark:text-slate-300 sm:grid-cols-2">
+              {aboutKeyPoints.map((point) => (
+                <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{point}</span></li>
+              ))}
+            </ul>
+          )}
+
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a class="inline-flex rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800" href={aboutCtaUrl}>
+              {aboutCtaText}
+            </a>
+            <a class="inline-flex rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900" href={aboutSecondaryCtaUrl}>
+              {aboutSecondaryCtaText}
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <img class="h-80 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[30rem] dark:ring-slate-700" src={aboutMainImage} alt="Nosotros" loading="lazy" />
+        </div>
+      </div>
+
+      {aboutGallery.length > 0 && (
+        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {aboutGallery.map((img, idx) => (
+            <img class="h-44 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Nosotros ${idx + 1}`} loading="lazy" />
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="mx-auto mt-12 max-w-6xl px-4">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="type-section-title">Fotos y videos recomendados</h2>
+        <a class="text-sm font-medium hover:underline" href="/galeria">Ver fotos y videos</a>
+      </div>
+
+      {homeGallery.length === 0 ? (
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          Pronto compartiremos mas fotos y videos. Mientras tanto, puedes agendar tu cita.
+        </div>
+      ) : (
+        <div class="mt-6 space-y-10">
+          {homeGalleryPhotos.length > 0 && (
+            <div>
+              <h3 class="mb-3 text-xl font-bold">Fotos recomendadas</h3>
+              <div class="relative">
+                <button
+                  type="button"
+                  data-photo-carousel-prev
+                  aria-label="Anterior"
+                  class="absolute left-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white lg:inline-flex dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900"
+                >
+                  <span aria-hidden="true">&lt;</span>
+                </button>
+                <button
+                  type="button"
+                  data-photo-carousel-next
+                  aria-label="Siguiente"
+                  class="absolute right-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white lg:inline-flex dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900"
+                >
+                  <span aria-hidden="true">&gt;</span>
+                </button>
+                <div data-photo-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+                  {homeGalleryPhotos.map((it: HomeGalleryItem, index: number) => (
+                    <article data-photo-carousel-item={index} class="min-w-[88%] snap-start overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg sm:min-w-[72%] md:min-w-[48%] lg:min-w-[32%] dark:border-slate-800 dark:bg-slate-950">
+                      <div class="p-4">
+                        <p class="type-card-title">{it.title || "Foto destacada"}</p>
+                        <p class="type-meta mt-1 text-slate-500 dark:text-slate-400">{it.category || "galeria"}</p>
+                      </div>
+                      {it.imageUrl ? (
+                        <img class="h-56 w-full object-cover ring-1 ring-slate-200/70 transition duration-300 hover:opacity-95 dark:ring-slate-700/70" src={it.imageUrl} alt={it.title || "Imagen"} loading="lazy" />
+                      ) : (
+                        <div class="flex h-56 items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                          Sin imagen
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </div>
+              <div class="mt-3 flex flex-wrap justify-center gap-2" data-photo-carousel-dots>
+                {homeGalleryPhotos.map((_, index) => (
+                  <button
+                    type="button"
+                    data-photo-carousel-dot={index}
+                    aria-label={`Ir a foto ${index + 1}`}
+                    class="h-2.5 w-2.5 rounded-full bg-slate-300 transition hover:bg-sky-400 dark:bg-slate-700"
+                  ></button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {homeGalleryVideos.length > 0 && (
+            <div>
+              <h3 class="mb-3 text-xl font-bold">Videos recomendados</h3>
+              <div class="relative">
+                {homeGalleryVideos.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      data-video-carousel-prev
+                      aria-label="Anterior"
+                      class="absolute left-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white lg:inline-flex dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900"
+                    >
+                      <span aria-hidden="true">&lt;</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-video-carousel-next
+                      aria-label="Siguiente"
+                      class="absolute right-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white lg:inline-flex dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900"
+                    >
+                      <span aria-hidden="true">&gt;</span>
+                    </button>
+                  </>
+                )}
+
+                <div data-video-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+                  {homeGalleryVideos.map((it: HomeGalleryItem, index: number) => (
+                    <article data-video-carousel-item={index} class="min-w-[88%] snap-start overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg sm:min-w-[72%] md:min-w-[48%] lg:min-w-[32%] dark:border-slate-800 dark:bg-slate-950">
+                      <div class="p-4">
+                        <p class="type-card-title">{it.title || "Video destacado"}</p>
+                        <p class="type-meta mt-1 text-slate-500 dark:text-slate-400">{it.category || "video"}</p>
+                      </div>
+                      <div class="px-4 pb-4">
+                        <a
+                          href={it.url || "/galeria"}
+                          target={it.url ? "_blank" : undefined}
+                          rel={it.url ? "noopener noreferrer" : undefined}
+                          class="group block overflow-hidden rounded-2xl border border-slate-200 ring-1 ring-slate-200/70 transition hover:shadow-md dark:border-slate-700 dark:ring-slate-700/70"
+                        >
+                          {getVideoPreviewSource(it) ? (
+                            <div class={`relative w-full overflow-hidden bg-slate-100 dark:bg-slate-900 ${getVideoAspectClass(it)}`}>
+                              <img
+                                src={getVideoPreviewSource(it)}
+                                alt={it.title || "Video"}
+                                class:list={[
+                                  "h-full w-full transition duration-300 group-hover:scale-[1.02]",
+                                  it.platform === "tiktok" ? "object-contain" : "object-cover",
+                                ]}
+                                loading="lazy"
+                              />
+                              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-slate-900/10 to-transparent"></div>
+                              <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/92 text-xl text-slate-900 shadow-sm">
+                                  &#9654;
+                                </span>
+                              </div>
+                              <span class="absolute left-3 top-3 rounded-full bg-slate-900/75 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                                {it.platform || "video"}
+                              </span>
+                            </div>
+                          ) : (
+                            <div class={`flex items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400 ${getVideoAspectClass(it)}`}>
+                              Ver video
+                            </div>
+                          )}
+                        </a>
+                        <a
+                          href={it.url || "/galeria"}
+                          target={it.url ? "_blank" : undefined}
+                          rel={it.url ? "noopener noreferrer" : undefined}
+                          class="mt-3 inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900"
+                        >
+                          Abrir video
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+              {homeGalleryVideos.length > 1 && (
+                <div class="mt-3 flex flex-wrap justify-center gap-2" data-video-carousel-dots>
+                  {homeGalleryVideos.map((_, index) => (
+                    <button
+                      type="button"
+                      data-video-carousel-dot={index}
+                      aria-label={`Ir a video ${index + 1}`}
+                      class="h-2.5 w-2.5 rounded-full bg-slate-300 transition hover:bg-sky-400 dark:bg-slate-700"
+                    ></button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .promo-media {
+    aspect-ratio: 4 / 3;
+  }
+  .promo-media--portrait {
+    aspect-ratio: 3 / 4;
+  }
+  .promo-media--landscape {
+    aspect-ratio: 4 / 3;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
+<script is:inline>
+  const initCarousel = ({ trackSelector, itemSelector, prevSelector, nextSelector, dotSelector, autoplayMs }) => {
+    const track = document.querySelector(trackSelector);
+    const prev = document.querySelector(prevSelector);
+    const next = document.querySelector(nextSelector);
+    const dots = Array.from(document.querySelectorAll(dotSelector));
+    if (!track || !prev || !next) return;
+
+    let intervalId;
+    let currentIndex = 0;
+
+    const getItems = () => Array.from(track.querySelectorAll(itemSelector));
+
+    const updateDots = () => {
+      if (!dots.length) return;
+      const items = getItems();
+      if (!items.length) return;
+      currentIndex = items.reduce(
+        (best, item, index) => {
+          const dist = Math.abs(item.offsetLeft - track.scrollLeft);
+          return dist < best.dist ? { index, dist } : best;
+        },
+        { index: 0, dist: Number.POSITIVE_INFINITY }
+      ).index;
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("bg-sky-600", i === currentIndex);
+        dot.classList.toggle("dark:bg-sky-400", i === currentIndex);
+        dot.classList.toggle("bg-slate-300", i !== currentIndex);
+        dot.classList.toggle("dark:bg-slate-700", i !== currentIndex);
+      });
+    };
+
+    const goToIndex = (index) => {
+      const items = getItems();
+      if (!items.length) return;
+      const bounded = (index + items.length) % items.length;
+      const target = items[bounded];
+      if (!target) return;
+      track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+    };
+
+    const move = (dir) => {
+      goToIndex(currentIndex + dir);
+    };
+
+    const stopAutoplay = () => {
+      if (!intervalId) return;
+      clearInterval(intervalId);
+      intervalId = undefined;
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (getItems().length <= 1) return;
+      if (document.hidden) return;
+      intervalId = setInterval(() => move(1), autoplayMs);
+    };
+
+    prev.addEventListener("click", () => {
+      move(-1);
+      startAutoplay();
+    });
+
+    next.addEventListener("click", () => {
+      move(1);
+      startAutoplay();
+    });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        goToIndex(index);
+        startAutoplay();
+      });
+    });
+
+    track.addEventListener("scroll", updateDots, { passive: true });
+    track.addEventListener("mouseenter", stopAutoplay);
+    track.addEventListener("mouseleave", startAutoplay);
+    track.addEventListener("focusin", stopAutoplay);
+    track.addEventListener("focusout", startAutoplay);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        stopAutoplay();
+      } else {
+        startAutoplay();
+      }
+    });
+
+    updateDots();
+    startAutoplay();
+  };
+
+  initCarousel({
+    trackSelector: "[data-promo-carousel-track]",
+    itemSelector: "[data-promo-carousel-item]",
+    prevSelector: "[data-promo-carousel-prev]",
+    nextSelector: "[data-promo-carousel-next]",
+    dotSelector: "[data-promo-carousel-dot]",
+    autoplayMs: 4500,
+  });
+
+  initCarousel({
+    trackSelector: "[data-photo-carousel-track]",
+    itemSelector: "[data-photo-carousel-item]",
+    prevSelector: "[data-photo-carousel-prev]",
+    nextSelector: "[data-photo-carousel-next]",
+    dotSelector: "[data-photo-carousel-dot]",
+    autoplayMs: 3200,
+  });
+
+  initCarousel({
+    trackSelector: "[data-video-carousel-track]",
+    itemSelector: "[data-video-carousel-item]",
+    prevSelector: "[data-video-carousel-prev]",
+    nextSelector: "[data-video-carousel-next]",
+    dotSelector: "[data-video-carousel-dot]",
+    autoplayMs: 3200,
+  });
+
+  const promoImages = Array.from(document.querySelectorAll("[data-promo-image]"));
+  promoImages.forEach((img) => {
+    const media = img.closest("[data-promo-media]");
+    if (!media) return;
+
+    const applyRatio = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const isPortrait = img.naturalHeight > img.naturalWidth;
+      media.classList.toggle("promo-media--portrait", isPortrait);
+      media.classList.toggle("promo-media--landscape", !isPortrait);
+    };
+
+    if (img.complete) {
+      applyRatio();
+    } else {
+      img.addEventListener("load", applyRatio, { once: true });
+    }
+  });
+</script>
