@@ -10,6 +10,7 @@
     "check": "astro check",
     "lint": "eslint . --ext .js,.mjs --ignore-pattern \"dist/**\" --ignore-pattern \"node_modules/**\" --ignore-pattern \"cms/**\"",
     "lint:cms": "npm --prefix cms run lint",
+    "deploy:cms": "npm --prefix cms run deploy -- -y",
     "quality": "npm run check && npm run lint && npm run lint:cms",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",

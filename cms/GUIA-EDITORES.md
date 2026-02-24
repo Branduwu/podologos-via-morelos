@@ -57,6 +57,7 @@ Esta guia explica que editar en cada area para mantener la web clara y ordenada.
 
 ### Promociones
 - Edita: titulo, etiqueta, descripcion, vigencia, imagen y estado.
+- Vigencia: usa formato `AAAA-MM-DD` (ejemplo `2026-03-01`).
 - Usa `Fijada` para subir prioridad.
 
 ## 3) Fotos y videos
@@ -112,3 +113,7 @@ Esta guia explica que editar en cada area para mantener la web clara y ordenada.
 - Si aparece un error y no sabes como resolver:
   - Revisa esta guia.
   - Si persiste, contacta al desarrollador de este sistema ABJV.
+
+- Si aparece un error de calendario (`firstDay`):
+  - Recarga el Studio.
+  - Verifica que la vigencia este en formato `AAAA-MM-DD`.

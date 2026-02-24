@@ -142,8 +142,18 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
           <div class="grid gap-4 sm:grid-cols-3">
             <div class="grid gap-2 sm:col-span-2">
               <label class="text-sm font-medium" for="date">Fecha (opcional)</label>
-              <input id="date" name="date" type="date" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" />
+              <input
+                id="date"
+                name="date"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="10"
+                placeholder="dd/mm/aaaa"
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950"
+              />
               <p id="date-readable" class="text-xs text-slate-500 dark:text-slate-400"></p>
+              <p id="date-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Usa formato dd/mm/aaaa (ejemplo 23/02/2026).</p>
             </div>
             <div class="grid gap-2">
               <label class="text-sm font-medium" for="timeSlot">Hora exacta</label>
@@ -248,6 +258,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const shiftSelect = document.getElementById("shift") as HTMLSelectElement | null;
   const notesInput = document.getElementById("notes") as HTMLTextAreaElement | null;
   const dateReadable = document.getElementById("date-readable") as HTMLParagraphElement | null;
+  const dateError = document.getElementById("date-error") as HTMLParagraphElement | null;
   const phoneError = document.getElementById("phone-error") as HTMLParagraphElement | null;
   const timeHelp = document.getElementById("time-help") as HTMLParagraphElement | null;
   const quoteServicesEl = document.getElementById("quote-services") as HTMLParagraphElement | null;
@@ -257,6 +268,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   if (!form || !sendBtn || !nameInput || !phoneInput || !serviceSelect || !specialistSelect || !dateInput || !timeSlotSelect || !shiftSelect || !notesInput) {
     throw new Error("No se encontraron elementos del formulario de agendar");
   }
+
+  // Refuerzo defensivo: evita que el navegador renderice picker nativo mm/dd/yyyy.
+  dateInput.type = "text";
+  dateInput.inputMode = "numeric";
+  dateInput.autocomplete = "off";
+  dateInput.placeholder = "dd/mm/aaaa";
 
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) {
@@ -283,6 +300,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const hasSpecialistPrefill = Boolean(String(prefill.specialist || "").trim());
   const priceCatalog = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
   const waNumber = String(config.whatsappNumber || "").replace(/\D/g, "");
+  const dateDisplayPattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
   const scheduleByDay: Record<number, { open: string; close: string } | null> = {
     0: null,
     1: { open: "10:00", close: "18:00" },
@@ -294,10 +312,19 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   };
 
   const setFieldErrorStyle = (input: HTMLElement, hasError: boolean) => {
+    input.classList.remove("border-emerald-500", "ring-emerald-300", "dark:ring-emerald-500/40");
     input.classList.toggle("border-rose-500", hasError);
     input.classList.toggle("ring-1", hasError);
     input.classList.toggle("ring-rose-300", hasError);
     input.classList.toggle("dark:ring-rose-500/40", hasError);
+  };
+
+  const setFieldSuccessStyle = (input: HTMLElement, hasSuccess: boolean) => {
+    input.classList.remove("border-rose-500", "ring-rose-300", "dark:ring-rose-500/40");
+    input.classList.toggle("border-emerald-500", hasSuccess);
+    input.classList.toggle("ring-1", hasSuccess);
+    input.classList.toggle("ring-emerald-300", hasSuccess);
+    input.classList.toggle("dark:ring-emerald-500/40", hasSuccess);
   };
 
   const validatePhoneField = () => {
@@ -308,6 +335,54 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     if (phoneError) phoneError.classList.toggle("hidden", !hasError);
     return valid;
   };
+
+  const parseDisplayDateToIso = (displayDate: string) => {
+    const value = String(displayDate || "").trim();
+    if (!value) return "";
+
+    const match = value.match(dateDisplayPattern);
+    if (!match) return "";
+
+    const [, dd, mm, yyyy] = match;
+    const day = Number(dd);
+    const month = Number(mm);
+    const year = Number(yyyy);
+
+    if (!Number.isInteger(day) || !Number.isInteger(month) || !Number.isInteger(year)) return "";
+    if (year < 1900 || year > 2100) return "";
+
+    const iso = `${yyyy}-${mm}-${dd}`;
+    const date = new Date(`${iso}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const validDate =
+      date.getFullYear() === year &&
+      date.getMonth() + 1 === month &&
+      date.getDate() === day;
+
+    return validDate ? iso : "";
+  };
+
+  const formatDateDigits = (rawValue: string) => {
+    const digits = String(rawValue || "").replace(/\D/g, "").slice(0, 8);
+    const dd = digits.slice(0, 2);
+    const mm = digits.slice(2, 4);
+    const yyyy = digits.slice(4, 8);
+
+    if (!digits) return "";
+
+    let formatted = dd;
+    if (mm) formatted += `/${mm}`;
+    if (yyyy) formatted += `/${yyyy}`;
+    return formatted;
+  };
+
+  const normalizeDateInputValue = () => {
+    dateInput.value = formatDateDigits(dateInput.value);
+  };
+
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const toMoneyMX = (value: number) =>
     new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value || 0);
@@ -384,6 +459,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
   const updateTimeLimitsByDate = () => {
     const previousValue = timeSlotSelect.value;
+    const isoDate = parseDisplayDateToIso(dateInput.value);
     timeSlotSelect.innerHTML = "";
     const baseOption = document.createElement("option");
     baseOption.value = "";
@@ -400,7 +476,17 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       return;
     }
 
-    const date = new Date(`${dateInput.value}T12:00:00`);
+    if (!isoDate) {
+      timeSlotSelect.disabled = true;
+      if (timeHelp) {
+        timeHelp.textContent = "Usa formato de fecha dd/mm/aaaa para habilitar horarios.";
+        timeHelp.classList.remove("text-slate-500", "dark:text-slate-400");
+        timeHelp.classList.add("text-rose-600", "dark:text-rose-400");
+      }
+      return;
+    }
+
+    const date = new Date(`${isoDate}T12:00:00`);
     const day = date.getDay();
     const schedule = scheduleByDay[day];
 
@@ -498,32 +584,87 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
   const updateDatePreview = () => {
     if (!dateReadable) return;
-    dateReadable.textContent = dateInput.value ? `Fecha seleccionada: ${formatDateMX(dateInput.value)}` : "Si no eliges fecha, se enviara como por definir.";
+    const isoDate = parseDisplayDateToIso(dateInput.value);
+    if (!dateInput.value) {
+      dateReadable.textContent = "Si no eliges fecha, se enviara como por definir.";
+      dateReadable.classList.remove("text-emerald-600", "dark:text-emerald-400", "text-rose-600", "dark:text-rose-400");
+      dateReadable.classList.add("text-slate-500", "dark:text-slate-400");
+      return;
+    }
+
+    if (isoDate) {
+      dateReadable.textContent = `Fecha seleccionada: ${formatDateMX(isoDate)}`;
+      dateReadable.classList.remove("text-slate-500", "dark:text-slate-400", "text-rose-600", "dark:text-rose-400");
+      dateReadable.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+
+    dateReadable.textContent = "Formato esperado: dd/mm/aaaa.";
+    dateReadable.classList.remove("text-slate-500", "dark:text-slate-400", "text-emerald-600", "dark:text-emerald-400");
+    dateReadable.classList.add("text-rose-600", "dark:text-rose-400");
   };
 
   const validateSchedule = () => {
+    const isoDate = parseDisplayDateToIso(dateInput.value);
     dateInput.setCustomValidity("");
     timeSlotSelect.setCustomValidity("");
     setFieldErrorStyle(dateInput, false);
+    setFieldSuccessStyle(dateInput, false);
     setFieldErrorStyle(timeSlotSelect, false);
     const selectedTime = timeSlotSelect.value;
 
-    if (dateInput.value && isSunday(dateInput.value)) {
+    if (dateError) dateError.classList.add("hidden");
+
+    if (dateInput.value && !isoDate) {
+      dateInput.setCustomValidity("Usa formato dd/mm/aaaa.");
+      setFieldErrorStyle(dateInput, true);
+      if (dateError) dateError.classList.remove("hidden");
+      return false;
+    }
+
+    if (isoDate && isoDate < todayIso) {
+      dateInput.setCustomValidity("No puedes elegir una fecha pasada.");
+      setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "No puedes elegir una fecha pasada.";
+        dateError.classList.remove("hidden");
+      }
+      return false;
+    }
+
+    if (isoDate && isSunday(isoDate)) {
       dateInput.setCustomValidity("Los domingos no hay atencion.");
       setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "Domingo cerrado. Elige otro dia.";
+        dateError.classList.remove("hidden");
+      }
       return false;
     }
 
-    if (selectedTime && !dateInput.value) {
+    if (isoDate) {
+      setFieldSuccessStyle(dateInput, true);
+    }
+
+    if (selectedTime && !isoDate) {
       dateInput.setCustomValidity("Selecciona fecha para validar la hora.");
       setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "Selecciona una fecha valida para usar hora exacta.";
+        dateError.classList.remove("hidden");
+      }
       return false;
     }
 
-    if (dateInput.value && selectedTime && !isWithinSchedule(dateInput.value, selectedTime)) {
+    if (isoDate && selectedTime && !isWithinSchedule(isoDate, selectedTime)) {
       timeSlotSelect.setCustomValidity("La hora esta fuera de horario para ese dia.");
       setFieldErrorStyle(timeSlotSelect, true);
       return false;
+    }
+
+    if (dateError) {
+      dateError.textContent = "Usa formato dd/mm/aaaa (ejemplo 23/02/2026).";
+      dateError.classList.add("hidden");
     }
 
     return true;
@@ -580,7 +721,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       selectedServices: quote.list,
       approxTotal: quote.total > 0 ? quote.total : undefined,
       specialist: specialistName,
-      date: dateInput.value || undefined,
+      date: parseDisplayDateToIso(dateInput.value) || undefined,
       time: timeSlotSelect.value || undefined,
       shift: String(shiftSelect.value || "") || undefined,
       notes: String(notesInput.value || "") || undefined,
@@ -589,12 +730,6 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const href = buildWhatsAppUrl(message, waNumber);
     setEnabledCta(href);
   };
-
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  dateInput.min = `${yyyy}-${mm}-${dd}`;
 
   form.reset();
   applyPrefill();
@@ -612,13 +747,56 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     updateCta();
   });
 
-  [nameInput, phoneInput, specialistSelect, dateInput, timeSlotSelect, shiftSelect, notesInput].forEach((el) => {
+  [nameInput, phoneInput, specialistSelect, timeSlotSelect, shiftSelect, notesInput].forEach((el) => {
     if (!el) return;
     el.addEventListener("input", updateCta);
     el.addEventListener("change", updateCta);
   });
 
+  const allowedDateControlKeys = new Set([
+    "Backspace",
+    "Delete",
+    "Tab",
+    "Escape",
+    "Enter",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "Home",
+    "End",
+  ]);
+
+  dateInput.addEventListener("keydown", (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (allowedDateControlKeys.has(event.key)) return;
+    if (/^\d$/.test(event.key)) return;
+    if (event.key === "/") return;
+    event.preventDefault();
+  });
+
+  dateInput.addEventListener("beforeinput", (event) => {
+    const inputEvent = event as InputEvent;
+    if (!inputEvent.data) return;
+    if (!inputEvent.inputType || !inputEvent.inputType.startsWith("insert")) return;
+    if (/^[\d/]+$/.test(inputEvent.data)) return;
+    event.preventDefault();
+  });
+
+  dateInput.addEventListener("paste", (event) => {
+    event.preventDefault();
+    const pasted = event.clipboardData?.getData("text") || "";
+    dateInput.value = formatDateDigits(pasted);
+    updateCta();
+  });
+
+  dateInput.addEventListener("input", () => {
+    normalizeDateInputValue();
+    updateCta();
+  });
+
   dateInput.addEventListener("change", () => {
+    normalizeDateInputValue();
     updateTimeLimitsByDate();
     updateCta();
   });

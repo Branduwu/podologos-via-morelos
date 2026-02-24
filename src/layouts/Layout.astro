@@ -10,9 +10,7 @@ const {
 
 const business = await getBusinessInfo();
 const waNumber = (business?.whatsappCitasNumber || "").replace(/\D/g, "");
-const waMessage = encodeURIComponent(
-  business?.whatsappDefaultMessage || "Hola, quiero agendar una cita."
-);
+const waMessage = encodeURIComponent("Hola, me interesa informacion y disponibilidad para agendar una cita.");
 const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMessage}` : null;
 const siteUrl = Astro.site || new URL("http://localhost:4321");
 const canonical = new URL(Astro.url?.pathname || "/", siteUrl).toString();

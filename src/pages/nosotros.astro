@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getAboutSection, getBusinessInfo, getServices, getSpecialists } from "../lib/sanity.js";
+import { buildContactMessage, buildWhatsAppUrl, sanitizeDirectReason } from "../utils/whatsapp";
 
 type AboutSection = {
   title?: string;
@@ -60,10 +61,17 @@ function specialistLink(specialist: Specialist) {
   const shouldUseWhatsApp = specialist.useWhatsAppButton !== false;
 
   if (shouldUseWhatsApp && waNumber) {
-    const message =
-      specialist.whatsAppMessage?.trim() ||
-      `Hola, quiero agendar una cita con ${specialist.name || "el especialista"}.`;
-    return `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+    const customReasonRaw = String(specialist.whatsAppMessage || "").trim();
+    const reason = customReasonRaw
+      ? sanitizeDirectReason(customReasonRaw)
+      : `Quiero agendar con ${specialist.name || "este especialista"}.`;
+    return buildWhatsAppUrl(
+      buildContactMessage({
+        service: specialist.specialty || "Especialista",
+        reason,
+      }),
+      waNumber
+    );
   }
 
   return specialist.ctaUrl || "/agendar";

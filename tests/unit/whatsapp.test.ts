@@ -28,8 +28,16 @@ describe("whatsapp utils", () => {
       service: "Psicologia",
       reason: "Quiero informes",
     });
-    expect(message).toContain("Servicio: Psicologia");
-    expect(message).toContain("Motivo: Quiero informes");
+    expect(message).toContain("Servicio de interes: Psicologia");
+    expect(message).toContain("Consulta: Quiero informes");
+  });
+
+  it("sanitizes direct contact placeholder reasons", () => {
+    const message = buildContactMessage({
+      service: "Podologia",
+      reason: "Hola soy [Nombre], quiero informes",
+    });
+    expect(message).toContain("Consulta: Quiero informacion y disponibilidad para agendar.");
   });
 
   it("builds wa.me URL encoded", () => {
@@ -38,4 +46,3 @@ describe("whatsapp utils", () => {
     expect(url).toContain("text=Hola%20mundo");
   });
 });
-

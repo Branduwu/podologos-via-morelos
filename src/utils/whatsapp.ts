@@ -19,6 +19,33 @@ export type ContactMessageInput = {
   reason?: string;
 };
 
+const normalizeBaseText = (value: string) =>
+  String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+export function sanitizeDirectReason(reason?: string): string {
+  const raw = String(reason || "").trim();
+  if (!raw) return "Quiero informacion y disponibilidad para agendar.";
+
+  const normalized = normalizeBaseText(raw);
+  const hasNamePlaceholder =
+    normalized.includes("hola soy") ||
+    normalized.includes("mi nombre es") ||
+    normalized.includes("[nombre") ||
+    normalized.includes("{nombre") ||
+    normalized.includes("<nombre") ||
+    normalized.includes("tu nombre");
+
+  if (hasNamePlaceholder) {
+    return "Quiero informacion y disponibilidad para agendar.";
+  }
+
+  return raw;
+}
+
 export function buildAppointmentMessage(data: AppointmentMessageInput): string {
   const specialist = data.specialist?.trim() || "Sin preferencia";
   const dateText = data.date ? formatDateMX(data.date) : "Por definir";
@@ -53,11 +80,11 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
 
 export function buildContactMessage(data: ContactMessageInput): string {
   const service = data.service?.trim() || "General";
-  const reason = data.reason?.trim() || "Quiero informacion y apoyo para agendar.";
+  const reason = sanitizeDirectReason(data.reason);
   return [
-    `Hola, quiero informacion en ${clinic.name}.`,
-    `Servicio: ${service}`,
-    `Motivo: ${reason}`,
+    `Hola, me interesa agendar en ${clinic.name}.`,
+    `Servicio de interes: ${service}`,
+    `Consulta: ${reason}`,
   ].join("\n");
 }
 

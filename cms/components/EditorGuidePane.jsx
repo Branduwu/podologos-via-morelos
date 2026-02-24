@@ -94,6 +94,7 @@ export default function EditorGuidePane() {
         <Section title="Promociones">
           <Stack space={2}>
             <Text size={1}>Que llenar: titulo, descripcion corta/completa, fechas, imagen y estado activa.</Text>
+            <Text size={1}>Vigencia: usa formato AAAA-MM-DD (ejemplo 2026-03-01).</Text>
             <Text size={1}>Slug URL: se usa para la pagina detalle de cada promocion.</Text>
             <Text size={1}>Usa etiqueta corta si ayuda: Ejemplo 2x1, Nuevo, Temporada.</Text>
             <Text size={1}>Destacada: aparece en bloque principal de promociones.</Text>
@@ -158,6 +159,7 @@ export default function EditorGuidePane() {
           <Stack space={2}>
             <Text size={1}>- Error al borrar servicio: el servicio tiene referencias en otros documentos.</Text>
             <Text size={1}>- Solucion: quita la referencia en precios/promociones y vuelve a intentar.</Text>
+            <Text size={1}>- Si aparece error de calendario (firstDay): recarga el Studio y valida que la fecha este en formato AAAA-MM-DD.</Text>
             <Text size={1}>- Si algo no se refleja en Agenda: revisa categoria del servicio y estado Activo.</Text>
             <Text size={1}>- Si aparece un error tecnico: revisa esta guia.</Text>
             <Text size={1}>- Si persiste: contacta al desarrollador de este sistema ABJV.</Text>

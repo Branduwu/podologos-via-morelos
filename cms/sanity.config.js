@@ -28,7 +28,16 @@ export default defineConfig({
   ],
 
   i18n: {
-    locales: [{ id: "es", title: "Espanol" }],
+    locales: [
+      {
+        id: "es",
+        title: "Espanol",
+        weekInfo: {
+          firstDay: 1,
+          weekend: [6, 7],
+        },
+      },
+    ],
   },
 
   schema: {

@@ -10,8 +10,23 @@ const mapsUrl = safeCmsUrl(business?.mapsUrl, "https://www.google.com/maps");
 const phoneDigits = String(business?.phone || "").replace(/\D/g, "");
 const whatsappDigits = String(business?.whatsappCitasNumber || "").replace(/\D/g, "");
 const callHref = phoneDigits ? `tel:${phoneDigits}` : null;
+const normalizeComparableText = (value: string) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 
-const zoneText = business?.locationZoneText || "Sta. Maria Tulpetlac, Ecatepec (sobre Via Morelos).";
+const addressText = String(business?.address || "").trim();
+const rawZoneText = String(business?.locationZoneText || "").trim();
+const defaultZoneText =
+  String(business?.area || "").trim() || "Sta. Maria Tulpetlac, Ecatepec (sobre Via Morelos).";
+const zoneText = (() => {
+  if (!rawZoneText) return defaultZoneText;
+  if (normalizeComparableText(rawZoneText) === normalizeComparableText(addressText)) return defaultZoneText;
+  return rawZoneText;
+})();
 const referencesText =
   business?.locationReferencesText ||
   "Consulta referencias exactas por WhatsApp para llegar mas facil.";
@@ -66,7 +81,7 @@ const scheduleText =
 
   <main class="mx-auto max-w-6xl px-4 py-10">
     <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Ubicacion</h1>
-    <p class="mt-2 text-slate-600 dark:text-slate-300">{business?.address || "Direccion no configurada todavia."}</p>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">{addressText || "Direccion no configurada todavia."}</p>
 
     <div class="mt-8 grid gap-6 lg:grid-cols-2">
       <section class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
@@ -76,7 +91,7 @@ const scheduleText =
         </p>
 
         <div class="mt-8 grid gap-2 text-sm text-slate-800 dark:text-slate-100">
-          <p><strong>Direccion:</strong> {business?.address || "-"}</p>
+          <p><strong>Direccion:</strong> {addressText || "-"}</p>
           <p><strong>Telefono:</strong> {business?.phone || "-"}</p>
           <p><strong>WhatsApp:</strong> {whatsappDigits || "-"}</p>
           <p><strong>Horarios:</strong> {scheduleText}</p>

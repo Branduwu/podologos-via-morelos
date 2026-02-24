@@ -5,7 +5,7 @@ import Footer from "../../components/Footer.astro";
 import { clinic } from "../../config/clinic";
 import { getBusinessInfo, getSpecialistByPath, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
-import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
+import { buildContactMessage, buildWhatsAppUrl, sanitizeDirectReason } from "../../utils/whatsapp";
 
 type Specialist = {
   _id?: string;
@@ -35,11 +35,15 @@ if (!specialist) {
 }
 
 const waNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
+const customReasonRaw = String(specialist?.whatsAppMessage || "").trim();
+const specialistReason = customReasonRaw
+  ? sanitizeDirectReason(customReasonRaw)
+  : `Quiero agendar con ${specialist?.name || "este especialista"}.`;
 const waLink = waNumber
   ? buildWhatsAppUrl(
       buildContactMessage({
         service: specialist?.specialty || "Especialista",
-        reason: specialist?.whatsAppMessage?.trim() || `Quiero agendar con ${specialist?.name || "este especialista"}.`,
+        reason: specialistReason,
       }),
       waNumber
     )
