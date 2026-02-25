@@ -40,6 +40,7 @@ export default {
           { title: "Psicologia", value: "psicologia" },
           { title: "Optica / Optometria", value: "optica" },
           { title: "Quiropractica", value: "quiropractica" },
+          { title: "Dentista", value: "dentista" },
         ],
         layout: "dropdown",
       },
@@ -84,6 +85,7 @@ export default {
         psicologia: "Psicologia",
         optica: "Optica/Optometria",
         quiropractica: "Quiropractica",
+        dentista: "Dentista",
       };
       const cut = (subtitle || "").slice(0, 42);
       const cat = categoryMap[category] || "General";

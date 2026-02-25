@@ -22,6 +22,7 @@ const priceCategories = [
   { key: "psicologia", label: "Psicologia" },
   { key: "optica", label: "Optica" },
   { key: "quiropractica", label: "Quiropractica" },
+  { key: "dentista", label: "Dentista" },
 ];
 
 function normalizeText(value: string) {
@@ -34,13 +35,14 @@ function normalizeText(value: string) {
 
 function priceCategoryKey(price: PriceRow) {
   const fromCms = normalizeText(price.category || "");
-  if (["podologia", "psicologia", "optica", "quiropractica"].includes(fromCms)) return fromCms;
+  if (["podologia", "psicologia", "optica", "quiropractica", "dentista"].includes(fromCms)) return fromCms;
   const text = normalizeText(`${price.serviceTitle || ""} ${price.note || ""}`);
   if (!text) return "general";
   if (text.includes("podolog")) return "podologia";
   if (text.includes("psicolog")) return "psicologia";
   if (text.includes("optomet") || text.includes("optic")) return "optica";
   if (text.includes("quiropr") || text.includes("quiro")) return "quiropractica";
+  if (text.includes("dent") || text.includes("odont")) return "dentista";
   return "general";
 }
 

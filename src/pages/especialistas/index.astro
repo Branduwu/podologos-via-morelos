@@ -31,6 +31,7 @@ const specialistCategories = [
   { key: "psicologia", label: "Psicologia" },
   { key: "optica", label: "Optica" },
   { key: "quiropractica", label: "Quiropractica" },
+  { key: "dentista", label: "Dentista" },
 ];
 
 function normalizeText(value: string) {
@@ -48,12 +49,13 @@ function specialistCategoryKey(specialty: string | undefined) {
   if (text.includes("psicolog")) return "psicologia";
   if (text.includes("optomet") || text.includes("optic")) return "optica";
   if (text.includes("quiropr") || text.includes("quiro")) return "quiropractica";
+  if (text.includes("dent") || text.includes("odont")) return "dentista";
   return "general";
 }
 
 function specialistCategoryFromData(specialist: Specialist) {
   const fromCms = normalizeText(specialist.specialtyCategory || "");
-  if (["podologia", "psicologia", "optica", "quiropractica"].includes(fromCms)) return fromCms;
+  if (["podologia", "psicologia", "optica", "quiropractica", "dentista"].includes(fromCms)) return fromCms;
   return specialistCategoryKey(specialist.specialty);
 }
 

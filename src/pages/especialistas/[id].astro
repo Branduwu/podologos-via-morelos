@@ -34,6 +34,13 @@ if (!specialist) {
   return Astro.redirect("/especialistas");
 }
 
+const requestedId = String(id || "").trim();
+const canonicalSlug = String(specialist?.slug || "").trim();
+const specialistId = String(specialist?._id || "").trim();
+if (canonicalSlug && requestedId && requestedId !== canonicalSlug && requestedId !== specialistId) {
+  return Astro.redirect(`/especialistas/${encodeURIComponent(canonicalSlug)}`);
+}
+
 const waNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
 const customReasonRaw = String(specialist?.whatsAppMessage || "").trim();
 const specialistReason = customReasonRaw

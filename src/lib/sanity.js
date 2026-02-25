@@ -47,6 +47,7 @@ export async function getPromotions() {
     endDate,
     featured,
     pinned,
+    targetCategories,
     appliesTo,
     "serviceCategories": services[]->category,
     "slug": slug.current,
@@ -89,6 +90,8 @@ export async function getBusinessInfo() {
     locationZoneText, locationReferencesText, locationParkingText, locationAccessText, locationGuideTips,
     "locationFacadeImageUrl": locationFacadeImage.asset->url,
     homeHeroEyebrow, homeHeroTitle, homeHeroSubtitle, "homeHeroImageUrl": homeHeroImage.asset->url,
+    "homeHeroCarouselImageUrls": homeHeroCarouselImages[].asset->url,
+    homeHeroCarouselIntervalMs,
     homePrimaryCtaText, homePrimaryCtaUrl, homeSecondaryCtaText, homeSecondaryCtaUrl,
     homePromotionsTitle, homePromotionsSubtitle, "homePromotionFallbackImageUrl": homePromotionFallbackImage.asset->url,
     "logoImageUrl": logoImage.asset->url,
@@ -104,7 +107,8 @@ export async function getAboutSection() {
 export async function getPromotionByPath(pathValue) {
   return fetchSafe(
     `*[_type=="promotion" && active==true && (slug.current == $value || _id == $value)][0]{
-      _id, title, label, shortDescription, description, startDate, endDate, featured, pinned, appliesTo,
+      _id, title, label, shortDescription, description, startDate, endDate, featured, pinned, targetCategories, appliesTo,
+      "serviceCategories": services[]->category,
       "slug": slug.current, "imageUrl": image.asset->url
     }`,
     { value: pathValue },

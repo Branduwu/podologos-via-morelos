@@ -1,4 +1,4 @@
-export type SpecialistCategory = "podologia" | "psicologia" | "optica" | "quiropractica";
+export type SpecialistCategory = "podologia" | "psicologia" | "optica" | "quiropractica" | "dentista";
 
 export type Specialist = {
   _id: string;

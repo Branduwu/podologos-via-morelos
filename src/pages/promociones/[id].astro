@@ -15,7 +15,9 @@ type Promotion = {
   endDate?: string;
   featured?: boolean;
   pinned?: boolean;
+  targetCategories?: string[];
   appliesTo?: string[];
+  serviceCategories?: string[];
   slug?: string;
   imageUrl?: string;
 };
@@ -47,7 +49,12 @@ function fmt(d: string | Date | null | undefined) {
   }
 }
 
-const promoServiceParam = normalizeServiceSlug((promo?.appliesTo || [])[0] || "");
+const promoServiceParam = normalizeServiceSlug(
+  (promo?.targetCategories || [])[0] ||
+    (promo?.appliesTo || [])[0] ||
+    (promo?.serviceCategories || [])[0] ||
+    ""
+);
 const promoAgendarHref = (() => {
   const params = new URLSearchParams();
   if (promoServiceParam) params.set("service", promoServiceParam);

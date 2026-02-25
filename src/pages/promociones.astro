@@ -15,6 +15,7 @@ type Promotion = {
   endDate?: string;
   featured?: boolean;
   pinned?: boolean;
+  targetCategories?: string[];
   appliesTo: string[];
   serviceCategories?: string[];
   categories: string[];
@@ -31,6 +32,7 @@ const FILTER_OPTIONS = [
   { label: "Psicologia", value: "psicologia" },
   { label: "Optica", value: "optica" },
   { label: "Quiropractica", value: "quiropractica" },
+  { label: "Dentista", value: "dentista" },
 ];
 
 function normalizeCategory(value: string | null | undefined) {
@@ -45,6 +47,7 @@ function normalizeCategory(value: string | null | undefined) {
   if (raw.includes("psicolog")) return "psicologia";
   if (raw.includes("optic") || raw.includes("optometr")) return "optica";
   if (raw.includes("quiropr")) return "quiropractica";
+  if (raw.includes("dent") || raw.includes("odont")) return "dentista";
   return "";
 }
 
@@ -52,11 +55,16 @@ const normalized: Promotion[] = promos.map((p: Partial<Promotion>, idx: number) 
   ...p,
   pinned: Boolean(p.pinned),
   featured: Boolean(p.featured),
+  targetCategories: Array.isArray(p.targetCategories) ? p.targetCategories : [],
   appliesTo: Array.isArray(p.appliesTo) ? p.appliesTo : [],
   serviceCategories: Array.isArray(p.serviceCategories) ? p.serviceCategories : [],
   categories: Array.from(
     new Set(
-      [...(Array.isArray(p.appliesTo) ? p.appliesTo : []), ...(Array.isArray(p.serviceCategories) ? p.serviceCategories : [])]
+      [
+        ...(Array.isArray(p.targetCategories) ? p.targetCategories : []),
+        ...(Array.isArray(p.appliesTo) ? p.appliesTo : []),
+        ...(Array.isArray(p.serviceCategories) ? p.serviceCategories : []),
+      ]
         .map(normalizeCategory)
         .filter(Boolean)
     )

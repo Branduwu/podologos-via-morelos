@@ -45,35 +45,38 @@ export default function EditorGuidePane() {
           <Stack space={2}>
             <Text size={1}>Agenda: Servicios, Especialistas, Precios y Promociones ya envian datos a Agenda tu cita.</Text>
             <Text size={1}>Precios: se permite cotizacion de varios servicios con total aproximado.</Text>
-            <Text size={1}>Categorias oficiales: Podologia, Psicologia, Optica y Quiropractica.</Text>
+            <Text size={1}>Categorias oficiales: Podologia, Psicologia, Optica, Quiropractica y Dentista.</Text>
             <Text size={1}>Si una categoria esta mal escrita, filtros y agenda pueden fallar.</Text>
           </Stack>
         </Section>
 
         <Section title="Orden recomendado de edicion">
           <Stack space={2}>
-            <Text size={1}>1) Informacion del negocio: nombre, direccion, telefono, WhatsApp y redes.</Text>
-            <Text size={1}>2) Servicios y precios: valida categoria, descripcion y precio desde.</Text>
-            <Text size={1}>3) Especialistas: foto, especialidad, areas de atencion y boton.</Text>
-            <Text size={1}>4) Promociones y galeria: activa solo lo vigente y con imagen clara.</Text>
-            <Text size={1}>5) FAQ: agrega preguntas reales por categoria para reducir dudas.</Text>
+            <Text size={1}>1) Configuracion del sitio (Header, Inicio, Ubicacion, Contacto, Redes y Footer).</Text>
+            <Text size={1}>2) Contenido comercial (Servicios, Especialistas, Precios y Promociones).</Text>
+            <Text size={1}>3) Fotos y videos.</Text>
+            <Text size={1}>4) Preguntas frecuentes (FAQ).</Text>
+            <Text size={1}>Nota: no hay rutas duplicadas por seccion para evitar confusion al editar.</Text>
           </Stack>
         </Section>
 
         <Section title="Que pagina se alimenta de cada area">
           <Stack space={2}>
-            <Text size={1}>Inicio: Informacion del negocio + Servicios + Promociones + Nosotros.</Text>
-            <Text size={1}>Servicios: Servicios.</Text>
-            <Text size={1}>Especialistas: Especialistas.</Text>
-            <Text size={1}>Precios: Precios.</Text>
-            <Text size={1}>Ubicacion y Contacto: Informacion del negocio + Redes.</Text>
-            <Text size={1}>Agenda tu cita: Informacion del negocio + Servicios + Especialistas.</Text>
+            <Text size={1}>Informacion del negocio: Header, Inicio, Ubicacion, Contacto, Redes y Footer.</Text>
+            <Text size={1}>Seccion Nosotros: Home y pagina Nosotros.</Text>
+            <Text size={1}>Servicios/Especialistas/Precios/Promociones: sus paginas publicas y bloques del Home.</Text>
+            <Text size={1}>Fotos y videos: pagina Galeria y recomendados del Home.</Text>
+            <Text size={1}>FAQ: pagina Preguntas frecuentes y bloques relacionados.</Text>
+            <Text size={1}>Agenda tu cita: toma datos de Informacion del negocio + Servicios + Especialistas + Precios.</Text>
           </Stack>
         </Section>
 
         <Section title="Informacion del negocio">
           <Stack space={2}>
             <Text size={1}>Que llenar: nombre, zona, direccion, telefono, horarios, mapa y WhatsApp.</Text>
+            <Text size={1}>Inicio: puedes definir varias imagenes y velocidad del carrusel de portada (en milisegundos).</Text>
+            <Text size={1}>Logo del negocio: cambia Header y Footer.</Text>
+            <Text size={1}>Icono de pestana (favicon): se cambia en archivos /public/favicon-light.svg y /public/favicon-dark.svg.</Text>
             <Text size={1}>Redes: pega links completos de Facebook, Instagram y TikTok.</Text>
             <Text size={1}>Ejemplo de horarios: Lun a Sab 10:00 a 19:00.</Text>
             <Text size={1}>Mapa: pega URL de Google Maps que abra directo la ubicacion.</Text>
@@ -94,6 +97,7 @@ export default function EditorGuidePane() {
         <Section title="Promociones">
           <Stack space={2}>
             <Text size={1}>Que llenar: titulo, descripcion corta/completa, fechas, imagen y estado activa.</Text>
+            <Text size={1}>Categorias (filtro web): usa Podologia, Psicologia, Optica, Quiropractica o Dentista.</Text>
             <Text size={1}>Vigencia: usa formato AAAA-MM-DD (ejemplo 2026-03-01).</Text>
             <Text size={1}>Slug URL: se usa para la pagina detalle de cada promocion.</Text>
             <Text size={1}>Usa etiqueta corta si ayuda: Ejemplo 2x1, Nuevo, Temporada.</Text>

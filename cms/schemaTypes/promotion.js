@@ -6,12 +6,12 @@ export default {
   type: "document",
   description: "Promociones activas que se muestran en home y pagina de promociones.",
   fieldsets: [
-    { name: "basic", title: "Basico", options: { collapsible: true, collapsed: false } },
-    { name: "content", title: "Contenido", options: { collapsible: true, collapsed: false } },
-    { name: "visibility", title: "Visibilidad", options: { collapsible: true, collapsed: false } },
-    { name: "timing", title: "Vigencia", options: { collapsible: true, collapsed: false } },
-    { name: "meta", title: "URL", options: { collapsible: true, collapsed: true } },
-    { name: "relations", title: "Relaciones", options: { collapsible: true, collapsed: true } },
+    { name: "basic", title: "1) Basico", options: { collapsible: true, collapsed: false } },
+    { name: "content", title: "2) Contenido", options: { collapsible: true, collapsed: false } },
+    { name: "visibility", title: "3) Visibilidad", options: { collapsible: true, collapsed: false } },
+    { name: "timing", title: "4) Vigencia", options: { collapsible: true, collapsed: false } },
+    { name: "relations", title: "5) Categoria y relacion", options: { collapsible: true, collapsed: false } },
+    { name: "meta", title: "6) URL", options: { collapsible: true, collapsed: true } },
   ],
   fields: [
     {
@@ -135,10 +135,33 @@ export default {
         }),
     },
     {
+      name: "targetCategories",
+      title: "Categorias (filtro web)",
+      type: "array",
+      description: "Selecciona categorias oficiales para filtros: Podologia, Psicologia, Optica, Quiropractica, Dentista.",
+      fieldset: "relations",
+      of: [
+        {
+          type: "string",
+          options: {
+            list: [
+              { title: "Podologia", value: "podologia" },
+              { title: "Psicologia", value: "psicologia" },
+              { title: "Optica / Optometria", value: "optica" },
+              { title: "Quiropractica", value: "quiropractica" },
+              { title: "Dentista", value: "dentista" },
+            ],
+            layout: "dropdown",
+          },
+        },
+      ],
+      validation: (R) => R.min(1).warning("Recomendado: selecciona al menos 1 categoria para filtros."),
+    },
+    {
       name: "appliesTo",
       title: "Aplica a (texto)",
       type: "array",
-      description: "Aqui puedes agregar etiquetas visibles, por ejemplo: podologia.",
+      description: "Etiquetas visibles para la tarjeta (ejemplo: primera vez, prevencion, evaluacion).",
       fieldset: "relations",
       of: [{ type: "string" }],
     },
@@ -156,12 +179,14 @@ export default {
       title: "title",
       active: "active",
       startDate: "startDate",
+      targetCategories: "targetCategories",
     },
-    prepare({ title, active, startDate }) {
+    prepare({ title, active, startDate, targetCategories }) {
       const status = active ? "Activa" : "Inactiva";
+      const firstCategory = Array.isArray(targetCategories) && targetCategories[0] ? ` | ${targetCategories[0]}` : "";
       return {
         title,
-        subtitle: `${status}${startDate ? ` - Inicio: ${startDate}` : ""}`,
+        subtitle: `${status}${startDate ? ` - Inicio: ${startDate}` : ""}${firstCategory}`,
       };
     },
   },

@@ -1,4 +1,4 @@
----
+﻿---
 import { getBusinessInfo } from "../lib/sanity.js";
 import { safeCmsUrl } from "../utils/url";
 
@@ -29,10 +29,10 @@ const socialLinks = [
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
       <div class="sm:col-span-2 lg:col-span-1">
         <a href="/" class="inline-flex items-center gap-3">
-          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
+          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1 sm:h-11 md:h-12 lg:h-14" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
           <span class="type-card-title leading-tight">{businessName}</span>
         </a>
-        <p class="type-footer-body mt-3 text-sky-100">Atencion integral en podologia, psicologia, optica y quiropractica.</p>
+        <p class="type-footer-body mt-3 text-sky-100">Atencion integral en podologia, psicologia, optica, quiropractica y dentista.</p>
         {phone && <p class="type-footer-body mt-2 text-sky-100">Tel: {phone}</p>}
       </div>
 
@@ -99,6 +99,13 @@ const socialLinks = [
         </a>
       </p>
       <div class="type-footer-body flex items-center justify-center gap-2 text-center md:col-start-2 md:justify-self-center">
+        <img
+          src={logoUrl}
+          alt={businessName}
+          class="h-7 w-auto rounded-md bg-white/10 p-1"
+          loading="lazy"
+          data-fallback-src="/default-logo-clinica.svg"
+        />
         <span class="text-center md:whitespace-nowrap">Copyright (c) {new Date().getFullYear()} {businessName} | {copyrightText}</span>
         <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/15" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">

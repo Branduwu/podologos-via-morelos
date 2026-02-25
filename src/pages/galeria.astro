@@ -39,6 +39,7 @@ const categoryLabel: Record<string, string> = {
   psicologia: "Psicologia",
   optica: "Optica",
   quiropractica: "Quiropractica",
+  dentista: "Dentista",
   instalaciones: "Instalaciones",
   otros: "Otros",
 };
@@ -53,11 +54,14 @@ const categoryLabel: Record<string, string> = {
       Fotos y videos de nuestros servicios e instalaciones.
     </p>
 
-    <div class="mt-6 flex flex-wrap gap-2">
-      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#imagenes">Fotos</a>
-      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#youtube">Videos en YouTube</a>
-      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#tiktok">Videos en TikTok</a>
-      <a class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href="#facebook">Videos en Facebook</a>
+    <div class="mt-6">
+      <div class="flex flex-wrap gap-2" data-media-filters>
+        <button type="button" data-media-filter="all" class="rounded-full border border-sky-200 bg-sky-600 px-3 py-1 text-sm font-semibold text-white dark:border-sky-700">Todo</button>
+        <button type="button" data-media-filter="image" class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">Fotos</button>
+        <button type="button" data-media-filter="youtube" class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">YouTube</button>
+        <button type="button" data-media-filter="tiktok" class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">TikTok</button>
+        <button type="button" data-media-filter="facebook" class="rounded-full border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">Facebook</button>
+      </div>
     </div>
 
     {items.length === 0 && (
@@ -66,14 +70,14 @@ const categoryLabel: Record<string, string> = {
       </div>
     )}
 
-    <section id="imagenes" class="mt-10">
+    <section id="imagenes" class="mt-10" data-media-section="image">
       <h2 class="text-xl font-semibold">Fotos</h2>
       {images.length === 0 ? (
         <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos fotos en esta seccion.</p>
       ) : (
-        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
           {images.map((it) => (
-            <article class="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+            <article data-gallery-item data-media-type="image" class="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -93,14 +97,14 @@ const categoryLabel: Record<string, string> = {
       )}
     </section>
 
-    <section id="youtube" class="mt-12">
+    <section id="youtube" class="mt-12" data-media-section="youtube">
       <h2 class="text-xl font-semibold">Videos en YouTube</h2>
       {youtubeVideos.length === 0 ? (
         <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos videos en YouTube.</p>
       ) : (
-        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
           {youtubeVideos.map((it) => (
-            <article class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+            <article data-gallery-item data-media-type="youtube" class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -123,14 +127,14 @@ const categoryLabel: Record<string, string> = {
       )}
     </section>
 
-    <section id="tiktok" class="mt-12">
+    <section id="tiktok" class="mt-12" data-media-section="tiktok">
       <h2 class="text-xl font-semibold">Videos en TikTok</h2>
       {tiktokVideos.length === 0 ? (
         <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos videos en TikTok.</p>
       ) : (
-        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
           {tiktokVideos.map((it) => (
-            <article class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+            <article data-gallery-item data-media-type="tiktok" class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -153,14 +157,14 @@ const categoryLabel: Record<string, string> = {
       )}
     </section>
 
-    <section id="facebook" class="mt-12">
+    <section id="facebook" class="mt-12" data-media-section="facebook">
       <h2 class="text-xl font-semibold">Videos en Facebook</h2>
       {facebookVideos.length === 0 ? (
         <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Pronto compartiremos videos en Facebook.</p>
       ) : (
-        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
           {facebookVideos.map((it) => (
-            <article class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+            <article data-gallery-item data-media-type="facebook" class="self-start overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -186,3 +190,58 @@ const categoryLabel: Record<string, string> = {
 
   <Footer />
 </Layout>
+
+<script is:inline>
+  (() => {
+    const mediaButtons = Array.from(document.querySelectorAll("[data-media-filter]"));
+    const items = Array.from(document.querySelectorAll("[data-gallery-item]"));
+    const sections = Array.from(document.querySelectorAll("[data-media-section]"));
+
+    if (!mediaButtons.length || !sections.length) return;
+
+    let activeMedia = "all";
+
+    const setActiveStyle = (buttons, activeValue, attrName) => {
+      buttons.forEach((button) => {
+        const isActive = button.getAttribute(attrName) === activeValue;
+        button.classList.toggle("bg-sky-600", isActive);
+        button.classList.toggle("text-white", isActive);
+        button.classList.toggle("border-sky-200", isActive);
+        button.classList.toggle("dark:border-sky-700", isActive);
+        button.classList.toggle("font-semibold", isActive);
+      });
+    };
+
+    const applyFilters = () => {
+      items.forEach((item) => {
+        const mediaType = item.getAttribute("data-media-type") || "";
+        const show = activeMedia === "all" || mediaType === activeMedia;
+        item.classList.toggle("hidden", !show);
+      });
+
+      sections.forEach((section) => {
+        const sectionMedia = section.getAttribute("data-media-section") || "";
+        const mediaSectionOk = activeMedia === "all" || sectionMedia === activeMedia;
+        section.classList.toggle("hidden", !mediaSectionOk);
+      });
+    };
+
+    mediaButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.getAttribute("data-media-filter") || "all";
+        activeMedia = value;
+        setActiveStyle(mediaButtons, activeMedia, "data-media-filter");
+        applyFilters();
+
+        const targetId = value === "all" ? "imagenes" : value;
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+
+    setActiveStyle(mediaButtons, activeMedia, "data-media-filter");
+    applyFilters();
+  })();
+</script>

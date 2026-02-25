@@ -49,6 +49,7 @@ export const clinic: ClinicConfig = {
     { key: "psicologia", label: "Psicologia" },
     { key: "optica", label: "Optica / Optometria" },
     { key: "quiropractica", label: "Quiropractica" },
+    { key: "dentista", label: "Dentista" },
   ],
   quoteSelectionLimit: 6,
 };

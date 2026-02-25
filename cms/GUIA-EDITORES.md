@@ -2,118 +2,143 @@
 
 ## Proyecto firmado por Abraham Jimenez Valdes Dev
 
-Esta guia explica que editar en cada area para mantener la web clara y ordenada.
+Esta guia explica que editar en cada seccion del CMS para que la web se vea clara y consistente.
 
-## Novedades sincronizadas (Front + CMS)
+## Categorias oficiales (usar exactamente asi)
 
-- `Agenda desde cualquier pagina`:
-  - Servicios, Especialistas, Precios y Promociones ya envian datos a `Agenda tu cita`.
-  - Si eliges varios servicios en Precios, se envia cotizacion con total aproximado.
-- `Categorias unificadas`:
-  - Usa siempre: `Podologia`, `Psicologia`, `Optica`, `Quiropractica`.
-  - Estas categorias alimentan filtros en Web (Precios, Especialistas, Promociones, FAQ).
-- `Botones de Precios`:
-  - La web ya usa texto claro:
-    - `Agendar solo este`
-    - `Agregar a cotizacion`
-  - No cambies estos textos en CMS porque son parte del flujo de conversion.
+- `Podologia`
+- `Psicologia`
+- `Optica`
+- `Quiropractica`
+- `Dentista`
+
+Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
 
 ## Orden recomendado de edicion
 
-1. `1) Configuracion del sitio`
-2. `2) Contenido comercial`
-3. `3) Fotos y videos`
-4. `4) Preguntas frecuentes (FAQ)`
+1. `Header y navegacion`
+2. `Inicio`
+3. `Servicios`
+4. `Especialistas`
+5. `Precios`
+6. `Ubicacion`
+7. `Promociones`
+8. `Fotos y videos`
+9. `Nosotros`
+10. `FAQ`
+11. `Contacto`
+12. `Agenda tu cita`
 
-## 1) Configuracion del sitio
+## 1) Header y navegacion
 
-### Informacion del negocio
-- Edita: nombre, zona, direccion, telefono, horarios, WhatsApp y mapa.
-- Edita redes: Facebook, Instagram y TikTok.
-- Edita Home: texto principal, botones y fondo.
-- Edita Footer: titulos de columnas, enlaces y copyright.
+- Edita en `Informacion del negocio`:
+  - Nombre del negocio
+  - Subtexto del header
+  - Logo del header
+  - Texto de horario en header
+  - Telefono y redes
 
-### Seccion Nosotros
-- Edita titulo, textos, puntos clave e imagen principal.
-- Edita subtitulos y botones de la pagina Nosotros.
+## 2) Inicio
 
-## 2) Contenido comercial
+- Edita en `Informacion del negocio`:
+  - Texto pequeno superior
+  - Titulo principal
+  - Subtitulo
+  - Imagen principal
+  - Botones (texto + enlace)
+  - Titulo/subtitulo de promociones
+- Edita en `Nosotros (Inicio)`:
+  - Titulo, intro, texto secundario y puntos clave
 
-### Servicios
-- Edita: nombre, categoria, descripcion corta/larga, duracion y precio desde.
-- Recomendado: descripcion corta de una linea.
-- No borres servicios con historial. Usa `Activo = apagado` para ocultarlo.
-- Si necesitas borrar, usa `Borrar servicio` y sigue el mensaje de validacion.
+## 3) Servicios
 
-### Especialistas
+- Edita: nombre, categoria, descripcion corta/larga, incluye, duracion y precio desde.
+- No borres servicios con historial. Usa `Activo = apagado`.
+
+## 4) Especialistas
+
 - Edita: nombre, especialidad, categoria, foto, descripcion y areas.
-- Puedes activar WhatsApp y personalizar mensaje por especialista.
+- Boton de WhatsApp: usa mensaje claro y sin placeholders.
 
-### Precios
+## 5) Precios
+
 - Relaciona cada precio con un servicio.
-- Edita: nombre del precio, monto, nota, activo y orden.
-- La categoria del servicio debe estar correcta para que el filtro y la agenda funcionen.
-- Si un precio no aparece en filtro, revisa categoria del servicio relacionado.
+- El filtro por categoria en web depende de la categoria del servicio relacionado.
 
-### Promociones
-- Edita: titulo, etiqueta, descripcion, vigencia, imagen y estado.
-- Vigencia: usa formato `AAAA-MM-DD` (ejemplo `2026-03-01`).
-- Usa `Fijada` para subir prioridad.
+## 6) Ubicacion
 
-## 3) Fotos y videos
+- Edita en `Informacion del negocio`:
+  - Direccion
+  - URL de Google Maps
+  - Zona
+  - Referencias
+  - Estacionamiento y acceso (si aplica)
+  - Guia rapida (maximo 3 tips)
+  - Foto de fachada
 
-### Galeria
-- Edita: titulo, categoria, tipo (imagen/video), activo y orden.
-- Si es video: pega solo URL (no iframe).
-- Si no se puede embeber: activa "solo enlace" y usa imagen previa.
+## 7) Promociones
 
-## 4) Preguntas frecuentes (FAQ)
+- Edita: titulo, etiqueta, descripcion, imagen y vigencia.
+- Vigencia: formato `AAAA-MM-DD` (ejemplo `2026-03-01`).
+- `Categorias (filtro web)`: selecciona una o varias categorias oficiales (incluye `Dentista`).
+- `Aplica a (texto)`: usa etiquetas visibles de marketing (ejemplo: primera vez, prevencion).
 
-- Edita por categoria: General, Podologia, Psicologia, Optica y Quiropractica.
-- Cada item debe tener pregunta clara + respuesta corta.
-- Usa `Destacada` solo en dudas clave.
+## 8) Fotos y videos
 
-## Que pagina se alimenta de que area
+- Edita: titulo, categoria, tipo, estado activo y orden.
+- Video: pega solo enlace (no iframe).
+- Si no se puede embeber, usa modo solo enlace e imagen previa.
 
-- Inicio: Informacion del negocio + Servicios + Promociones + Nosotros.
-- Servicios: Servicios.
-- Especialistas: Especialistas.
-- Precios: Precios.
-- Ubicacion: Informacion del negocio.
-- Promociones: Promociones.
-- Fotos y videos: Galeria.
-- Nosotros: Seccion Nosotros.
-- FAQ: FAQ.
-- Contacto: Informacion del negocio + Redes.
-- Agenda tu cita: Informacion del negocio + Servicios + Especialistas.
+## 9) Nosotros
 
-## Antes de publicar
+- Edita en `Nosotros (Inicio)`:
+  - Textos de bloque Inicio
+  - Textos de pagina Nosotros
+  - Imagen principal e imagenes de apoyo
+  - Botones
+
+## 10) FAQ
+
+- Edita por categoria:
+  - General, Podologia, Psicologia, Optica, Quiropractica, Dentista.
+- Usa preguntas reales y respuestas cortas.
+
+## 11) Contacto
+
+- Edita en `Informacion del negocio`:
+  - Telefono
+  - WhatsApp citas
+  - Redes sociales
+  - Direccion y mapa
+
+## 12) Agenda tu cita
+
+Se alimenta de:
+
+- `Informacion del negocio` (contacto/horario)
+- `Servicios` (categorias)
+- `Especialistas` (filtro por categoria)
+- `Precios` (total aproximado en cotizacion)
+
+## Checklist antes de publicar
 
 1. Guardar borrador.
 2. Revisar ortografia.
-3. Validar links (WhatsApp, Maps, redes).
-4. Confirmar categoria correcta (Podologia/Psicologia/Optica/Quiropractica).
-5. Probar un click real en Web:
-   - `Agendar este servicio` o `Agendar con este especialista`.
-   - Verificar que se precargue en `Agenda tu cita`.
-6. Publicar.
+3. Confirmar categoria correcta.
+4. Verificar estado `Activo`.
+5. Validar links (WhatsApp, Maps, redes).
+6. Probar un clic real en web:
+   - `Agendar este servicio`
+   - `Agendar con este especialista`
+   - `Agendar` en promociones y precios
+7. Publicar.
 
-## Errores comunes y como resolver
+## Errores comunes
 
-- Error al borrar servicio por referencias:
-  - Significa que otro documento usa ese servicio.
-  - Abre los documentos relacionados y quita la referencia.
-  - Vuelve a intentar borrar.
-
-- Error al borrar especialista/promocion/precio por referencias:
-  - Significa que hay relacion activa con otro documento.
-  - Revisa y limpia referencias relacionadas.
-  - Si no es urgente, usa `Desactivar` en lugar de borrar.
-
-- Si aparece un error y no sabes como resolver:
-  - Revisa esta guia.
-  - Si persiste, contacta al desarrollador de este sistema ABJV.
-
-- Si aparece un error de calendario (`firstDay`):
-  - Recarga el Studio.
-  - Verifica que la vigencia este en formato `AAAA-MM-DD`.
+- Error al borrar por referencias:
+  - Ese documento esta usado en otro lado.
+  - Quita referencias primero o usa `Desactivar`.
+- Error de calendario (`firstDay`):
+  - Recarga Studio y confirma formato `AAAA-MM-DD`.
+- Si persiste un error:
+  - Revisa esta guia y contacta al desarrollador ABJV.

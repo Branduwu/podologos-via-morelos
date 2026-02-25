@@ -18,10 +18,13 @@ function normalizeSlug(value: string | null | undefined): string {
 export function normalizeServiceSlug(value: string | null | undefined): string {
   const raw = normalizeSlug(value);
 
+  if (raw.startsWith("dent")) return "dentista";
+  if (raw.startsWith("odont")) return "dentista";
   if (raw.startsWith("optometr")) return "optica";
   if (raw.startsWith("podolog")) return "podologia";
   if (raw.startsWith("psicolog")) return "psicologia";
   if (raw.startsWith("quiropr")) return "quiropractica";
+  if (raw.includes("dent") || raw.includes("odont")) return "dentista";
   if (raw.includes("una") || raw.includes("callo") || raw.includes("pie")) return "podologia";
   if (raw.includes("ansiedad") || raw.includes("terapia")) return "psicologia";
   if (raw.includes("vista") || raw.includes("lente")) return "optica";

@@ -57,6 +57,7 @@ export default {
           { title: "Psicologia", value: "psicologia" },
           { title: "Optica / Optometria", value: "optica" },
           { title: "Quiropractica", value: "quiropractica" },
+          { title: "Dentista", value: "dentista" },
           { title: "Instalaciones", value: "instalaciones" },
         ],
         layout: "dropdown",
@@ -238,6 +239,7 @@ export default {
         psicologia: "Psicologia",
         optica: "Optica/Optometria",
         quiropractica: "Quiropractica",
+        dentista: "Dentista",
         instalaciones: "Instalaciones",
       };
       const status =
