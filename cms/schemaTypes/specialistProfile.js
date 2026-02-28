@@ -87,10 +87,27 @@ export default {
       description: "Si esta activo, el boton abre WhatsApp con mensaje precargado para este especialista.",
     },
     {
+      name: "whatsAppNumber",
+      title: "WhatsApp del especialista (solo numero, opcional)",
+      type: "string",
+      description:
+        "Si llenas este campo, los botones de este especialista enviaran al numero aqui capturado. Si lo dejas vacio, usa el WhatsApp para especialistas en Informacion del negocio.",
+      validation: (R) =>
+        R.custom((value) => {
+          if (!value) return true;
+          const digits = String(value).replace(/\D/g, "");
+          if (digits.length < 10 || digits.length > 15) {
+            return "Ingresa un numero valido de 10 a 15 digitos.";
+          }
+          return true;
+        }),
+    },
+    {
       name: "whatsAppMessage",
       title: "Mensaje de WhatsApp (opcional)",
       type: "string",
-      description: "Si lo dejas vacio, se genera uno automatico con el nombre del especialista.",
+      description:
+        "Si lo dejas vacio, se usa el mensaje base de especialistas de Informacion del negocio. Placeholders: {especialista}, {servicio}, {negocio}, {problema}.",
       validation: (R) => R.max(180).warning("Recomendado: maximo 180 caracteres."),
     },
     {

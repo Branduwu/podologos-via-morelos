@@ -1,13 +1,21 @@
 ---
 import { clinic } from "../config/clinic";
-import { buildContactMessage, buildWhatsAppUrl } from "../utils/whatsapp";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../utils/whatsapp";
 import { safeCmsUrl } from "../utils/url";
 
 type Props = {
   business?: {
+    name?: string;
     address?: string;
     phone?: string;
     whatsappCitasNumber?: string;
+    whatsappGeneralMessage?: string;
+    whatsappQuickProblemDefault?: string;
     mapsUrl?: string;
     facebookUrl?: string;
     instagramUrl?: string;
@@ -19,7 +27,10 @@ const { business } = Astro.props as Props;
 const address = business?.address || clinic.address;
 const phoneDisplay = business?.phone || clinic.phoneDisplay;
 const phoneTel = String(phoneDisplay).replace(/\D/g, "") || clinic.phoneTel;
-const waNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
+const waNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  clinic.whatsappNumber
+);
 const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
 
 const serviceChips = [
@@ -42,7 +53,16 @@ function socialHandle(rawUrl: string): string {
   }
 }
 
-const primaryWaMessage = buildContactMessage({ reason: "Quiero informacion y agendar una cita." });
+const primaryWaMessage = buildContactMessage({
+  reason: resolveWhatsAppReason(
+    business?.whatsappGeneralMessage,
+    "Quiero informacion y agendar una cita.",
+    {
+      business: business?.name || clinic.name,
+      problem: business?.whatsappQuickProblemDefault || "",
+    }
+  ),
+});
 const waPrimaryHref = buildWhatsAppUrl(primaryWaMessage, waNumber);
 
 const socialItems = [
@@ -75,7 +95,18 @@ const socialItems = [
     <div class="mt-2 flex flex-wrap gap-2">
       {serviceChips.map((chip) => {
         const href = buildWhatsAppUrl(
-          buildContactMessage({ service: chip.label, reason: "Quiero informacion y agendar." }),
+          buildContactMessage({
+            service: chip.label,
+            reason: resolveWhatsAppReason(
+              business?.whatsappGeneralMessage,
+              "Quiero informacion y agendar este servicio.",
+              {
+                service: chip.label,
+                business: business?.name || clinic.name,
+                problem: business?.whatsappQuickProblemDefault || "",
+              }
+            ),
+          }),
           waNumber
         );
         return (

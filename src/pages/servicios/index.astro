@@ -2,10 +2,15 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { getServices } from "../../lib/sanity.js";
 import { clinic } from "../../config/clinic";
+import { getBusinessInfo, getServices, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
-import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../utils/whatsapp";
 
 type ServiceItem = {
   title?: string;
@@ -14,11 +19,23 @@ type ServiceItem = {
   duration?: string;
   priceFrom?: number;
   category?: string;
+  leadSpecialistSlug?: string;
 };
 
+type SpecialistRoutingItem = {
+  _id?: string;
+  slug?: string;
+  specialtyCategory?: string;
+};
+
+const business = await getBusinessInfo();
 const services: ServiceItem[] = (await getServices()) || [];
+const specialists: SpecialistRoutingItem[] = (await getSpecialists()) || [];
 const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const waNumber = clinic.whatsappNumber;
+const waNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  clinic.whatsappNumber
+);
 const serviceCategories = [
   { key: "all", label: "Todas" },
   { key: "podologia", label: "Podologia" },
@@ -27,6 +44,14 @@ const serviceCategories = [
   { key: "quiropractica", label: "Quiropractica" },
   { key: "dentista", label: "Dentista" },
 ];
+
+const firstSpecialistByCategory = new Map<string, string>();
+for (const specialist of specialists) {
+  const slug = String(specialist?.slug || specialist?._id || "").trim();
+  const category = normalizeServiceSlug(specialist?.specialtyCategory || "");
+  if (!slug || !category || firstSpecialistByCategory.has(category)) continue;
+  firstSpecialistByCategory.set(category, slug);
+}
 
 function moneyMXN(n: number | string | null | undefined) {
   const num = Number(n);
@@ -81,13 +106,24 @@ function moneyMXN(n: number | string | null | undefined) {
         const servicePrice = Number(s.priceFrom || 0);
         const agendarParams = new URLSearchParams();
         if (serviceCategory) agendarParams.set("service", serviceCategory);
+        const preferredSpecialistSlug =
+          String(s.leadSpecialistSlug || "").trim() || firstSpecialistByCategory.get(serviceCategory) || "";
+        if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
         if (serviceLabel) agendarParams.append("services", serviceLabel);
         if (servicePrice > 0) agendarParams.set("approxTotal", String(Math.round(servicePrice)));
         const agendarHref = agendarParams.toString() ? `/agendar?${agendarParams.toString()}` : "/agendar";
         const waHref = buildWhatsAppUrl(
           buildContactMessage({
             service: serviceLabel,
-            reason: "Quiero informacion y agendar este servicio.",
+            reason: resolveWhatsAppReason(
+              business?.whatsappGeneralMessage,
+              "Quiero informacion y agendar este servicio.",
+              {
+                service: serviceLabel,
+                business: business?.name || clinic.name,
+                problem: business?.whatsappQuickProblemDefault || "",
+              }
+            ),
           }),
           waNumber
         );

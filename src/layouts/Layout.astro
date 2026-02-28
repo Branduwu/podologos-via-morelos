@@ -1,6 +1,8 @@
 ﻿---
 import "../styles/global.css";
+import { clinic } from "../config/clinic";
 import { getBusinessInfo } from "../lib/sanity.js";
+import { resolveWhatsAppNumber, resolveWhatsAppReason } from "../utils/whatsapp";
 
 const {
   title: titleProp,
@@ -9,8 +11,20 @@ const {
 } = Astro.props;
 
 const business = await getBusinessInfo();
-const waNumber = (business?.whatsappCitasNumber || "").replace(/\D/g, "");
-const waMessage = encodeURIComponent("Hola, me interesa informacion y disponibilidad para agendar una cita.");
+const waNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  clinic.whatsappNumber
+);
+const waMessage = encodeURIComponent(
+  resolveWhatsAppReason(
+    business?.whatsappGeneralMessage,
+    "Quiero informacion y disponibilidad para agendar una cita.",
+    {
+      business: business?.name || clinic.name,
+      problem: business?.whatsappQuickProblemDefault || "",
+    }
+  )
+);
 const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMessage}` : null;
 const siteUrl = Astro.site || new URL("http://localhost:4321");
 const canonical = new URL(Astro.url?.pathname || "/", siteUrl).toString();

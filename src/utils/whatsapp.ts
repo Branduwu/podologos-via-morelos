@@ -5,6 +5,7 @@ export type AppointmentMessageInput = {
   name: string;
   phone: string;
   service: string;
+  introMessage?: string;
   selectedServices?: string[];
   approxTotal?: number;
   specialist?: string;
@@ -15,9 +16,23 @@ export type AppointmentMessageInput = {
 };
 
 export type ContactMessageInput = {
+  introMessage?: string;
   service?: string;
   reason?: string;
 };
+
+export type WhatsAppTemplateValues = {
+  specialist?: string;
+  service?: string;
+  business?: string;
+  problem?: string;
+};
+
+const normalizeMessage = (value: string) =>
+  String(value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .trim();
 
 const normalizeBaseText = (value: string) =>
   String(value || "")
@@ -46,7 +61,64 @@ export function sanitizeDirectReason(reason?: string): string {
   return raw;
 }
 
+function applyTemplate(
+  template: string,
+  values: WhatsAppTemplateValues = {}
+): string {
+  let output = String(template || "");
+  const fallbackBusiness = String(values.business || clinic.name || "nuestro negocio").trim();
+  const replacements: Record<string, string> = {
+    especialista: String(values.specialist || "este especialista").trim(),
+    servicio: String(values.service || "General").trim(),
+    negocio: fallbackBusiness,
+    problema: String(values.problem || "Por definir").trim(),
+  };
+
+  Object.entries(replacements).forEach(([key, value]) => {
+    output = output.split(`{${key}}`).join(value);
+  });
+
+  // Compatibilidad: si el editor usa "_____" en lugar de {problema}, lo rellenamos igual.
+  output = output.replace(/_{3,}/g, replacements.problema || "Por definir");
+
+  return output.trim();
+}
+
+function isLikelyFullMessage(text: string): boolean {
+  const normalized = normalizeBaseText(text);
+  if (!normalized) return false;
+  if (text.includes("\n")) return true;
+  if (normalized.startsWith("hola")) return true;
+  if (normalized.startsWith("buen dia")) return true;
+  if (normalized.startsWith("buenas")) return true;
+  return false;
+}
+
+export function resolveWhatsAppReason(
+  template: string | null | undefined,
+  fallback: string,
+  values: WhatsAppTemplateValues = {}
+): string {
+  const resolvedTemplate = applyTemplate(String(template || ""), values);
+  if (resolvedTemplate) return sanitizeDirectReason(resolvedTemplate);
+  return sanitizeDirectReason(applyTemplate(fallback, values));
+}
+
+export function resolveWhatsAppNumber(
+  ...numbers: Array<string | null | undefined>
+): string {
+  for (const number of numbers) {
+    const clean = sanitizePhone(String(number || ""));
+    if (clean.length >= 10 && clean.length <= 15) return clean;
+  }
+  return "";
+}
+
 export function buildAppointmentMessage(data: AppointmentMessageInput): string {
+  const intro =
+    data.introMessage && String(data.introMessage).trim()
+      ? sanitizeDirectReason(data.introMessage)
+      : `Hola, quiero agendar una cita en ${clinic.name}.`;
   const specialist = data.specialist?.trim() || "Sin preferencia";
   const dateText = data.date ? formatDateMX(data.date) : "Por definir";
   const timeText = data.time || data.shift || "Por definir";
@@ -62,7 +134,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
       : [];
 
   return [
-    `Hola, quiero agendar una cita en ${clinic.name}.`,
+    intro,
     "",
     `Nombre: ${data.name.trim()}`,
     `Telefono: ${sanitizePhone(data.phone)}`,
@@ -80,9 +152,19 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
 
 export function buildContactMessage(data: ContactMessageInput): string {
   const service = data.service?.trim() || "General";
-  const reason = sanitizeDirectReason(data.reason);
+  const reason = normalizeMessage(sanitizeDirectReason(data.reason));
+
+  // Si el editor escribio un mensaje completo (ej. "Hola ..."), se envia tal cual.
+  if (reason && isLikelyFullMessage(reason)) {
+    return reason;
+  }
+
+  const intro =
+    data.introMessage && String(data.introMessage).trim()
+      ? sanitizeDirectReason(data.introMessage)
+      : `Hola, me interesa agendar en ${clinic.name}.`;
   return [
-    `Hola, me interesa agendar en ${clinic.name}.`,
+    intro,
     `Servicio de interes: ${service}`,
     `Consulta: ${reason}`,
   ].join("\n");

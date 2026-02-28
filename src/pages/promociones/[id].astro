@@ -37,7 +37,7 @@ if (!promo) {
 }
 
 function fmt(d: string | Date | null | undefined) {
-  if (!d) return "Sin fecha";
+  if (!d) return "";
   try {
     return new Date(d).toLocaleDateString("es-MX", {
       year: "numeric",
@@ -47,6 +47,15 @@ function fmt(d: string | Date | null | undefined) {
   } catch {
     return String(d);
   }
+}
+
+function promotionValidityText(startDate?: string, endDate?: string) {
+  const hasStart = Boolean(startDate);
+  const hasEnd = Boolean(endDate);
+  if (!hasStart && !hasEnd) return "";
+  if (hasStart && hasEnd) return `Vigencia: ${fmt(startDate)} a ${fmt(endDate)}`;
+  if (hasStart) return `Vigencia desde: ${fmt(startDate)}`;
+  return `Vigencia hasta: ${fmt(endDate)}`;
 }
 
 const promoServiceParam = normalizeServiceSlug(
@@ -91,9 +100,11 @@ const promoAgendarHref = (() => {
         {promo.shortDescription && <p class="mt-3 text-lg text-slate-700 dark:text-slate-300">{promo.shortDescription}</p>}
         {promo.description && <p class="mt-4 whitespace-pre-line text-slate-700 dark:text-slate-300">{promo.description}</p>}
 
-        <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
-          Vigencia: {fmt(promo.startDate)} a {fmt(promo.endDate)}
-        </p>
+        {promotionValidityText(promo.startDate, promo.endDate) && (
+          <p class="mt-6 text-sm text-slate-600 dark:text-slate-400">
+            {promotionValidityText(promo.startDate, promo.endDate)}
+          </p>
+        )}
 
         {Array.isArray(promo.appliesTo) && promo.appliesTo.length > 0 && (
           <div class="mt-4 flex flex-wrap gap-2">

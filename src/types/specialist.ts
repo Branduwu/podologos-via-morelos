@@ -12,6 +12,7 @@ export type Specialist = {
   ctaText?: string;
   ctaUrl?: string;
   useWhatsAppButton?: boolean;
+  whatsAppNumber?: string;
   whatsAppMessage?: string;
   active: boolean;
   order: number;

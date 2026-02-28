@@ -2,9 +2,15 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
+import { clinic } from "../../config/clinic";
 import { getBusinessInfo, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
-import { buildContactMessage, buildWhatsAppUrl, sanitizeDirectReason } from "../../utils/whatsapp";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../utils/whatsapp";
 
 type Specialist = {
   _id?: string;
@@ -14,6 +20,10 @@ type Specialist = {
   specialtyCategory?: string;
   shortBio?: string;
   focusAreas?: string[];
+  ctaText?: string;
+  ctaUrl?: string;
+  useWhatsAppButton?: boolean;
+  whatsAppNumber?: string;
   whatsAppMessage?: string;
   photoUrl?: string;
 };
@@ -59,7 +69,14 @@ function specialistCategoryFromData(specialist: Specialist) {
   return specialistCategoryKey(specialist.specialty);
 }
 
-const waNumber = String(business?.whatsappCitasNumber || "").replace(/\D/g, "");
+const generalWaNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  clinic.whatsappNumber
+);
+const specialistsWaNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWaNumber
+);
 
 function agendarSpecialistHref(specialist: Specialist) {
   const service = normalizeServiceSlug(specialist.specialtyCategory || specialist.specialty || "");
@@ -74,10 +91,21 @@ function agendarSpecialistHref(specialist: Specialist) {
 }
 
 function specialistWhatsAppHref(specialist: Specialist) {
+  const waNumber = resolveWhatsAppNumber(
+    specialist?.whatsAppNumber,
+    specialistsWaNumber
+  );
   const customReasonRaw = String(specialist.whatsAppMessage || "").trim();
-  const reason = customReasonRaw
-    ? sanitizeDirectReason(customReasonRaw)
-    : `Quiero agendar con ${specialist.name || "este especialista"}.`;
+  const reason = resolveWhatsAppReason(
+    customReasonRaw || business?.whatsappSpecialistsMessage,
+    "Quiero agendar con {especialista}.",
+    {
+      specialist: specialist.name || "este especialista",
+      service: specialist.specialty || "Especialista",
+      business: business?.name || clinic.name,
+      problem: business?.whatsappQuickProblemDefault || "",
+    }
+  );
 
   return buildWhatsAppUrl(
     buildContactMessage({
@@ -86,6 +114,14 @@ function specialistWhatsAppHref(specialist: Specialist) {
     }),
     waNumber
   );
+}
+
+function canUseSpecialistWhatsApp(specialist: Specialist) {
+  const waNumber = resolveWhatsAppNumber(
+    specialist?.whatsAppNumber,
+    specialistsWaNumber
+  );
+  return specialist.useWhatsAppButton !== false && Boolean(waNumber);
 }
 ---
 
@@ -151,7 +187,7 @@ function specialistWhatsAppHref(specialist: Specialist) {
                   >
                     Agendar con este especialista
                   </a>
-                  {waNumber && (
+                  {canUseSpecialistWhatsApp(specialist) && (
                     <a
                       class="btn-base btn-secondary w-full"
                       href={specialistWhatsAppHref(specialist)}

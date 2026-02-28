@@ -3,10 +3,15 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { clinic } from "../../config/clinic";
-import { sanityClient } from "../../lib/sanity.js";
+import { getBusinessInfo, getSpecialists, sanityClient } from "../../lib/sanity.js";
 import { reportError } from "../../lib/reportError.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
-import { buildContactMessage, buildWhatsAppUrl } from "../../utils/whatsapp";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../utils/whatsapp";
 
 type ServiceDetail = {
   title?: string;
@@ -16,9 +21,11 @@ type ServiceDetail = {
   includes?: string[];
   duration?: string;
   priceFrom?: number;
+  leadSpecialistSlug?: string;
 };
 
 type ServiceSlugRow = { slug?: string };
+type SpecialistRoutingItem = { _id?: string; slug?: string; specialtyCategory?: string };
 
 const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const routeParams = Astro.params as Record<string, string | undefined>;
@@ -36,12 +43,23 @@ const service: ServiceDetail | null =
           long,
           includes,
           duration,
-          priceFrom
+          priceFrom,
+          "leadSpecialistSlug": leadSpecialist->slug.current
         }
       `,
         { slug: slugString },
       )
     : null;
+const business = await getBusinessInfo();
+const specialists: SpecialistRoutingItem[] = (await getSpecialists()) || [];
+
+const firstSpecialistByCategory = new Map<string, string>();
+for (const specialist of specialists) {
+  const slug = String(specialist?.slug || specialist?._id || "").trim();
+  const category = normalizeServiceSlug(specialist?.specialtyCategory || "");
+  if (!slug || !category || firstSpecialistByCategory.has(category)) continue;
+  firstSpecialistByCategory.set(category, slug);
+}
 
 function moneyMXN(n: number | null | undefined) {
   if (typeof n !== "number") return "";
@@ -81,15 +99,29 @@ const waHref = service?.title
   ? buildWhatsAppUrl(
       buildContactMessage({
         service: service.title,
-        reason: "Quiero informacion y agendar este servicio.",
+        reason: resolveWhatsAppReason(
+          business?.whatsappGeneralMessage,
+          "Quiero informacion y agendar este servicio.",
+          {
+            service: service.title,
+            business: business?.name || clinic.name,
+            problem: business?.whatsappQuickProblemDefault || "",
+          }
+        ),
       }),
-      clinic.whatsappNumber
+      resolveWhatsAppNumber(
+        business?.whatsappCitasNumber,
+        clinic.whatsappNumber
+      )
     )
   : "";
 
 const serviceKey = normalizeServiceSlug(service?.category || service?.title || slugString);
 const agendarParams = new URLSearchParams();
 if (serviceKey) agendarParams.set("service", serviceKey);
+const preferredSpecialistSlug =
+  String(service?.leadSpecialistSlug || "").trim() || firstSpecialistByCategory.get(serviceKey) || "";
+if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
 if (service?.title) agendarParams.append("services", service.title);
 if (typeof service?.priceFrom === "number" && service.priceFrom > 0) {
   agendarParams.set("approxTotal", String(Math.round(service.priceFrom)));

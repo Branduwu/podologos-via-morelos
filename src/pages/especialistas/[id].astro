@@ -5,7 +5,12 @@ import Footer from "../../components/Footer.astro";
 import { clinic } from "../../config/clinic";
 import { getBusinessInfo, getSpecialistByPath, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
-import { buildContactMessage, buildWhatsAppUrl, sanitizeDirectReason } from "../../utils/whatsapp";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../utils/whatsapp";
 
 type Specialist = {
   _id?: string;
@@ -15,6 +20,8 @@ type Specialist = {
   specialtyCategory?: string;
   shortBio?: string;
   focusAreas?: string[];
+  useWhatsAppButton?: boolean;
+  whatsAppNumber?: string;
   whatsAppMessage?: string;
   photoUrl?: string;
 };
@@ -41,11 +48,30 @@ if (canonicalSlug && requestedId && requestedId !== canonicalSlug && requestedId
   return Astro.redirect(`/especialistas/${encodeURIComponent(canonicalSlug)}`);
 }
 
-const waNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
+const generalWaNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  clinic.whatsappNumber
+);
+const specialistsWaNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWaNumber
+);
+const waNumber = resolveWhatsAppNumber(
+  specialist?.whatsAppNumber,
+  specialistsWaNumber
+);
 const customReasonRaw = String(specialist?.whatsAppMessage || "").trim();
-const specialistReason = customReasonRaw
-  ? sanitizeDirectReason(customReasonRaw)
-  : `Quiero agendar con ${specialist?.name || "este especialista"}.`;
+const specialistReason = resolveWhatsAppReason(
+  customReasonRaw || business?.whatsappSpecialistsMessage,
+  "Quiero agendar con {especialista}.",
+  {
+    specialist: specialist?.name || "este especialista",
+    service: specialist?.specialty || "Especialista",
+    business: business?.name || clinic.name,
+    problem: business?.whatsappQuickProblemDefault || "",
+  }
+);
+const canUseWhatsApp = specialist.useWhatsAppButton !== false && Boolean(waNumber);
 const waLink = waNumber
   ? buildWhatsAppUrl(
       buildContactMessage({
@@ -101,14 +127,16 @@ const prefilledAgendarHref = (() => {
         )}
 
         <div class="mt-8 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
-          <a
-            href={waLink}
-            target={waNumber ? "_blank" : undefined}
-            rel={waNumber ? "noopener noreferrer" : undefined}
-            class="btn-base btn-primary w-full sm:w-auto"
-          >
-            WhatsApp con este especialista
-          </a>
+          {canUseWhatsApp && (
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-base btn-primary w-full sm:w-auto"
+            >
+              WhatsApp con este especialista
+            </a>
+          )}
           <a href={prefilledAgendarHref} class="btn-base btn-secondary w-full sm:w-auto">
             Agendar con este especialista
           </a>

@@ -12,6 +12,7 @@ export const specialistsExample: Specialist[] = [
     active: true,
     order: 1,
     useWhatsAppButton: true,
+    whatsAppNumber: "525525388683",
   },
   {
     _id: "sp-psi-luisa-ortiz",

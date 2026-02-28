@@ -265,10 +265,47 @@
     },
     {
       name: "whatsappCitasNumber",
-      title: "WhatsApp citas (solo numero)",
+      title: "WhatsApp general (citas y botones generales)",
       type: "string",
       description: "Pega solo numeros, ejemplo 525512345678.",
       fieldset: "contact",
+    },
+    {
+      name: "whatsappSpecialistsNumber",
+      title: "WhatsApp para especialistas (fallback)",
+      type: "string",
+      description:
+        "Numero por defecto para botones de especialistas. Si un especialista tiene su propio numero, ese se usa primero.",
+      fieldset: "contact",
+    },
+    {
+      name: "whatsappGeneralMessage",
+      title: "Mensaje WhatsApp general (editable)",
+      type: "text",
+      rows: 3,
+      description:
+        "Mensaje base para botones generales (servicios, contacto, etc.). Puedes usar {servicio}, {negocio} y {problema}. En Agendar, {problema} toma el campo 'Problema o notas'.",
+      fieldset: "contact",
+      validation: (R) => R.max(220).warning("Recomendado: maximo 220 caracteres."),
+    },
+    {
+      name: "whatsappSpecialistsMessage",
+      title: "Mensaje WhatsApp para especialistas (editable)",
+      type: "text",
+      rows: 3,
+      description:
+        "Mensaje base para especialistas. Puedes usar {especialista}, {servicio}, {negocio} y {problema}.",
+      fieldset: "contact",
+      validation: (R) => R.max(220).warning("Recomendado: maximo 220 caracteres."),
+    },
+    {
+      name: "whatsappQuickProblemDefault",
+      title: "Problema por defecto para botones rapidos",
+      type: "string",
+      description:
+        "Texto que llena {problema} en botones rapidos (cuando el usuario no pasa por el formulario Agendar). Ejemplo: Quiero una valoracion inicial.",
+      fieldset: "contact",
+      validation: (R) => R.max(120).warning("Recomendado: maximo 120 caracteres."),
     },
 
     {

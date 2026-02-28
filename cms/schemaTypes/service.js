@@ -39,6 +39,26 @@ export default {
       validation: (R) => R.required().error("Selecciona una categoria."),
     },
     {
+      name: "leadSpecialist",
+      title: "Especialista destino (Agendar/WhatsApp)",
+      type: "reference",
+      to: [{ type: "specialistProfile" }],
+      description:
+        "Opcional. Si lo eliges, al dar clic en 'Agendar este servicio' se precarga ese especialista y el mensaje se dirige a su WhatsApp. Si lo dejas vacio, se usa automaticamente el primer especialista activo de la misma categoria.",
+      fieldset: "basic",
+      options: {
+        disableNew: true,
+        filter: ({ document }) => {
+          const category = document?.category;
+          if (!category) return { filter: "(!defined(active) || active == true)" };
+          return {
+            filter: "specialtyCategory == $category && (!defined(active) || active == true)",
+            params: { category },
+          };
+        },
+      },
+    },
+    {
       name: "slug",
       title: "Slug (URL)",
       type: "slug",

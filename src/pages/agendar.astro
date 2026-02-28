@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import { clinic } from "../config/clinic";
 import { getBusinessInfo, getPrices, getServices, getSpecialists } from "../lib/sanity.js";
 import { getPrefillFromUrl, normalizeServiceSlug } from "../utils/prefill";
+import { resolveWhatsAppNumber } from "../utils/whatsapp";
 
 type ServiceItem = {
   title?: string;
@@ -18,6 +19,8 @@ type Specialist = {
   name?: string;
   specialty?: string;
   specialtyCategory?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
   active?: boolean;
 };
 
@@ -32,7 +35,17 @@ const services: ServiceItem[] = (await getServices()) || [];
 const specialists: Specialist[] = (await getSpecialists()) || [];
 const prices: PriceRow[] = (await getPrices()) || [];
 
-const whatsappNumber = String(business?.whatsappCitasNumber || clinic.whatsappNumber).replace(/\D/g, "");
+const generalWhatsappNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  clinic.whatsappNumber
+);
+const specialistsWhatsappNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWhatsappNumber
+);
+const generalWhatsAppMessage = String(business?.whatsappGeneralMessage || "").trim();
+const specialistsWhatsAppMessage = String(business?.whatsappSpecialistsMessage || "").trim();
+const quickProblemDefault = String(business?.whatsappQuickProblemDefault || "").trim();
 const address = business?.address || clinic.address;
 const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sabado 10:00 a 16:00 · Domingo cerrado";
 
@@ -56,6 +69,8 @@ const specialistOptions = specialists
     name: sp?.name || "Especialista",
     category: normalizeServiceSlug(sp?.specialtyCategory || ""),
     specialty: sp?.specialty || "",
+    whatsAppNumber: String(sp?.whatsAppNumber || "").trim(),
+    whatsAppMessage: String(sp?.whatsAppMessage || "").trim(),
   }));
 
 const prefill = getPrefillFromUrl(Astro.url);
@@ -174,7 +189,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
           </div>
 
           <div class="grid gap-2">
-            <label class="text-sm font-medium" for="notes">Motivo o notas (opcional)</label>
+            <label class="text-sm font-medium" for="notes">Problema o notas (opcional)</label>
             <textarea id="notes" name="notes" rows="3" maxlength="300" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Describe brevemente tu motivo"></textarea>
           </div>
 
@@ -212,7 +227,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   type="application/json"
   is:inline
   set:html={JSON.stringify({
-    whatsappNumber,
+    generalWhatsappNumber,
+    specialistsWhatsappNumber,
+    generalWhatsAppMessage,
+    specialistsWhatsAppMessage,
+    quickProblemDefault,
+    businessName: business?.name || clinic.name,
     serviceOptions,
     specialistOptions,
     prefill: {
@@ -225,7 +245,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 ></script>
 
 <script>
-  import { buildAppointmentMessage, buildWhatsAppUrl } from "../utils/whatsapp";
+  import {
+    buildAppointmentMessage,
+    buildWhatsAppUrl,
+    resolveWhatsAppNumber,
+    resolveWhatsAppReason,
+  } from "../utils/whatsapp";
   import { formatDateMX, isSunday, isValidPhone, isValidPhoneInput, isWithinSchedule, sanitizePhone } from "../utils/validation";
   import { getPrefillFromUrl } from "../utils/prefill";
 
@@ -234,10 +259,17 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     name: string;
     category: string;
     specialty?: string;
+    whatsAppNumber?: string;
+    whatsAppMessage?: string;
   };
 
   type ClientConfig = {
-    whatsappNumber?: string;
+    generalWhatsappNumber?: string;
+    specialistsWhatsappNumber?: string;
+    generalWhatsAppMessage?: string;
+    specialistsWhatsAppMessage?: string;
+    quickProblemDefault?: string;
+    businessName?: string;
     prefill?: { service?: string; specialist?: string; services?: string[]; approxTotal?: number };
     specialistOptions?: SpecialistOption[];
     quoteSelectionLimit?: number;
@@ -297,9 +329,16 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const quoteLimit = Math.max(1, Number(config.quoteSelectionLimit || 6));
   let selectedServicesState = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
   let quoteTotalState = Number(prefill.approxTotal || 0);
-  const hasSpecialistPrefill = Boolean(String(prefill.specialist || "").trim());
   const priceCatalog = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
-  const waNumber = String(config.whatsappNumber || "").replace(/\D/g, "");
+  const generalWaNumber = resolveWhatsAppNumber(config.generalWhatsappNumber);
+  const specialistsWaNumber = resolveWhatsAppNumber(
+    config.specialistsWhatsappNumber,
+    generalWaNumber
+  );
+  const generalWhatsAppMessage = String(config.generalWhatsAppMessage || "").trim();
+  const specialistsWhatsAppMessage = String(config.specialistsWhatsAppMessage || "").trim();
+  const quickProblemDefault = String(config.quickProblemDefault || "").trim();
+  const businessName = String(config.businessName || "Podologo Plus Care").trim();
   const dateDisplayPattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
   const scheduleByDay: Record<number, { open: string; close: string } | null> = {
     0: null,
@@ -399,12 +438,13 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const getCurrentQuote = () => {
     const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
     const selectedCategory = String(serviceSelect.value || "");
+    const hasSelectedSpecialist = Boolean(String(specialistSelect.value || "").trim());
     const list = selectedServicesState.length > 0
       ? selectedServicesState
       : (selectedLabel ? [selectedLabel] : []);
 
     let total = Number.isFinite(quoteTotalState) && quoteTotalState > 0 ? quoteTotalState : 0;
-    if (total <= 0 && selectedCategory && !hasSpecialistPrefill) {
+    if (total <= 0 && selectedCategory && !hasSelectedSpecialist) {
       total = getMinPriceByCategory(selectedCategory);
     }
 
@@ -413,15 +453,21 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
   const updateQuoteSummary = () => {
     const { list, total } = getCurrentQuote();
-    const specialistSlug = String(prefill.specialist || "").trim();
-    const specialistName = specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)?.name || "";
+    const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
+    const specialistSlug = String(specialistSelect.value || "").trim();
+    const specialistName = specialistSlug
+      ? (specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)?.name || specialistSlug)
+      : "";
 
     if (contextBadgeEl) {
-      if (hasSpecialistPrefill) {
+      if (specialistSlug) {
         contextBadgeEl.classList.remove("hidden");
         contextBadgeEl.textContent = specialistName
           ? `Agendando con especialista: ${specialistName}`
           : "Agendando con especialista";
+      } else if (selectedServiceLabel) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Agendando servicio: ${selectedServiceLabel}`;
       } else {
         contextBadgeEl.classList.add("hidden");
       }
@@ -689,11 +735,6 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     updateTimeLimitsByDate();
     updateDatePreview();
 
-    if (!waNumber) {
-      setDisabledCta("WhatsApp no configurado");
-      return;
-    }
-
     if (!validateSchedule()) {
       setDisabledCta("Completa los campos para enviar por WhatsApp");
       return;
@@ -709,25 +750,60 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     }
 
     const specialistValue = String(specialistSelect.value || "").trim();
+    const selectedSpecialist = specialistValue
+      ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)
+      : undefined;
     const specialistName = specialistValue
-      ? (specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)?.name || specialistValue)
+      ? (selectedSpecialist?.name || specialistValue)
       : "Sin preferencia";
+    const targetWaNumber = specialistValue
+      ? resolveWhatsAppNumber(
+          selectedSpecialist?.whatsAppNumber,
+          specialistsWaNumber,
+          generalWaNumber
+        )
+      : generalWaNumber;
+
+    if (!targetWaNumber) {
+      setDisabledCta("WhatsApp no configurado");
+      return;
+    }
+
+    const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || service;
+    const notesValue = String(notesInput.value || "").trim();
+    const problemValue = notesValue || quickProblemDefault || "Por definir";
+    const introTemplate = specialistValue
+      ? (selectedSpecialist?.whatsAppMessage || specialistsWhatsAppMessage || generalWhatsAppMessage)
+      : generalWhatsAppMessage;
+    const introMessage = resolveWhatsAppReason(
+      introTemplate,
+      specialistValue
+        ? "Hola, quiero agendar con {especialista} en {negocio}."
+        : "Hola, quiero agendar una cita en {negocio}.",
+      {
+        specialist: specialistName,
+        service: selectedServiceLabel,
+        business: businessName,
+        problem: problemValue,
+      }
+    );
     const quote = getCurrentQuote();
 
     const message = buildAppointmentMessage({
+      introMessage,
       name,
       phone,
-      service: serviceSelect.options[serviceSelect.selectedIndex]?.text || service,
+      service: selectedServiceLabel,
       selectedServices: quote.list,
       approxTotal: quote.total > 0 ? quote.total : undefined,
       specialist: specialistName,
       date: parseDisplayDateToIso(dateInput.value) || undefined,
       time: timeSlotSelect.value || undefined,
       shift: String(shiftSelect.value || "") || undefined,
-      notes: String(notesInput.value || "") || undefined,
+      notes: notesValue || undefined,
     });
 
-    const href = buildWhatsAppUrl(message, waNumber);
+    const href = buildWhatsAppUrl(message, targetWaNumber);
     setEnabledCta(href);
   };
 
@@ -743,6 +819,11 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     selectedServicesState = selectedLabel ? [selectedLabel] : [];
     quoteTotalState = 0;
     renderSpecialists(serviceSelect.value, "");
+    updateQuoteSummary();
+    updateCta();
+  });
+
+  specialistSelect.addEventListener("change", () => {
     updateQuoteSummary();
     updateCta();
   });

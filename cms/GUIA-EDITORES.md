@@ -54,12 +54,23 @@ Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
 ## 3) Servicios
 
 - Edita: nombre, categoria, descripcion corta/larga, incluye, duracion y precio desde.
+- `Especialista destino (Agendar/WhatsApp)` (opcional):
+  - Si lo eliges, desde `Agendar este servicio` se precarga ese especialista y el WhatsApp va a su numero.
+  - Si lo dejas vacio, el sistema toma automaticamente el primer especialista activo de la misma categoria.
 - No borres servicios con historial. Usa `Activo = apagado`.
 
 ## 4) Especialistas
 
 - Edita: nombre, especialidad, categoria, foto, descripcion y areas.
-- Boton de WhatsApp: usa mensaje claro y sin placeholders.
+- Boton de WhatsApp:
+  - `WhatsApp del especialista`: numero directo de ese especialista (si aplica).
+  - `Mensaje de WhatsApp`: texto personalizado para ese especialista.
+  - Si esos campos van vacios, usa los valores globales de `Informacion del negocio`.
+  - Placeholders soportados en mensajes:
+    - `{especialista}`: se rellena con el nombre del especialista.
+    - `{servicio}`: se rellena con la especialidad/servicio.
+    - `{negocio}`: se rellena con el nombre del negocio.
+    - `{problema}`: en botones rapidos usa el valor por defecto global; en `Agendar` usa "Problema o notas".
 
 ## 5) Precios
 
@@ -108,9 +119,31 @@ Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
 
 - Edita en `Informacion del negocio`:
   - Telefono
-  - WhatsApp citas
+  - WhatsApp general (citas y botones generales)
+  - WhatsApp para especialistas (fallback)
+  - Mensaje WhatsApp general (editable)
+  - Mensaje WhatsApp para especialistas (editable)
+  - Problema por defecto para botones rapidos
   - Redes sociales
   - Direccion y mapa
+
+### Plantillas WhatsApp (importante)
+
+- Puedes usar placeholders en mensajes:
+  - `{servicio}`, `{especialista}`, `{negocio}`, `{problema}`
+- Tambien se acepta `_____` como alias de `{problema}`.
+- No dupliques placeholder + texto manual:
+  - Correcto: `Hola, quiero agendar con {especialista}.`
+  - Incorrecto: `Hola, quiero agendar con {especialista} Bernardo Hernandez.`
+- Como se llena `{problema}`:
+  - En pagina `Agendar`: toma el texto de `Problema o notas`.
+  - En botones rapidos (sin formulario): toma `Problema por defecto para botones rapidos`.
+- Logica de envio:
+  - Si el mensaje en CMS empieza con `Hola...` o lleva saltos de linea, se envia tal cual (mensaje completo).
+  - Si pones solo una frase corta, el sistema arma un formato guiado (intro + servicio + consulta).
+  - En lista de especialistas:
+    - `Agendar con este especialista` abre la pagina `/agendar` con datos precargados.
+    - `WhatsApp` abre WhatsApp con mensaje personalizado.
 
 ## 12) Agenda tu cita
 

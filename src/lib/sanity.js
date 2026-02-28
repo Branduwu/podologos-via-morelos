@@ -33,7 +33,7 @@ async function fetchSafe(query, params = {}, fallback = null) {
 }
 
 export async function getServices() {
-  return fetchSafe(`*[_type == "service" && (!defined(active) || active == true)]{ title, slug, short, priceFrom, duration, category }|order(order asc, title asc)`, {}, []);
+  return fetchSafe(`*[_type == "service" && (!defined(active) || active == true)]{ title, slug, short, priceFrom, duration, category, "leadSpecialistSlug": leadSpecialist->slug.current }|order(order asc, title asc)`, {}, []);
 }
 
 export async function getPromotions() {
@@ -74,6 +74,7 @@ export async function getSpecialists() {
     ctaText,
     ctaUrl,
     useWhatsAppButton,
+    whatsAppNumber,
     whatsAppMessage,
     "slug": slug.current,
     "photoUrl": photo.asset->url
@@ -87,6 +88,7 @@ export async function getFaqs() {
 export async function getBusinessInfo() {
   return fetchSafe(`*[_type=="businessInfo"][0]{
     name, area, address, phone, hoursText, mapsUrl, whatsappCitasNumber,
+    whatsappSpecialistsNumber, whatsappGeneralMessage, whatsappSpecialistsMessage, whatsappQuickProblemDefault,
     socialShareTitle, socialShareDescription, "socialShareImageUrl": socialShareImage.asset->url,
     locationZoneText, locationReferencesText, locationParkingText, locationAccessText, locationGuideTips,
     "locationFacadeImageUrl": locationFacadeImage.asset->url,
@@ -120,7 +122,7 @@ export async function getPromotionByPath(pathValue) {
 export async function getSpecialistByPath(pathValue) {
   return fetchSafe(
     `*[_type=="specialistProfile" && active==true && (slug.current == $value || _id == $value)][0]{
-      _id, name, specialty, specialtyCategory, shortBio, focusAreas, ctaText, ctaUrl, useWhatsAppButton, whatsAppMessage,
+      _id, name, specialty, specialtyCategory, shortBio, focusAreas, ctaText, ctaUrl, useWhatsAppButton, whatsAppNumber, whatsAppMessage,
       "slug": slug.current, "photoUrl": photo.asset->url
     }`,
     { value: pathValue },

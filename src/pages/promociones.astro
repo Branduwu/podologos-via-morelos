@@ -81,7 +81,7 @@ const featured = ordered.filter((p) => p.featured);
 const regular = ordered.filter((p) => !p.featured);
 
 function fmt(d: string | Date | null | undefined) {
-  if (!d) return "Sin fecha";
+  if (!d) return "";
   try {
     return new Date(d).toLocaleDateString("es-MX", {
       year: "numeric",
@@ -95,6 +95,15 @@ function fmt(d: string | Date | null | undefined) {
 
 function excerpt(p: Promotion) {
   return (p.shortDescription || p.description || "").trim();
+}
+
+function promotionValidityText(p: Promotion) {
+  const hasStart = Boolean(p.startDate);
+  const hasEnd = Boolean(p.endDate);
+  if (!hasStart && !hasEnd) return "";
+  if (hasStart && hasEnd) return `Vigencia: ${fmt(p.startDate)} -> ${fmt(p.endDate)}`;
+  if (hasStart) return `Vigencia desde: ${fmt(p.startDate)}`;
+  return `Vigencia hasta: ${fmt(p.endDate)}`;
 }
 
 function promoStatus(p: Promotion) {
@@ -199,9 +208,11 @@ function agendarPromotionHref(p: Promotion) {
 
                 {excerpt(p) && <p class="type-card-body mt-3 text-slate-600 dark:text-slate-300">{excerpt(p)}</p>}
 
-                <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
-                  Vigencia: {fmt(p.startDate)} -> {fmt(p.endDate)}
-                </p>
+                {promotionValidityText(p) && (
+                  <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
+                    {promotionValidityText(p)}
+                  </p>
+                )}
 
                 {p.appliesTo.length > 0 && (
                   <div class="mt-4">
@@ -266,9 +277,11 @@ function agendarPromotionHref(p: Promotion) {
 
                 {excerpt(p) && <p class="type-card-body mt-3 text-slate-600 dark:text-slate-300">{excerpt(p)}</p>}
 
-                <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
-                  Vigencia: {fmt(p.startDate)} -> {fmt(p.endDate)}
-                </p>
+                {promotionValidityText(p) && (
+                  <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
+                    {promotionValidityText(p)}
+                  </p>
+                )}
 
                 {p.appliesTo.length > 0 && (
                   <div class="mt-4 flex flex-wrap gap-2">
