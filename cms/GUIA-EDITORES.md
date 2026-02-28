@@ -37,6 +37,7 @@ Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
   - Logo del header
   - Texto de horario en header
   - Telefono y redes
+  - Compartir enlace (titulo, descripcion e imagen de vista previa para WhatsApp/Facebook)
 
 ## 2) Inicio
 

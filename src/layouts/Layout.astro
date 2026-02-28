@@ -3,8 +3,8 @@ import "../styles/global.css";
 import { getBusinessInfo } from "../lib/sanity.js";
 
 const {
-  title = "Podologos Via Morelos Tulpetlac",
-  description = "Podologia, Psicologia, Optica, Quiropractica y Dentista en Tulpetlac y alrededores.",
+  title: titleProp,
+  description: descriptionProp,
   image,
 } = Astro.props;
 
@@ -14,7 +14,12 @@ const waMessage = encodeURIComponent("Hola, me interesa informacion y disponibil
 const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMessage}` : null;
 const siteUrl = Astro.site || new URL("http://localhost:4321");
 const canonical = new URL(Astro.url?.pathname || "/", siteUrl).toString();
-const ogImage = image || business?.homeHeroImageUrl || "/default-logo-clinica.svg";
+const metaTitle = titleProp || business?.socialShareTitle || "Podologos Via Morelos Tulpetlac";
+const metaDescription =
+  descriptionProp ||
+  business?.socialShareDescription ||
+  "Podologia, Psicologia, Optica, Quiropractica y Dentista en Tulpetlac y alrededores.";
+const ogImage = image || business?.socialShareImageUrl || business?.homeHeroImageUrl || "/default-logo-clinica.svg";
 const ogImageUrl = ogImage.startsWith("http") ? ogImage : new URL(ogImage, siteUrl).toString();
 
 const localBusinessLd = {
@@ -37,17 +42,17 @@ const localBusinessLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
     <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
     <link rel="preload" as="image" href="/placeholder.jpg" />
     <link id="theme-favicon" rel="icon" type="image/svg+xml" href="/favicon-light.svg" />

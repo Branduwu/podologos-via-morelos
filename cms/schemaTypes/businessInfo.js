@@ -5,11 +5,16 @@
   description: "Datos generales visibles en header, inicio, contacto, ubicacion y pie de pagina.",
   fieldsets: [
     { name: "general", title: "1) Header", options: { collapsible: true, collapsed: false } },
-    { name: "home", title: "2) Inicio", options: { collapsible: true, collapsed: false } },
-    { name: "location", title: "3) Ubicacion", options: { collapsible: true, collapsed: false } },
-    { name: "contact", title: "4) Contacto", options: { collapsible: true, collapsed: false } },
-    { name: "social", title: "5) Redes", options: { collapsible: true, collapsed: false } },
-    { name: "footer", title: "6) Pie de pagina", options: { collapsible: true, collapsed: false } },
+    {
+      name: "sharePreview",
+      title: "2) Compartir enlace (WhatsApp/Facebook)",
+      options: { collapsible: true, collapsed: false },
+    },
+    { name: "home", title: "3) Inicio", options: { collapsible: true, collapsed: false } },
+    { name: "location", title: "4) Ubicacion", options: { collapsible: true, collapsed: false } },
+    { name: "contact", title: "5) Contacto", options: { collapsible: true, collapsed: false } },
+    { name: "social", title: "6) Redes", options: { collapsible: true, collapsed: false } },
+    { name: "footer", title: "7) Pie de pagina", options: { collapsible: true, collapsed: false } },
   ],
   fields: [
     {
@@ -42,6 +47,35 @@
       type: "string",
       description: "Ejemplo: Horario de hoy: lunes de 10 a.m. a 6 p.m.",
       fieldset: "general",
+    },
+
+    {
+      name: "socialShareTitle",
+      title: "Titulo para compartir enlace",
+      type: "string",
+      description:
+        "Aqui estamos editando este contenido. Este titulo aparece cuando pegas tu link en WhatsApp, Facebook u otras apps.",
+      fieldset: "sharePreview",
+      validation: (R) => R.max(80).warning("Recomendado: maximo 80 caracteres."),
+    },
+    {
+      name: "socialShareDescription",
+      title: "Descripcion para compartir enlace",
+      type: "text",
+      rows: 3,
+      description:
+        "Aqui estamos editando este contenido. Esta descripcion aparece debajo del titulo en la vista previa del link.",
+      fieldset: "sharePreview",
+      validation: (R) => R.max(180).warning("Recomendado: maximo 180 caracteres."),
+    },
+    {
+      name: "socialShareImage",
+      title: "Imagen para compartir enlace",
+      type: "image",
+      options: { hotspot: true },
+      description:
+        "Aqui subes la foto de vista previa cuando compartes el link. Puedes cambiarla y volver a subirla cuando quieras.",
+      fieldset: "sharePreview",
     },
 
     {

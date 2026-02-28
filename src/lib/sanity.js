@@ -87,6 +87,7 @@ export async function getFaqs() {
 export async function getBusinessInfo() {
   return fetchSafe(`*[_type=="businessInfo"][0]{
     name, area, address, phone, hoursText, mapsUrl, whatsappCitasNumber,
+    socialShareTitle, socialShareDescription, "socialShareImageUrl": socialShareImage.asset->url,
     locationZoneText, locationReferencesText, locationParkingText, locationAccessText, locationGuideTips,
     "locationFacadeImageUrl": locationFacadeImage.asset->url,
     homeHeroEyebrow, homeHeroTitle, homeHeroSubtitle, "homeHeroImageUrl": homeHeroImage.asset->url,
