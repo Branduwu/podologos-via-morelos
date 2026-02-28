@@ -454,17 +454,20 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const updateQuoteSummary = () => {
     const { list, total } = getCurrentQuote();
     const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
+    const selectedServiceKey = String(serviceSelect.value || "").trim();
     const specialistSlug = String(specialistSelect.value || "").trim();
-    const specialistName = specialistSlug
-      ? (specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)?.name || specialistSlug)
-      : "";
+    const selectedSpecialist = specialistSlug
+      ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)
+      : undefined;
+    const autoSpecialist = selectedSpecialist ? undefined : getAutoSpecialistForService(selectedServiceKey);
+    const routingSpecialist = selectedSpecialist || autoSpecialist;
 
     if (contextBadgeEl) {
-      if (specialistSlug) {
+      if (routingSpecialist) {
         contextBadgeEl.classList.remove("hidden");
-        contextBadgeEl.textContent = specialistName
-          ? `Agendando con especialista: ${specialistName}`
-          : "Agendando con especialista";
+        contextBadgeEl.textContent = selectedSpecialist
+          ? `Agendando con especialista: ${routingSpecialist.name || "Especialista"}`
+          : `Agendando con especialista de ${selectedServiceLabel || "servicio"}: ${routingSpecialist.name || "Especialista"}`;
       } else if (selectedServiceLabel) {
         contextBadgeEl.classList.remove("hidden");
         contextBadgeEl.textContent = `Agendando servicio: ${selectedServiceLabel}`;
@@ -590,6 +593,11 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     } else {
       specialistSelect.value = "";
     }
+  };
+
+  const getAutoSpecialistForService = (serviceKey: string): SpecialistOption | undefined => {
+    if (!serviceKey) return undefined;
+    return specialistItems.find((sp: SpecialistOption) => sp.category === serviceKey);
   };
 
   const applyPrefill = () => {
@@ -753,12 +761,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const selectedSpecialist = specialistValue
       ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)
       : undefined;
-    const specialistName = specialistValue
-      ? (selectedSpecialist?.name || specialistValue)
-      : "Sin preferencia";
-    const targetWaNumber = specialistValue
+    const autoSpecialist = selectedSpecialist ? undefined : getAutoSpecialistForService(service);
+    const routingSpecialist = selectedSpecialist || autoSpecialist;
+    const specialistName = routingSpecialist?.name || "Sin preferencia";
+    const targetWaNumber = routingSpecialist
       ? resolveWhatsAppNumber(
-          selectedSpecialist?.whatsAppNumber,
+          routingSpecialist?.whatsAppNumber,
           specialistsWaNumber,
           generalWaNumber
         )
@@ -772,12 +780,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || service;
     const notesValue = String(notesInput.value || "").trim();
     const problemValue = notesValue || quickProblemDefault || "Por definir";
-    const introTemplate = specialistValue
-      ? (selectedSpecialist?.whatsAppMessage || specialistsWhatsAppMessage || generalWhatsAppMessage)
+    const introTemplate = routingSpecialist
+      ? (routingSpecialist?.whatsAppMessage || specialistsWhatsAppMessage || generalWhatsAppMessage)
       : generalWhatsAppMessage;
     const introMessage = resolveWhatsAppReason(
       introTemplate,
-      specialistValue
+      routingSpecialist
         ? "Hola, quiero agendar con {especialista} en {negocio}."
         : "Hola, quiero agendar una cita en {negocio}.",
       {
