@@ -22,6 +22,7 @@ type AboutSection = {
   servicesSubtitle?: string;
   mainImageUrl?: string;
   galleryImageUrls?: string[];
+  galleryCarouselIntervalMs?: number;
 };
 
 type Specialist = {
@@ -65,6 +66,11 @@ const mainImage =
   "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1400&q=80";
 const points = Array.isArray(about?.keyPoints) ? about.keyPoints.filter(Boolean).slice(0, 8) : [];
 const gallery = Array.isArray(about?.galleryImageUrls) ? about.galleryImageUrls.filter(Boolean).slice(0, 6) : [];
+const galleryAutoplayMsRaw = Number(about?.galleryCarouselIntervalMs);
+const galleryAutoplayMs =
+  Number.isFinite(galleryAutoplayMsRaw) && galleryAutoplayMsRaw >= 1200 && galleryAutoplayMsRaw <= 10000
+    ? Math.round(galleryAutoplayMsRaw)
+    : 2200;
 const specialistsTitle = about?.specialistsTitle || "Nuestros especialistas";
 const specialistsSubtitle =
   about?.specialistsSubtitle || "Conoce a las personas que atienden cada especialidad en nuestra clinica.";
@@ -216,12 +222,37 @@ function specialistProfileHref(specialist: Specialist) {
     </section>
 
     {gallery.length > 0 && (
-      <section class="mt-8">
+      <section
+        class="mt-8"
+        data-about-page-gallery-carousel
+        data-about-page-gallery-autoplay-ms={String(galleryAutoplayMs)}
+      >
         <h2 class="text-2xl font-bold tracking-tight">Instalaciones y atencion</h2>
-        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {gallery.map((img, idx) => (
-            <img class="h-52 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Foto ${idx + 1} de nosotros`} loading="lazy" />
-          ))}
+        <div class="relative mt-4">
+          <button
+            type="button"
+            data-about-page-gallery-prev
+            aria-label="Anterior"
+            class={`absolute left-1 top-1/2 z-20 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white sm:left-2 md:left-3 md:h-10 md:w-10 md:text-xl lg:-left-10 xl:-left-14 dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900 ${gallery.length > 1 ? "" : "hidden"}`}
+          >
+            <span aria-hidden="true">&lt;</span>
+          </button>
+          <button
+            type="button"
+            data-about-page-gallery-next
+            aria-label="Siguiente"
+            class={`absolute right-1 top-1/2 z-20 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white sm:right-2 md:right-3 md:h-10 md:w-10 md:text-xl lg:-right-10 xl:-right-14 dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900 ${gallery.length > 1 ? "" : "hidden"}`}
+          >
+            <span aria-hidden="true">&gt;</span>
+          </button>
+
+          <div data-about-page-gallery-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+            {gallery.map((img, idx) => (
+              <article data-about-page-gallery-item={idx} class="min-w-[88%] snap-start overflow-hidden rounded-2xl bg-white sm:min-w-[64%] md:min-w-[48%] lg:min-w-[34%] dark:bg-slate-950">
+                <img class="h-52 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Foto ${idx + 1} de nosotros`} loading="lazy" />
+              </article>
+            ))}
+          </div>
         </div>
       </section>
     )}
@@ -229,3 +260,120 @@ function specialistProfileHref(specialist: Specialist) {
 
   <Footer />
 </Layout>
+
+<script is:inline>
+  const initLoopCarousel = ({ trackSelector, itemSelector, prevSelector, nextSelector, autoplayMs }) => {
+    const track = document.querySelector(trackSelector);
+    const prev = document.querySelector(prevSelector);
+    const next = document.querySelector(nextSelector);
+    if (!track || !prev || !next) return;
+
+    let intervalId;
+    let currentIndex = 0;
+
+    const getItems = () => Array.from(track.querySelectorAll(itemSelector));
+
+    const updateCurrentIndex = () => {
+      const items = getItems();
+      if (!items.length) return;
+      currentIndex = items.reduce(
+        (best, item, index) => {
+          const dist = Math.abs(item.offsetLeft - track.scrollLeft);
+          return dist < best.dist ? { index, dist } : best;
+        },
+        { index: 0, dist: Number.POSITIVE_INFINITY }
+      ).index;
+    };
+
+    const updateControls = () => {
+      const isSingleItem = getItems().length <= 1;
+      prev.disabled = isSingleItem;
+      next.disabled = isSingleItem;
+      prev.classList.toggle("opacity-50", isSingleItem);
+      prev.classList.toggle("cursor-not-allowed", isSingleItem);
+      next.classList.toggle("opacity-50", isSingleItem);
+      next.classList.toggle("cursor-not-allowed", isSingleItem);
+    };
+
+    const goToIndex = (index) => {
+      const items = getItems();
+      if (!items.length) return;
+      const normalized = ((index % items.length) + items.length) % items.length;
+      const target = items[normalized];
+      if (!target) return;
+      currentIndex = normalized;
+      track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+      updateControls();
+    };
+
+    const move = (dir) => {
+      const items = getItems();
+      if (items.length <= 1) return;
+      goToIndex(currentIndex + dir);
+    };
+
+    const stopAutoplay = () => {
+      if (!intervalId) return;
+      clearInterval(intervalId);
+      intervalId = undefined;
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (getItems().length <= 1) return;
+      if (document.hidden) return;
+      intervalId = setInterval(() => {
+        updateCurrentIndex();
+        move(1);
+      }, autoplayMs);
+    };
+
+    prev.addEventListener("click", () => {
+      updateCurrentIndex();
+      move(-1);
+      startAutoplay();
+    });
+
+    next.addEventListener("click", () => {
+      updateCurrentIndex();
+      move(1);
+      startAutoplay();
+    });
+
+    track.addEventListener("scroll", () => {
+      updateCurrentIndex();
+      updateControls();
+    }, { passive: true });
+    track.addEventListener("mouseenter", stopAutoplay);
+    track.addEventListener("mouseleave", startAutoplay);
+    track.addEventListener("focusin", stopAutoplay);
+    track.addEventListener("focusout", startAutoplay);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+
+    updateCurrentIndex();
+    updateControls();
+    startAutoplay();
+  };
+
+  const aboutPageGalleryNode = document.querySelector("[data-about-page-gallery-carousel]");
+  const aboutPageGalleryAutoplayFromDom = Number(
+    aboutPageGalleryNode?.getAttribute("data-about-page-gallery-autoplay-ms") || "2200"
+  );
+  const aboutPageGalleryAutoplayFinal =
+    Number.isFinite(aboutPageGalleryAutoplayFromDom) &&
+    aboutPageGalleryAutoplayFromDom >= 1200 &&
+    aboutPageGalleryAutoplayFromDom <= 10000
+      ? aboutPageGalleryAutoplayFromDom
+      : 2200;
+
+  initLoopCarousel({
+    trackSelector: "[data-about-page-gallery-track]",
+    itemSelector: "[data-about-page-gallery-item]",
+    prevSelector: "[data-about-page-gallery-prev]",
+    nextSelector: "[data-about-page-gallery-next]",
+    autoplayMs: aboutPageGalleryAutoplayFinal,
+  });
+</script>

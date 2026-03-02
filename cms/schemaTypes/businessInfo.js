@@ -12,9 +12,9 @@
     },
     { name: "home", title: "3) Inicio", options: { collapsible: true, collapsed: false } },
     { name: "location", title: "4) Ubicacion", options: { collapsible: true, collapsed: false } },
-    { name: "contact", title: "5) Contacto", options: { collapsible: true, collapsed: false } },
-    { name: "social", title: "6) Redes", options: { collapsible: true, collapsed: false } },
-    { name: "footer", title: "7) Pie de pagina", options: { collapsible: true, collapsed: false } },
+    { name: "footer", title: "5) Pie de pagina", options: { collapsible: true, collapsed: false } },
+    { name: "contact", title: "6) Contacto", options: { collapsible: true, collapsed: false } },
+    { name: "social", title: "7) Redes", options: { collapsible: true, collapsed: false } },
   ],
   fields: [
     {
@@ -350,12 +350,28 @@
       initialValue: "Sobre el sitio",
     },
     {
+      name: "footerPrivacyLabel",
+      title: "Texto link Aviso de privacidad",
+      type: "string",
+      description: "Aqui editas el texto visible del enlace de aviso de privacidad.",
+      fieldset: "footer",
+      initialValue: "Aviso de privacidad",
+    },
+    {
       name: "footerPrivacyUrl",
       title: "URL Aviso de privacidad",
       type: "string",
       description: "Aqui editas el enlace de aviso de privacidad.",
       fieldset: "footer",
       initialValue: "/privacidad",
+    },
+    {
+      name: "footerNoticesLabel",
+      title: "Texto link Comunicados",
+      type: "string",
+      description: "Aqui editas el texto visible del enlace de comunicados o noticias.",
+      fieldset: "footer",
+      initialValue: "Comunicados",
     },
     {
       name: "footerNoticesUrl",

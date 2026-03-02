@@ -86,7 +86,28 @@ export const structure = (S) =>
                       .filter('_type == "faqItem" && category == $category')
                       .params({category: category.value})
                   )
-              ),
+                ),
+            ])
+        ),
+      S.listItem()
+        .title('5) Contenido legal y avisos')
+        .child(
+          S.list()
+            .title('5) Contenido legal y avisos')
+            .items([
+              S.listItem()
+                .title('Aviso de privacidad')
+                .child(
+                  S.document()
+                    .schemaType('privacyPage')
+                    .documentId('privacyPageSingleton')
+                    .title('Aviso de privacidad')
+                ),
+              S.listItem()
+                .title('Comunicados')
+                .child(
+                  S.documentTypeList('siteAnnouncement').title('Comunicados')
+                ),
             ])
         ),
     ])

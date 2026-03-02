@@ -85,6 +85,23 @@ export async function getFaqs() {
   return fetchSafe(`*[_type=="faqItem" && active==true]|order(featured desc, category asc, order asc, _createdAt asc){ _id, question, answer, category, featured }`, {}, []);
 }
 
+export async function getPrivacyPage() {
+  return fetchSafe(`*[_type=="privacyPage"][0]{ title, subtitle, updatedAt, body }`, {}, null);
+}
+
+export async function getSiteAnnouncements() {
+  return fetchSafe(
+    `*[_type=="siteAnnouncement" && (!defined(active) || active == true)]|order(order asc, publishDate desc, _createdAt desc){
+      _id,
+      title,
+      publishDate,
+      body
+    }`,
+    {},
+    []
+  );
+}
+
 export async function getBusinessInfo() {
   return fetchSafe(`*[_type=="businessInfo"][0]{
     name, area, address, phone, hoursText, mapsUrl, whatsappCitasNumber,
@@ -99,12 +116,15 @@ export async function getBusinessInfo() {
     homePromotionsTitle, homePromotionsSubtitle, "homePromotionFallbackImageUrl": homePromotionFallbackImage.asset->url,
     "logoImageUrl": logoImage.asset->url,
     facebookUrl, instagramUrl, tiktokUrl,
-    footerMenuTitle, footerSiteTitle, footerPrivacyUrl, footerNoticesUrl, footerCopyrightText, footerProjectSignature
+    footerMenuTitle, footerSiteTitle,
+    footerPrivacyLabel, footerPrivacyUrl,
+    footerNoticesLabel, footerNoticesUrl,
+    footerCopyrightText, footerProjectSignature
   }`, {}, null);
 }
 
 export async function getAboutSection() {
-  return fetchSafe(`*[_type=="aboutSection"]|order(_updatedAt desc)[0]{ title, intro, secondary, keyPoints, specialistsTitle, specialistsSubtitle, servicesTitle, servicesSubtitle, ctaText, ctaUrl, secondaryCtaText, secondaryCtaUrl, "mainImageUrl": mainImage.asset->url, "galleryImageUrls": galleryImages[].asset->url }`, {}, null);
+  return fetchSafe(`*[_type=="aboutSection"]|order(_updatedAt desc)[0]{ title, intro, secondary, keyPoints, specialistsTitle, specialistsSubtitle, servicesTitle, servicesSubtitle, ctaText, ctaUrl, secondaryCtaText, secondaryCtaUrl, "mainImageUrl": mainImage.asset->url, "galleryImageUrls": galleryImages[].asset->url, galleryCarouselIntervalMs }`, {}, null);
 }
 
 export async function getPromotionByPath(pathValue) {

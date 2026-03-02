@@ -6,5 +6,7 @@ import promotion from './promotion'
 import galleryItem from './galleryItem'
 import priceItem from './priceItem'
 import faqItem from './faqItem'
+import privacyPage from './privacyPage'
+import siteAnnouncement from './siteAnnouncement'
 
-export const schemaTypes = [businessInfo, aboutSection, specialistProfile, service, promotion, galleryItem, priceItem, faqItem]
+export const schemaTypes = [businessInfo, aboutSection, specialistProfile, service, promotion, galleryItem, priceItem, faqItem, privacyPage, siteAnnouncement]

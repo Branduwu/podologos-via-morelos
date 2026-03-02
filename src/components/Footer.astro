@@ -13,7 +13,9 @@ const tiktokUrl = safeCmsUrl(business?.tiktokUrl, "");
 
 const menuTitle = business?.footerMenuTitle || "Menu";
 const siteTitle = business?.footerSiteTitle || "Sobre el sitio";
+const privacyLabel = business?.footerPrivacyLabel || "Aviso de privacidad";
 const privacyUrl = safeCmsUrl(business?.footerPrivacyUrl, "/privacidad");
+const noticesLabel = business?.footerNoticesLabel || "Comunicados";
 const noticesUrl = safeCmsUrl(business?.footerNoticesUrl, "/comunicados");
 const copyrightText = business?.footerCopyrightText || "Todos los derechos reservados.";
 
@@ -52,8 +54,8 @@ const socialLinks = [
       <div>
         <h3 class="type-footer-title">{siteTitle}</h3>
         <ul class="type-footer-body mt-3 space-y-2">
-          <li><a class="footer-link hover:underline" href={privacyUrl}>Aviso de privacidad</a></li>
-          <li><a class="footer-link hover:underline" href={noticesUrl}>Comunicados</a></li>
+          <li><a class="footer-link hover:underline" href={privacyUrl}>{privacyLabel}</a></li>
+          <li><a class="footer-link hover:underline" href={noticesUrl}>{noticesLabel}</a></li>
         </ul>
       </div>
 

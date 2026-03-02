@@ -95,6 +95,19 @@
       validation: (R) => R.max(4).warning("Puedes subir maximo 4 imagenes de apoyo."),
     },
     {
+      name: "galleryCarouselIntervalMs",
+      title: "Velocidad carrusel imagenes de apoyo (ms)",
+      type: "number",
+      description:
+        "Aqui defines cada cuantos milisegundos cambia la imagen en Home. Recomendado rapido: 1800 a 2800.",
+      fieldset: "media",
+      initialValue: 2200,
+      validation: (R) =>
+        R.min(1200)
+          .max(10000)
+          .warning("Usa un valor entre 1200 y 10000 ms."),
+    },
+    {
       name: "ctaText",
       title: "Texto boton principal",
       type: "string",

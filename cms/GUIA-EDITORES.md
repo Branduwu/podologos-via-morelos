@@ -107,6 +107,7 @@ Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
   - Textos de bloque Inicio
   - Textos de pagina Nosotros
   - Imagen principal e imagenes de apoyo
+  - Velocidad del carrusel de imagenes de apoyo (ms)
   - Botones
 
 ## 10) FAQ
@@ -126,6 +127,19 @@ Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
   - Problema por defecto para botones rapidos
   - Redes sociales
   - Direccion y mapa
+
+## Pie de pagina (Sobre el sitio)
+
+- Edita en `Informacion del negocio` -> `Pie de pagina`:
+  - Titulo de columna (`Sobre el sitio`)
+  - Texto y URL de `Aviso de privacidad`
+  - Texto y URL de `Comunicados`
+
+## Contenido legal y avisos
+
+- Edita en `Panel de contenido` -> `5) Contenido legal y avisos`:
+  - `Aviso de privacidad`: contenido completo de la pagina `/privacidad`.
+  - `Comunicados`: aqui subes comunicados nuevos para la pagina `/comunicados`.
 
 ### Plantillas WhatsApp (importante)
 

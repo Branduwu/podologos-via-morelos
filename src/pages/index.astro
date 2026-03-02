@@ -46,6 +46,7 @@ type AboutSection = {
   secondaryCtaUrl?: string;
   mainImageUrl?: string;
   galleryImageUrls?: string[];
+  galleryCarouselIntervalMs?: number;
 };
 
 const business = await getBusinessInfo();
@@ -103,6 +104,11 @@ const aboutSecondary =
   about?.secondary ||
   "Nuestro objetivo es ayudarte a mejorar tu bienestar con tratamientos personalizados, explicaciones claras y seguimiento continuo.";
 const aboutGallery = Array.isArray(about?.galleryImageUrls) ? about?.galleryImageUrls.filter(Boolean).slice(0, 4) : [];
+const aboutGalleryAutoplayMsRaw = Number(about?.galleryCarouselIntervalMs);
+const aboutGalleryAutoplayMs =
+  Number.isFinite(aboutGalleryAutoplayMsRaw) && aboutGalleryAutoplayMsRaw >= 1200 && aboutGalleryAutoplayMsRaw <= 10000
+    ? Math.round(aboutGalleryAutoplayMsRaw)
+    : 2200;
 const aboutMainImage =
   about?.mainImageUrl ||
   (aboutGallery[0] ||
@@ -391,10 +397,33 @@ function getVideoAspectClass(it: HomeGalleryItem) {
       </div>
 
       {aboutGallery.length > 0 && (
-        <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {aboutGallery.map((img, idx) => (
-            <img class="h-44 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Nosotros ${idx + 1}`} loading="lazy" data-fallback-src="/placeholder.jpg" />
-          ))}
+        <div class="mt-5" data-about-gallery-carousel data-about-gallery-autoplay-ms={String(aboutGalleryAutoplayMs)}>
+          <div class="relative">
+            <button
+              type="button"
+              data-about-gallery-prev
+              aria-label="Anterior"
+              class={`absolute left-1 top-1/2 z-20 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white sm:left-2 md:left-3 md:h-10 md:w-10 md:text-xl lg:-left-10 xl:-left-14 dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900 ${aboutGallery.length > 1 ? "" : "hidden"}`}
+            >
+              <span aria-hidden="true">&lt;</span>
+            </button>
+            <button
+              type="button"
+              data-about-gallery-next
+              aria-label="Siguiente"
+              class={`absolute right-1 top-1/2 z-20 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white sm:right-2 md:right-3 md:h-10 md:w-10 md:text-xl lg:-right-10 xl:-right-14 dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900 ${aboutGallery.length > 1 ? "" : "hidden"}`}
+            >
+              <span aria-hidden="true">&gt;</span>
+            </button>
+
+            <div data-about-gallery-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+              {aboutGallery.map((img, idx) => (
+                <article data-about-gallery-item={idx} class="min-w-[88%] snap-start overflow-hidden rounded-2xl bg-white sm:min-w-[64%] md:min-w-[48%] lg:min-w-[34%] dark:bg-slate-950">
+                  <img class="h-44 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Nosotros ${idx + 1}`} loading="lazy" data-fallback-src="/placeholder.jpg" />
+                </article>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </section>
@@ -611,7 +640,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
     start();
   };
 
-  const initCarousel = ({ trackSelector, itemSelector, prevSelector, nextSelector, dotSelector, autoplayMs }) => {
+  const initCarousel = ({ trackSelector, itemSelector, prevSelector, nextSelector, dotSelector, autoplayMs, loop = false }) => {
     const track = document.querySelector(trackSelector);
     const prev = document.querySelector(prevSelector);
     const next = document.querySelector(nextSelector);
@@ -656,6 +685,23 @@ function getVideoAspectClass(it: HomeGalleryItem) {
         return;
       }
 
+      const isSingleItem = items.length <= 1;
+      if (isSingleItem) {
+        prev.disabled = true;
+        next.disabled = true;
+        prev.classList.add("opacity-50", "cursor-not-allowed");
+        next.classList.add("opacity-50", "cursor-not-allowed");
+        return;
+      }
+
+      if (loop) {
+        prev.disabled = false;
+        next.disabled = false;
+        prev.classList.remove("opacity-50", "cursor-not-allowed");
+        next.classList.remove("opacity-50", "cursor-not-allowed");
+        return;
+      }
+
       const atStart = currentIndex <= 0;
       const atEnd = currentIndex >= items.length - 1;
 
@@ -689,8 +735,11 @@ function getVideoAspectClass(it: HomeGalleryItem) {
     const move = (dir) => {
       const items = getItems();
       if (!items.length) return false;
-      const target = currentIndex + dir;
-      if (target < 0 || target > items.length - 1) return false;
+      let target = currentIndex + dir;
+      if (target < 0 || target > items.length - 1) {
+        if (!loop) return false;
+        target = target < 0 ? items.length - 1 : 0;
+      }
       goToIndex(target);
       return true;
     };
@@ -708,7 +757,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
       intervalId = setInterval(() => {
         syncUiState();
         const moved = move(1);
-        if (!moved) stopAutoplay();
+        if (!moved && !loop) stopAutoplay();
       }, autoplayMs);
     };
 
@@ -759,6 +808,27 @@ function getVideoAspectClass(it: HomeGalleryItem) {
     autoplayMs: heroAutoplayFinal,
   });
 
+  const aboutGalleryNode = document.querySelector("[data-about-gallery-carousel]");
+  const aboutGalleryAutoplayFromDom = Number(
+    aboutGalleryNode?.getAttribute("data-about-gallery-autoplay-ms") || "2200"
+  );
+  const aboutGalleryAutoplayFinal =
+    Number.isFinite(aboutGalleryAutoplayFromDom) &&
+    aboutGalleryAutoplayFromDom >= 1200 &&
+    aboutGalleryAutoplayFromDom <= 10000
+      ? aboutGalleryAutoplayFromDom
+      : 2200;
+
+  initCarousel({
+    trackSelector: "[data-about-gallery-track]",
+    itemSelector: "[data-about-gallery-item]",
+    prevSelector: "[data-about-gallery-prev]",
+    nextSelector: "[data-about-gallery-next]",
+    dotSelector: null,
+    autoplayMs: aboutGalleryAutoplayFinal,
+    loop: true,
+  });
+
   initCarousel({
     trackSelector: "[data-promo-carousel-track]",
     itemSelector: "[data-promo-carousel-item]",
@@ -766,6 +836,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
     nextSelector: "[data-promo-carousel-next]",
     dotSelector: null,
     autoplayMs: 4500,
+    loop: true,
   });
 
   initCarousel({
@@ -775,6 +846,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
     nextSelector: "[data-photo-carousel-next]",
     dotSelector: null,
     autoplayMs: 3200,
+    loop: true,
   });
 
   initCarousel({
@@ -784,6 +856,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
     nextSelector: "[data-video-carousel-next]",
     dotSelector: null,
     autoplayMs: 3200,
+    loop: true,
   });
 
   const promoImages = Array.from(document.querySelectorAll("[data-promo-image]"));
