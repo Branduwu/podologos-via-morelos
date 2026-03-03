@@ -28,10 +28,10 @@ today.setHours(0, 0, 0, 0);
 
 const FILTER_OPTIONS = [
   { label: "Todas", value: "todas" },
-  { label: "Podologia", value: "podologia" },
-  { label: "Psicologia", value: "psicologia" },
-  { label: "Optica", value: "optica" },
-  { label: "Quiropractica", value: "quiropractica" },
+  { label: "Podología", value: "podologia" },
+  { label: "Psicología", value: "psicologia" },
+  { label: "Óptica", value: "optica" },
+  { label: "Quiropráctica", value: "quiropractica" },
   { label: "Dentista", value: "dentista" },
 ];
 
@@ -135,7 +135,7 @@ function agendarPromotionHref(p: Promotion) {
 
   <main class="mx-auto max-w-6xl px-4 py-10">
     <h1 class="type-section-title">Promociones</h1>
-    <p class="type-section-subtitle mt-2 text-slate-600 dark:text-slate-300">
+    <p class="type-section-subtitle mt-2 text-slate-800 dark:text-slate-200">
       Promociones activas sujetas a disponibilidad.
     </p>
     <div class="mt-4 flex flex-wrap gap-2">
@@ -144,10 +144,8 @@ function agendarPromotionHref(p: Promotion) {
           type="button"
           data-promo-filter={opt.value}
           class:list={[
-            "rounded-full border px-4 py-2 text-sm font-semibold transition",
-            idx === 0
-              ? "border-sky-600 bg-sky-600 text-white"
-              : "border-slate-300 bg-white text-slate-700 hover:border-sky-500 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-sky-400 dark:hover:text-sky-300",
+            "category-chip",
+            idx === 0 && "category-chip--active",
           ]}
         >
           {opt.label}
@@ -156,7 +154,7 @@ function agendarPromotionHref(p: Promotion) {
     </div>
 
     {normalized.length === 0 && (
-      <div class="mt-8 rounded-2xl border border-slate-200 p-6 dark:border-slate-800">
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 dark:border-slate-800 dark:bg-slate-950">
         <p class="font-medium">Pronto compartiremos nuevas promociones.</p>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
           Mientras tanto, puedes agendar tu cita para conocer promociones vigentes.
@@ -177,8 +175,8 @@ function agendarPromotionHref(p: Promotion) {
       </div>
 
       {featured.length === 0 ? (
-        <div class="mt-4 rounded-2xl border border-slate-200 p-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
-          Aun no hay promociones recomendadas por ahora.
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white/95 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          Aún no hay promociones recomendadas por ahora.
         </div>
       ) : (
         <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -186,7 +184,7 @@ function agendarPromotionHref(p: Promotion) {
             <article
               data-promo-card
               data-promo-categories={p.categories.join(",")}
-              class="overflow-hidden rounded-3xl border border-slate-200 shadow-sm dark:border-slate-800"
+              class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm dark:border-slate-800 dark:bg-slate-950"
             >
               {p.imageUrl ? (
                 <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
@@ -243,10 +241,10 @@ function agendarPromotionHref(p: Promotion) {
     </section>
 
     <section class="mt-12">
-      <h2 class="type-card-title">Mas promociones</h2>
+      <h2 class="type-card-title">Más promociones</h2>
 
       {regular.length === 0 ? (
-        <div class="mt-4 rounded-2xl border border-slate-200 p-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white/95 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
           Por ahora solo tenemos promociones recomendadas.
         </div>
       ) : (
@@ -255,7 +253,7 @@ function agendarPromotionHref(p: Promotion) {
             <article
               data-promo-card
               data-promo-categories={p.categories.join(",")}
-              class="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800"
+              class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950"
             >
               {p.imageUrl ? (
                 <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
@@ -304,8 +302,8 @@ function agendarPromotionHref(p: Promotion) {
       )}
     </section>
 
-    <div data-promo-empty class="mt-8 hidden rounded-2xl border border-slate-200 p-5 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
-      No hay promociones para esta categoria por ahora.
+    <div data-promo-empty class="mt-8 hidden rounded-2xl border border-slate-200 bg-white/95 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+      No hay promociones para esta categoría por ahora.
     </div>
   </main>
 
@@ -329,8 +327,19 @@ function agendarPromotionHref(p: Promotion) {
   const promoCards = Array.from(document.querySelectorAll("[data-promo-card]"));
   const emptyState = document.querySelector("[data-promo-empty]");
 
-  const setFilter = (category) => {
+  const animateFilteredItems = (items) => {
+    items.forEach((item, index) => {
+      item.classList.remove("filter-item-in", "filter-item-in-slide");
+      item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+      // Reinicia la animacion para cada cambio de filtro.
+      void item.offsetWidth;
+      item.classList.add("filter-item-in-slide");
+    });
+  };
+
+  const setFilter = (category, animate = false) => {
     let visibleCount = 0;
+    const visibleCards = [];
 
     promoCards.forEach((card) => {
       const categories = String(card.getAttribute("data-promo-categories") || "")
@@ -340,7 +349,10 @@ function agendarPromotionHref(p: Promotion) {
 
       const visible = category === "todas" || categories.includes(category);
       card.classList.toggle("hidden", !visible);
-      if (visible) visibleCount += 1;
+      if (visible) {
+        visibleCount += 1;
+        visibleCards.push(card);
+      }
     });
 
     if (emptyState) {
@@ -349,23 +361,20 @@ function agendarPromotionHref(p: Promotion) {
 
     filterButtons.forEach((btn) => {
       const isActive = btn.getAttribute("data-promo-filter") === category;
-      btn.classList.toggle("border-sky-600", isActive);
-      btn.classList.toggle("bg-sky-600", isActive);
-      btn.classList.toggle("text-white", isActive);
-      btn.classList.toggle("border-slate-300", !isActive);
-      btn.classList.toggle("bg-white", !isActive);
-      btn.classList.toggle("text-slate-700", !isActive);
+      btn.classList.toggle("category-chip--active", isActive);
     });
+
+    if (animate) requestAnimationFrame(() => animateFilteredItems(visibleCards));
   };
 
   filterButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const category = btn.getAttribute("data-promo-filter") || "todas";
-      setFilter(category);
+      setFilter(category, true);
     });
   });
 
-  setFilter("todas");
+  setFilter("todas", false);
 
   const promoImages = Array.from(document.querySelectorAll("[data-promo-image]"));
   promoImages.forEach((img) => {

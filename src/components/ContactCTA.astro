@@ -34,10 +34,10 @@ const waNumber = resolveWhatsAppNumber(
 const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
 
 const serviceChips = [
-  { key: "podologia", label: "Podologia" },
-  { key: "psicologia", label: "Psicologia" },
-  { key: "optica", label: "Optica" },
-  { key: "quiropractica", label: "Quiropractica" },
+  { key: "podologia", label: "Podología" },
+  { key: "psicologia", label: "Psicología" },
+  { key: "optica", label: "Óptica" },
+  { key: "quiropractica", label: "Quiropráctica" },
   { key: "dentista", label: "Dentista" },
 ];
 
@@ -56,7 +56,7 @@ function socialHandle(rawUrl: string): string {
 const primaryWaMessage = buildContactMessage({
   reason: resolveWhatsAppReason(
     business?.whatsappGeneralMessage,
-    "Quiero informacion y agendar una cita.",
+    "Quiero información y agendar una cita.",
     {
       business: business?.name || clinic.name,
       problem: business?.whatsappQuickProblemDefault || "",
@@ -74,11 +74,11 @@ const socialItems = [
   .map((x) => ({ ...x, handle: socialHandle(String(x.value)) }));
 ---
 
-<section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+<section class="card-surface rounded-2xl p-6">
   <h2 class="text-xl font-semibold">Contacto</h2>
   <div class="mt-4 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
-    <p><span class="font-semibold">Direccion:</span> {address}</p>
-    <p><span class="font-semibold">Telefono:</span> <a class="text-sky-700 hover:underline dark:text-sky-300" href={`tel:${phoneTel}`}>{phoneDisplay}</a></p>
+    <p><span class="font-semibold">Dirección:</span> {address}</p>
+    <p><span class="font-semibold">Teléfono:</span> <a class="text-sky-700 hover:underline dark:text-sky-300" href={`tel:${phoneTel}`}>{phoneDisplay}</a></p>
     <p><span class="font-semibold">WhatsApp:</span> <a class="text-sky-700 hover:underline dark:text-sky-300" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">{waNumber}</a></p>
   </div>
 
@@ -87,7 +87,7 @@ const socialItems = [
     <a class="btn-base btn-secondary" href={`tel:${phoneTel}`}>Llamar</a>
     <a class="btn-base btn-secondary" href={mapsUrl} target="_blank" rel="noopener noreferrer">Abrir en Maps</a>
     <a class="btn-base btn-secondary" href="/agendar">Agendar en web</a>
-    <button id="copy-address-contact" type="button" class="btn-base btn-secondary">Copiar direccion</button>
+    <button id="copy-address-contact" type="button" class="btn-base btn-secondary">Copiar dirección</button>
   </div>
 
   <div class="mt-5">
@@ -99,7 +99,7 @@ const socialItems = [
             service: chip.label,
             reason: resolveWhatsAppReason(
               business?.whatsappGeneralMessage,
-              "Quiero informacion y agendar este servicio.",
+              "Quiero información y agendar este servicio.",
               {
                 service: chip.label,
                 business: business?.name || clinic.name,
@@ -143,12 +143,12 @@ const socialItems = [
     copyBtn.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(String(address || ""));
-        copyBtn.textContent = "Direccion copiada";
+        copyBtn.textContent = "Dirección copiada";
       } catch {
         copyBtn.textContent = "No se pudo copiar";
       }
       setTimeout(() => {
-        copyBtn.textContent = "Copiar direccion";
+        copyBtn.textContent = "Copiar dirección";
       }, 1600);
     });
   }

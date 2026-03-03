@@ -18,10 +18,10 @@ const quoteSelectionLimit = Math.max(1, Number(clinic.quoteSelectionLimit || 6))
 
 const priceCategories = [
   { key: "all", label: "Todas" },
-  { key: "podologia", label: "Podologia" },
-  { key: "psicologia", label: "Psicologia" },
-  { key: "optica", label: "Optica" },
-  { key: "quiropractica", label: "Quiropractica" },
+  { key: "podologia", label: "Podología" },
+  { key: "psicologia", label: "Psicología" },
+  { key: "optica", label: "Óptica" },
+  { key: "quiropractica", label: "Quiropráctica" },
   { key: "dentista", label: "Dentista" },
 ];
 
@@ -75,22 +75,25 @@ function buildAgendarHref(price: PriceRow) {
   <main class="mx-auto max-w-6xl px-4 py-10">
     <div class="max-w-4xl">
       <h1 class="text-left text-3xl font-bold tracking-tight md:text-4xl">Precios</h1>
-      <p class="mt-2 text-left text-slate-600 dark:text-slate-300">
-        Precios desde (pueden variar segun valoracion). Agenda para confirmar.
+      <p class="mt-2 text-left text-slate-800 dark:text-slate-200">
+        Precios desde (pueden variar según valoración). Agenda para confirmar.
       </p>
 
       {prices.length === 0 ? (
-        <div class="mt-8 rounded-2xl border border-slate-200 p-6 text-left text-slate-600 dark:border-slate-800 dark:text-slate-300">
-          Aun no hay precios cargados en el CMS.
+        <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 text-left text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          Aún no hay precios cargados en el CMS.
         </div>
       ) : (
         <>
           <div class="mt-6 flex flex-wrap gap-2" id="price-filters">
-            {priceCategories.map((cat) => (
+            {priceCategories.map((cat, idx) => (
               <button
                 type="button"
                 data-price-filter={cat.key}
-                class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                class:list={[
+                  "category-chip",
+                  idx === 0 && "category-chip--active",
+                ]}
               >
                 {cat.label}
               </button>
@@ -100,9 +103,9 @@ function buildAgendarHref(price: PriceRow) {
           <section class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950" id="quote-builder" data-quote-limit={quoteSelectionLimit}>
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p class="text-sm font-semibold">Cotizacion rapida</p>
+                <p class="text-sm font-semibold">Cotización rápida</p>
                 <p class="text-xs text-slate-600 dark:text-slate-300">
-                  Usa <strong>Agregar a cotizacion</strong> para varios servicios o <strong>Agendar solo este</strong> si solo quieres uno.
+                  Usa <strong>Agregar a cotización</strong> para varios servicios o <strong>Agendar solo este</strong> si solo quieres uno.
                 </p>
               </div>
               <a
@@ -117,9 +120,9 @@ function buildAgendarHref(price: PriceRow) {
               <p><span class="font-semibold">Seleccionados:</span> <span id="quote-count">0</span></p>
               <p><span class="font-semibold">Total aprox.:</span> <span id="quote-total">$0</span></p>
             </div>
-            <p id="quote-list" class="mt-2 text-xs text-slate-600 dark:text-slate-300">Aun no has seleccionado servicios.</p>
+            <p id="quote-list" class="mt-2 text-xs text-slate-600 dark:text-slate-300">Aún no has seleccionado servicios.</p>
             <p id="quote-limit-msg" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-300">
-              Llegaste al limite de {quoteSelectionLimit} servicios. Quita uno para agregar otro.
+              Llegaste al límite de {quoteSelectionLimit} servicios. Quita uno para agregar otro.
             </p>
           </section>
 
@@ -137,7 +140,7 @@ function buildAgendarHref(price: PriceRow) {
                 <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <p class="text-slate-600 dark:text-slate-300">Desde</p>
                   <p class="font-medium">{moneyMXN(p.priceFrom)}</p>
-                  <p class="text-slate-600 dark:text-slate-300">Duracion</p>
+                  <p class="text-slate-600 dark:text-slate-300">Duración</p>
                   <p class="font-medium">{p.duration || "-"}</p>
                   <p class="text-slate-600 dark:text-slate-300">Nota</p>
                   <p class="font-medium">{p.note || "-"}</p>
@@ -154,20 +157,20 @@ function buildAgendarHref(price: PriceRow) {
                     data-select-service
                     class="btn-base btn-secondary w-full"
                   >
-                    Agregar a cotizacion
+                    Agregar a cotización
                   </button>
                 </div>
               </article>
             ))}
           </div>
 
-          <div class="mt-8 hidden overflow-x-auto rounded-3xl border border-slate-200 md:block dark:border-slate-800">
+          <div class="mt-8 hidden overflow-x-auto rounded-3xl border border-slate-200 bg-white/95 md:block dark:border-slate-800 dark:bg-slate-950">
             <table class="min-w-[760px] w-full text-sm">
               <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
                 <tr>
                   <th class="px-4 py-3 text-left font-medium">Servicio</th>
                   <th class="px-4 py-3 text-left font-medium">Desde</th>
-                  <th class="px-4 py-3 text-left font-medium">Duracion</th>
+                  <th class="px-4 py-3 text-left font-medium">Duración</th>
                   <th class="px-4 py-3 text-left font-medium">Nota</th>
                   <th class="px-4 py-3 text-left font-medium">Accion</th>
                 </tr>
@@ -199,7 +202,7 @@ function buildAgendarHref(price: PriceRow) {
                           data-select-service
                           class="btn-base btn-secondary"
                         >
-                          Agregar a cotizacion
+                          Agregar a cotización
                         </button>
                       </div>
                     </td>
@@ -212,7 +215,7 @@ function buildAgendarHref(price: PriceRow) {
       )}
 
       <p id="prices-empty" class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-        No hay precios en esa categoria todavia.
+      No hay precios en esa categoría todavía.
       </p>
 
       <div class="mt-8">
@@ -244,29 +247,42 @@ function buildAgendarHref(price: PriceRow) {
   let activePriceFilter = "all";
   const selectedServices = new Map();
 
+  const animateFilteredItems = (items) => {
+    items.forEach((item, index) => {
+      item.classList.remove("filter-item-in", "filter-item-in-slide");
+      item.style.animationDelay = `${Math.min(index, 10) * 40}ms`;
+      // Reinicia la animacion para cada cambio de filtro.
+      void item.offsetWidth;
+      item.classList.add(item.tagName === "TR" ? "filter-item-in" : "filter-item-in-slide");
+    });
+  };
+
   const moneyMX = (value) =>
     new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value || 0);
 
   const updatePriceFilterUI = () => {
     priceFilterButtons.forEach((btn) => {
       const isActive = btn.dataset.priceFilter === activePriceFilter;
-      btn.classList.toggle("bg-sky-700", isActive);
-      btn.classList.toggle("text-white", isActive);
-      btn.classList.toggle("border-sky-700", isActive);
+      btn.classList.toggle("category-chip--active", isActive);
     });
   };
 
-  const applyPriceFilter = () => {
+  const applyPriceFilter = (animate = false) => {
     let visibleCount = 0;
+    const visibleRows = [];
 
     priceRows.forEach((row) => {
       const category = row.dataset.category || "general";
       const visible = activePriceFilter === "all" || category === activePriceFilter;
       row.classList.toggle("hidden", !visible);
-      if (visible) visibleCount += 1;
+      if (visible) {
+        visibleCount += 1;
+        visibleRows.push(row);
+      }
     });
 
     if (pricesEmpty) pricesEmpty.classList.toggle("hidden", visibleCount > 0);
+    if (animate) requestAnimationFrame(() => animateFilteredItems(visibleRows));
   };
 
   const updateQuoteUI = () => {
@@ -280,7 +296,7 @@ function buildAgendarHref(price: PriceRow) {
     if (quoteList) {
       quoteList.textContent = selected.length > 0
         ? selected.map((item) => item.title).join(" | ")
-        : "Aun no has seleccionado servicios.";
+        : "Aún no has seleccionado servicios.";
     }
 
     if (!quoteAgendarLink) return;
@@ -299,7 +315,7 @@ function buildAgendarHref(price: PriceRow) {
     quoteAgendarLink.setAttribute("href", `/agendar?${params.toString()}`);
     quoteAgendarLink.classList.remove("pointer-events-none", "btn-muted");
     quoteAgendarLink.classList.add("btn-primary");
-    quoteAgendarLink.textContent = "Cotizar servicios en agenda";
+      quoteAgendarLink.textContent = "Cotizar servicios en agenda";
 
     addButtons.forEach((button) => {
       const row = button.closest("[data-price-row]");
@@ -307,7 +323,7 @@ function buildAgendarHref(price: PriceRow) {
       const isSelected = selectedServices.has(title);
       const disableAdd = reachedLimit && !isSelected;
 
-      button.textContent = isSelected ? "Quitar" : "Agregar a cotizacion";
+      button.textContent = isSelected ? "Quitar" : "Agregar a cotización";
       button.classList.toggle("bg-sky-100", isSelected);
       button.classList.toggle("text-sky-800", isSelected);
       button.classList.toggle("border-sky-300", isSelected);
@@ -345,11 +361,11 @@ function buildAgendarHref(price: PriceRow) {
     btn.addEventListener("click", () => {
       activePriceFilter = btn.dataset.priceFilter || "all";
       updatePriceFilterUI();
-      applyPriceFilter();
+      applyPriceFilter(true);
     });
   });
 
   updatePriceFilterUI();
-  applyPriceFilter();
+  applyPriceFilter(false);
   updateQuoteUI();
 </script>

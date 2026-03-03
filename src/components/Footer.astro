@@ -26,16 +26,16 @@ const socialLinks = [
 ];
 ---
 
-<footer class="mt-12 bg-sky-900 text-sky-50">
+<footer class="mt-12 bg-[rgb(197,226,240)] text-slate-900 dark:bg-[rgb(14,34,58)] dark:text-[rgb(232,240,250)]">
   <div class="mx-auto max-w-6xl px-4 py-10">
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
       <div class="sm:col-span-2 lg:col-span-1">
         <a href="/" class="inline-flex items-center gap-3">
-          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1 sm:h-11 md:h-12 lg:h-14" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
+          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/60 p-1 sm:h-11 md:h-12 lg:h-14 dark:bg-white/10" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
           <span class="type-card-title leading-tight">{businessName}</span>
         </a>
-        <p class="type-footer-body mt-3 text-sky-100">Atencion integral en podologia, psicologia, optica, quiropractica y dentista.</p>
-        {phone && <p class="type-footer-body mt-2 text-sky-100">Tel: {phone}</p>}
+        <p class="type-footer-body mt-3 text-slate-700 dark:text-[rgb(192,208,228)]">Atención integral en podología, psicología, óptica, quiropráctica y dentista.</p>
+        {phone && <p class="type-footer-body mt-2 text-slate-700 dark:text-[rgb(192,208,228)]">Tel: {phone}</p>}
       </div>
 
       <div>
@@ -45,7 +45,7 @@ const socialLinks = [
           <li><a class="footer-link hover:underline" href="/servicios">Nuestros servicios</a></li>
           <li><a class="footer-link hover:underline" href="/especialistas">Especialistas</a></li>
           <li><a class="footer-link hover:underline" href="/nosotros">Nosotros</a></li>
-          <li><a class="footer-link hover:underline" href="/ubicacion">Ubicacion</a></li>
+          <li><a class="footer-link hover:underline" href="/ubicacion">Ubicación</a></li>
           <li><a class="footer-link hover:underline" href="/contacto">Contacto</a></li>
           <li><a class="footer-link hover:underline" href="/faq">FAQ</a></li>
         </ul>
@@ -67,8 +67,8 @@ const socialLinks = [
             return (
               <a
                 class={configured
-                  ? "rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-                  : "rounded-full bg-white/5 p-2 text-sky-200/50 cursor-not-allowed"}
+                  ? "rounded-full bg-white/70 p-2 text-sky-800 hover:bg-white dark:bg-white/10 dark:text-[rgb(196,216,240)] dark:hover:bg-white/20"
+                  : "rounded-full bg-white/40 p-2 text-slate-400 cursor-not-allowed dark:bg-white/5 dark:text-[rgb(126,150,178)]"}
                 href={configured ? social.url : "#"}
                 target={configured ? "_blank" : undefined}
                 rel={configured ? "noopener noreferrer" : undefined}
@@ -88,9 +88,9 @@ const socialLinks = [
     </div>
   </div>
 
-  <div class="border-t border-white/25">
-    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-2 px-4 py-4 text-sky-100 md:grid-cols-[1fr_auto_1fr]">
-      <p class="text-center text-xs font-medium tracking-wide text-sky-100/85 md:justify-self-start md:text-left">
+  <div class="border-t border-slate-300/80 dark:border-[rgb(44,72,104)]">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-2 px-4 py-4 text-slate-700 dark:text-[rgb(200,216,236)] md:grid-cols-[1fr_auto_1fr]">
+      <p class="text-center text-xs font-medium tracking-wide text-slate-600 dark:text-[rgb(172,194,220)] md:justify-self-start md:text-left">
         <a
           href="https://www.linkedin.com/in/ingabrahamjv/"
           target="_blank"
@@ -104,12 +104,12 @@ const socialLinks = [
         <img
           src={logoUrl}
           alt={businessName}
-          class="h-7 w-auto rounded-md bg-white/10 p-1"
+          class="h-7 w-auto rounded-md bg-white/60 p-1 dark:bg-white/10"
           loading="lazy"
           data-fallback-src="/default-logo-clinica.svg"
         />
         <span class="text-center md:whitespace-nowrap">Copyright (c) {new Date().getFullYear()} {businessName} | {copyrightText}</span>
-        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/15" aria-hidden="true">
+        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/70 text-sky-800 dark:bg-white/15 dark:text-[rgb(126,203,255)]" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor">
             <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-1 10h-4v4h-4v-4H6V9h4V5h4v4h4v4Z" />
           </svg>

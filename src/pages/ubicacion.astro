@@ -86,10 +86,10 @@ const scheduleText =
 
   <main class="mx-auto max-w-6xl px-4 py-10">
     <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Ubicacion</h1>
-    <p class="mt-2 text-slate-600 dark:text-slate-300">{addressText || "Direccion no configurada todavia."}</p>
+    <p class="mt-2 text-slate-800 dark:text-slate-200">{addressText || "Direccion no configurada todavia."}</p>
 
     <div class="mt-8 grid gap-6 lg:grid-cols-2">
-      <section class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
+      <section class="card-surface rounded-2xl p-6">
         <h2 class="text-lg font-semibold">Como llegar</h2>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
           <strong>Horario:</strong> {scheduleText}
@@ -105,16 +105,16 @@ const scheduleText =
         </div>
 
         <div class="mt-6 flex flex-wrap gap-3">
-          <a class="inline-flex items-center justify-center rounded-xl bg-sky-700 px-4 py-3 text-sm font-medium text-white hover:bg-sky-800" href={mapsUrl} target="_blank" rel="noopener noreferrer">
-            Como llegar
+          <a class="btn-base btn-primary" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+            Cómo llegar
           </a>
           {callHref && (
-            <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900" href={callHref}>
+            <a class="btn-base btn-secondary" href={callHref}>
               Llamar
             </a>
           )}
-          <button type="button" id="copy-address-btn" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">
-            Copiar direccion
+          <button type="button" id="copy-address-btn" class="btn-base btn-secondary">
+            Copiar dirección
           </button>
         </div>
 
@@ -161,13 +161,13 @@ const scheduleText =
         </div>
       </section>
 
-      <aside class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
+      <aside class="card-surface rounded-2xl p-6">
         <h2 class="text-lg font-semibold">Mapa</h2>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
           Si el mapa no carga, usa el boton "Como llegar" o la foto de fachada para ubicar la entrada.
         </p>
 
-        <a class="mt-3 inline-flex items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:opacity-90 dark:bg-white dark:text-slate-900" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+        <a class="btn-base btn-secondary mt-3" href={mapsUrl} target="_blank" rel="noopener noreferrer">
           Abrir ruta en Google Maps
         </a>
 
@@ -205,12 +205,12 @@ const scheduleText =
     copyButton.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(String(address || ""));
-        copyButton.textContent = "Direccion copiada";
+        copyButton.textContent = "Dirección copiada";
       } catch {
         copyButton.textContent = "No se pudo copiar";
       }
       setTimeout(() => {
-        copyButton.textContent = "Copiar direccion";
+        copyButton.textContent = "Copiar dirección";
       }, 1800);
     });
   }

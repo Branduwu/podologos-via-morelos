@@ -127,6 +127,12 @@ Configura variables para separar proyectos/datasets por entorno:
 
 Sin variables, el proyecto usa fallback local de desarrollo.
 
+## Resenas de Google en Inicio
+
+1. Agrega `GOOGLE_PLACES_API_KEY` en tu `.env` (solo servidor, no publica).
+2. En CMS, captura el `Google Place ID` en `Informacion del negocio -> Inicio`.
+3. Publica cambios en Sanity y vuelve a desplegar el frontend.
+
 ## Headers de seguridad (Vercel)
 
 Se agrego `vercel.json` con:

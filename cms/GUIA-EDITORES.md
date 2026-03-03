@@ -48,8 +48,19 @@ Si una categoria esta mal escrita, pueden fallar filtros y precargas en Agenda.
   - Imagen principal
   - Botones (texto + enlace)
   - Titulo/subtitulo de promociones
+  - Google Place ID (resenas)
+  - Titulo/subtitulo de resenas
+  - Texto del boton "Ver resenas en Google"
 - Edita en `Nosotros (Inicio)`:
   - Titulo, intro, texto secundario y puntos clave
+
+### Como obtener Google Place ID (resenas)
+
+1. Abre el negocio en Google Maps.
+2. Copia el Place ID desde la herramienta oficial de Google Place ID Finder.
+3. Pegalo en `Informacion del negocio -> Inicio -> Google Place ID`.
+
+Nota: si el Place ID o la API key no estan configurados, el bloque de resenas no se muestra.
 
 ## 3) Servicios
 

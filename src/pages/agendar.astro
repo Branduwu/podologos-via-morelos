@@ -47,7 +47,7 @@ const generalWhatsAppMessage = String(business?.whatsappGeneralMessage || "").tr
 const specialistsWhatsAppMessage = String(business?.whatsappSpecialistsMessage || "").trim();
 const quickProblemDefault = String(business?.whatsappQuickProblemDefault || "").trim();
 const address = business?.address || clinic.address;
-const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sabado 10:00 a 16:00 · Domingo cerrado";
+const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sábado 10:00 a 16:00 · Domingo cerrado";
 
 const categoryMap = new Map<string, string>();
 for (const c of clinic.serviceCategories) categoryMap.set(c.key, c.label);
@@ -104,7 +104,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
   <main class="mx-auto max-w-6xl px-4 py-10" id="contenido-principal">
     <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Agenda tu cita</h1>
-    <p class="mt-2 text-slate-600 dark:text-slate-300">Completa tus datos. El formulario no guarda informacion, solo genera tu solicitud por WhatsApp.</p>
+    <p class="mt-2 text-slate-800 dark:text-slate-200">Completa tus datos. El formulario no guarda información, solo genera tu solicitud por WhatsApp.</p>
 
     <div class="mt-8 grid gap-6 lg:grid-cols-2">
       <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
@@ -112,7 +112,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
         <form id="appointment-form" class="mt-4 grid gap-4" novalidate autocomplete="off">
           <div id="quote-summary" class="rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm dark:border-sky-900/40 dark:bg-sky-950/20">
-            <p class="font-semibold text-slate-900 dark:text-slate-100">Resumen de cotizacion</p>
+            <p class="font-semibold text-slate-900 dark:text-slate-100">Resumen de cotización</p>
             <p id="context-badge" class="mt-1 hidden text-xs font-semibold text-sky-700 dark:text-sky-300">
               Agendando con especialista
             </p>
@@ -131,10 +131,10 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
           </div>
 
           <div class="grid gap-2">
-            <label class="text-sm font-medium" for="phone">Telefono</label>
+            <label class="text-sm font-medium" for="phone">Teléfono</label>
             <input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="numeric" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Ej. 55 2538 8683" />
-            <p class="text-xs text-slate-500 dark:text-slate-400">Acepta espacios o guiones. Se valida entre 10 y 15 digitos y evita numeros invalidos (ej. todos iguales).</p>
-            <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Ingresa un telefono valido de 10 a 15 digitos (no se permiten numeros repetidos como 0000000000).</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Acepta espacios o guiones. Se valida entre 10 y 15 dígitos y evita números inválidos (ej. todos iguales).</p>
+            <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Ingresa un teléfono válido de 10 a 15 dígitos (no se permiten números repetidos como 0000000000).</p>
           </div>
 
           <div class="grid gap-2">
@@ -150,7 +150,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
           <div class="grid gap-2">
             <label class="text-sm font-medium" for="specialist">Especialista (opcional)</label>
             <select id="specialist" name="specialist" disabled class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950">
-              <option value="">Sin preferencia (el que este disponible)</option>
+              <option value="">Sin preferencia (el que esté disponible)</option>
             </select>
           </div>
 
@@ -175,7 +175,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
               <select id="timeSlot" name="timeSlot" disabled class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950">
                 <option value="">Selecciona hora</option>
               </select>
-              <p id="time-help" class="text-xs text-slate-500 dark:text-slate-400">Si prefieres, deja vacio y usa el turno.</p>
+              <p id="time-help" class="text-xs text-slate-500 dark:text-slate-400">Si prefieres, deja vacío y usa el turno.</p>
             </div>
           </div>
 
@@ -193,27 +193,27 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
             <textarea id="notes" name="notes" rows="3" maxlength="300" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Describe brevemente tu motivo"></textarea>
           </div>
 
-          <a id="send-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="pointer-events-none rounded-xl bg-slate-400 px-4 py-3 text-center text-sm font-semibold text-white">
+          <a id="send-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="btn-base btn-muted pointer-events-none w-full">
             Completa los campos para enviar por WhatsApp
           </a>
 
-          <p class="text-xs text-slate-500 dark:text-slate-400">Validamos horario: L-V 10:00-18:00, Sabado 10:00-16:00, Domingo cerrado.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Validamos horario: L-V 10:00-18:00, Sábado 10:00-16:00, Domingo cerrado.</p>
         </form>
       </section>
 
       <aside class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
-        <h2 class="text-lg font-semibold">Informacion</h2>
+        <h2 class="text-lg font-semibold">Información</h2>
         <p class="mt-2 text-slate-700 dark:text-slate-200">{address}</p>
         <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">Horarios: {hoursText}</p>
 
         <ul class="mt-5 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
-          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Confirmacion por WhatsApp.</span></li>
-          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Duracion aproximada: 30 a 60 minutos.</span></li>
-          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Higiene y protocolos de atencion profesional.</span></li>
+          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Confirmación por WhatsApp.</span></li>
+          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Duración aproximada: 30 a 60 minutos.</span></li>
+          <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>Higiene y protocolos de atención profesional.</span></li>
         </ul>
 
         <div class="mt-6">
-          <a class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-300" href="/ubicacion">Ver ubicacion</a>
+          <a class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-300" href="/ubicacion">Ver ubicación</a>
         </div>
       </aside>
     </div>
@@ -518,7 +518,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     if (!dateInput.value) {
       timeSlotSelect.disabled = true;
       if (timeHelp) {
-        timeHelp.textContent = "Si prefieres, deja vacio y usa el turno.";
+        timeHelp.textContent = "Si prefieres, deja vacío y usa el turno.";
         timeHelp.classList.remove("text-rose-600", "dark:text-rose-400");
         timeHelp.classList.add("text-slate-500", "dark:text-slate-400");
       }
@@ -542,7 +542,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     if (!schedule) {
       timeSlotSelect.disabled = true;
       if (timeHelp) {
-        timeHelp.textContent = "Domingo cerrado. Selecciona otro dia.";
+        timeHelp.textContent = "Domingo cerrado. Selecciona otro día.";
         timeHelp.classList.remove("text-slate-500", "dark:text-slate-400");
         timeHelp.classList.add("text-rose-600", "dark:text-rose-400");
       }
@@ -577,7 +577,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
     const baseOption = document.createElement("option");
     baseOption.value = "";
-    baseOption.textContent = "Sin preferencia (el que este disponible)";
+    baseOption.textContent = "Sin preferencia (el que esté disponible)";
     specialistSelect.appendChild(baseOption);
 
     filtered.forEach((sp: SpecialistOption) => {
@@ -687,10 +687,10 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     }
 
     if (isoDate && isSunday(isoDate)) {
-      dateInput.setCustomValidity("Los domingos no hay atencion.");
+      dateInput.setCustomValidity("Los domingos no hay atención.");
       setFieldErrorStyle(dateInput, true);
       if (dateError) {
-        dateError.textContent = "Domingo cerrado. Elige otro dia.";
+        dateError.textContent = "Domingo cerrado. Elige otro día.";
         dateError.classList.remove("hidden");
       }
       return false;
@@ -711,7 +711,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     }
 
     if (isoDate && selectedTime && !isWithinSchedule(isoDate, selectedTime)) {
-      timeSlotSelect.setCustomValidity("La hora esta fuera de horario para ese dia.");
+      timeSlotSelect.setCustomValidity("La hora está fuera de horario para ese día.");
       setFieldErrorStyle(timeSlotSelect, true);
       return false;
     }
@@ -725,15 +725,15 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   };
 
   const setDisabledCta = (text: string) => {
-    sendBtn.classList.add("pointer-events-none", "bg-slate-400", "hover:bg-slate-400");
-    sendBtn.classList.remove("bg-sky-700", "hover:bg-sky-800");
+    sendBtn.classList.add("pointer-events-none", "btn-muted");
+    sendBtn.classList.remove("btn-primary");
     sendBtn.textContent = text;
     sendBtn.setAttribute("href", "#");
   };
 
   const setEnabledCta = (href: string) => {
-    sendBtn.classList.remove("pointer-events-none", "bg-slate-400", "hover:bg-slate-400");
-    sendBtn.classList.add("bg-sky-700", "hover:bg-sky-800");
+    sendBtn.classList.remove("pointer-events-none", "btn-muted");
+    sendBtn.classList.add("btn-primary");
     sendBtn.textContent = "Enviar solicitud por WhatsApp";
     sendBtn.setAttribute("href", href);
   };

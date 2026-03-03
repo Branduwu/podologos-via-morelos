@@ -125,16 +125,16 @@ function specialistProfileHref(specialist: Specialist) {
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">
-    <section class="grid gap-8 rounded-3xl border border-sky-100 bg-white p-8 md:grid-cols-[1.1fr,0.9fr] md:items-center dark:border-slate-800 dark:bg-slate-950">
+    <section class="card-surface grid gap-8 rounded-3xl p-8 md:grid-cols-[1.1fr,0.9fr] md:items-center">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Conocenos</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Conócenos</p>
         <h1 class="mt-2 text-4xl font-bold tracking-tight md:text-5xl">{title}</h1>
         <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{intro}</p>
         <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{secondary}</p>
 
         <div class="mt-6 flex flex-wrap gap-3">
-          <a class="rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white hover:bg-sky-800" href="/agendar">Agenda tu cita</a>
-          <a class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900" href="/servicios">Nuestros servicios</a>
+          <a class="btn-base btn-primary" href="/agendar">Agenda tu cita</a>
+          <a class="btn-base btn-secondary" href="/servicios">Nuestros servicios</a>
         </div>
       </div>
 
@@ -144,8 +144,8 @@ function specialistProfileHref(specialist: Specialist) {
     </section>
 
     {points.length > 0 && (
-      <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
-        <h2 class="text-2xl font-bold tracking-tight">Por que elegirnos</h2>
+      <section class="card-surface mt-8 rounded-3xl p-6">
+        <h2 class="text-2xl font-bold tracking-tight">Por qué elegirnos</h2>
         <ul class="mt-4 grid gap-3 text-base text-slate-700 sm:grid-cols-2 dark:text-slate-300">
           {points.map((point) => (
             <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{point}</span></li>
@@ -154,7 +154,7 @@ function specialistProfileHref(specialist: Specialist) {
       </section>
     )}
 
-    <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+    <section class="card-surface mt-8 rounded-3xl p-6">
       <h2 class="text-2xl font-bold tracking-tight">{specialistsTitle}</h2>
       <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialistsSubtitle}</p>
 
@@ -165,7 +165,7 @@ function specialistProfileHref(specialist: Specialist) {
       ) : (
         <div class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {specialists.map((specialist) => (
-            <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950">
+            <article class="card-surface overflow-hidden rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
               <img
                 class="h-52 w-full object-cover ring-1 ring-slate-200/70 transition duration-300 hover:opacity-95 dark:ring-slate-700/70"
                 src={specialist.photoUrl || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=1000&q=80"}
@@ -185,9 +185,9 @@ function specialistProfileHref(specialist: Specialist) {
                   </div>
                 )}
 
-                <div class="mt-4 flex gap-2">
+                <div class="mt-4 grid grid-cols-2 gap-2">
                   <a
-                    class="inline-flex flex-1 items-center justify-center rounded-xl bg-sky-700 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+                    class="btn-base btn-primary w-full"
                     href={specialistLink(specialist)}
                     target={specialistUsesWhatsApp(specialist) ? "_blank" : undefined}
                     rel={specialistUsesWhatsApp(specialist) ? "noopener noreferrer" : undefined}
@@ -195,7 +195,7 @@ function specialistProfileHref(specialist: Specialist) {
                     {specialist.ctaText || "Agendar"}
                   </a>
                   <a
-                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+                    class="btn-base btn-secondary w-full"
                     href={specialistProfileHref(specialist)}
                   >
                     Perfil
@@ -208,7 +208,7 @@ function specialistProfileHref(specialist: Specialist) {
       )}
     </section>
 
-    <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+    <section class="card-surface mt-8 rounded-3xl p-6">
       <h2 class="text-2xl font-bold tracking-tight">{servicesTitle}</h2>
       <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{servicesSubtitle}</p>
       <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

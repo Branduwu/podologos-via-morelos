@@ -114,6 +114,7 @@ export async function getBusinessInfo() {
     homeHeroCarouselIntervalMs,
     homePrimaryCtaText, homePrimaryCtaUrl, homeSecondaryCtaText, homeSecondaryCtaUrl,
     homePromotionsTitle, homePromotionsSubtitle, "homePromotionFallbackImageUrl": homePromotionFallbackImage.asset->url,
+    googlePlaceId, homeGoogleReviewsTitle, homeGoogleReviewsSubtitle, homeGoogleReviewsCtaText,
     "logoImageUrl": logoImage.asset->url,
     facebookUrl, instagramUrl, tiktokUrl,
     footerMenuTitle, footerSiteTitle,

@@ -193,6 +193,37 @@
       description: "Aqui subes la imagen base cuando una promocion no tiene foto.",
       fieldset: "home",
     },
+    {
+      name: "googlePlaceId",
+      title: "Google Place ID (resenas en Inicio)",
+      type: "string",
+      description:
+        "ID del negocio en Google Maps para mostrar resenas reales en la pagina de Inicio.",
+      fieldset: "home",
+    },
+    {
+      name: "homeGoogleReviewsTitle",
+      title: "Titulo de resenas en Inicio",
+      type: "string",
+      description: "Aqui editas el titulo del bloque de resenas en Inicio.",
+      fieldset: "home",
+    },
+    {
+      name: "homeGoogleReviewsSubtitle",
+      title: "Texto corto de resenas en Inicio",
+      type: "string",
+      description: "Aqui editas el subtitulo del bloque de resenas en Inicio.",
+      fieldset: "home",
+      validation: (R) => R.max(160).warning("Recomendado: maximo 160 caracteres."),
+    },
+    {
+      name: "homeGoogleReviewsCtaText",
+      title: "Texto boton de resenas en Inicio",
+      type: "string",
+      description: "Aqui editas el texto del boton para abrir resenas en Google.",
+      fieldset: "home",
+      initialValue: "Ver resenas en Google",
+    },
 
     {
       name: "address",

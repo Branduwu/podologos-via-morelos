@@ -1,4 +1,8 @@
-﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Icono oscuro">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Icono oscuro con luna amarilla y crateres">
   <circle cx="32" cy="32" r="28" fill="#0f172a" stroke="#7dd3fc" stroke-width="6"/>
-  <path d="M32 18v28M18 32h28" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="29" cy="33" r="14" fill="#fcd34d"/>
+  <circle cx="37.5" cy="30.5" r="12" fill="#0f172a"/>
+  <circle cx="22.8" cy="27.5" r="2.1" fill="#f59e0b"/>
+  <circle cx="24.8" cy="34" r="1.7" fill="#f59e0b"/>
+  <circle cx="28" cy="39" r="1.4" fill="#f59e0b"/>
 </svg>

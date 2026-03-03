@@ -112,12 +112,12 @@ const previewImage = Astro.props.previewImage || "";
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        class="group block overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800"
+        class="group block overflow-hidden rounded-2xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950"
       >
         <img src={previewImage} alt={title} class="h-56 w-full object-cover transition group-hover:scale-[1.02]" loading="lazy" />
       </a>
     ) : (
-      <div class="rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+      <div class="rounded-2xl border border-slate-200 bg-white/95 p-4 text-sm dark:border-slate-800 dark:bg-slate-950">
         <p class="font-medium">{title}</p>
         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Configurado como solo enlace.
@@ -136,7 +136,7 @@ const previewImage = Astro.props.previewImage || "";
 ) : platform === "youtube" && ytId ? (
   <div class="space-y-3">
     <div
-      class="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800"
+      class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950"
       data-yt-wrap
       data-yt-src={ytEmbedSrc}
     >
@@ -192,7 +192,7 @@ const previewImage = Astro.props.previewImage || "";
   </div>
 ) : platform === "facebook" && fbEmbeddable ? (
   <div class="space-y-3">
-    <div class="aspect-video overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+    <div class="aspect-video overflow-hidden rounded-2xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
       <iframe
         class="h-full w-full"
         title={title}
@@ -213,7 +213,7 @@ const previewImage = Astro.props.previewImage || "";
   </div>
 ) : platform === "facebook" ? (
   <div class="space-y-3">
-    <div class="rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+    <div class="rounded-2xl border border-slate-200 bg-white/95 p-4 text-sm dark:border-slate-800 dark:bg-slate-950">
       <p class="font-medium">{title}</p>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
         Esta URL de Facebook no permite embed estable. Abrela directamente.
@@ -230,7 +230,7 @@ const previewImage = Astro.props.previewImage || "";
   </div>
 ) : ttId ? (
   <div class="space-y-3">
-    <div class="mx-auto aspect-[9/16] max-w-[360px] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+    <div class="mx-auto aspect-[9/16] max-w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
       <iframe
         class="h-full w-full"
         title={title}
@@ -251,7 +251,7 @@ const previewImage = Astro.props.previewImage || "";
   </div>
 ) : (
   <div class="space-y-3">
-    <div class="rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-800">
+    <div class="rounded-2xl border border-slate-200 bg-white/95 p-4 text-sm dark:border-slate-800 dark:bg-slate-950">
       <p class="font-medium">{title}</p>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
         La URL de TikTok no tiene formato valido de video. Usa un link tipo /@usuario/video/ID.
