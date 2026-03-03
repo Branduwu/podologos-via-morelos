@@ -56,7 +56,7 @@ for (const s of services) {
   if (key && !categoryMap.has(key)) categoryMap.set(key, s?.category || key);
 }
 for (const sp of specialists) {
-  const key = normalizeServiceSlug(sp?.specialtyCategory || "");
+  const key = normalizeServiceSlug(sp?.specialtyCategory || sp?.specialty || "");
   if (key && !categoryMap.has(key)) categoryMap.set(key, sp?.specialtyCategory || key);
 }
 
@@ -67,7 +67,7 @@ const specialistOptions = specialists
   .map((sp) => ({
     slug: String(sp?.slug || sp?._id || "").trim(),
     name: sp?.name || "Especialista",
-    category: normalizeServiceSlug(sp?.specialtyCategory || ""),
+    category: normalizeServiceSlug(sp?.specialtyCategory || sp?.specialty || ""),
     specialty: sp?.specialty || "",
     whatsAppNumber: String(sp?.whatsAppNumber || "").trim(),
     whatsAppMessage: String(sp?.whatsAppMessage || "").trim(),
@@ -116,9 +116,19 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
             <p id="context-badge" class="mt-1 hidden text-xs font-semibold text-sky-700 dark:text-sky-300">
               Agendando con especialista
             </p>
+            <p id="quote-routing-target" class="mt-1 hidden text-xs font-medium text-slate-600 dark:text-slate-300"></p>
             <p id="quote-services" class="mt-1 text-slate-700 dark:text-slate-200">
               {prefillServices.length > 0 ? prefillServices.join(" · ") : "Selecciona un servicio para ver precio aproximado."}
             </p>
+            <div id="quote-categories-wrap" class="mt-1 hidden">
+              <p class="text-xs font-medium text-slate-600 dark:text-slate-300">Categorias detectadas:</p>
+              <div id="quote-categories" class="mt-1 flex flex-wrap gap-2"></div>
+              <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Toca una categoria para quitarla de la cotizacion.</p>
+            </div>
+            <button id="restore-quote-btn" type="button" class="btn-base btn-ghost mt-2 hidden !inline-flex !h-8 !items-center !gap-1 !px-3 !text-xs">
+              <span aria-hidden="true">↺</span>
+              <span>Restaurar cotización</span>
+            </button>
             <p id="quote-total" class={`mt-1 text-slate-700 dark:text-slate-200 ${prefillApproxTotal > 0 ? "" : "hidden"}`}>
               <span class="font-semibold">Total aproximado:</span>{" "}
               {new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(prefillApproxTotal)}
@@ -252,7 +262,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     resolveWhatsAppReason,
   } from "../utils/whatsapp";
   import { formatDateMX, isSunday, isValidPhone, isValidPhoneInput, isWithinSchedule, sanitizePhone } from "../utils/validation";
-  import { getPrefillFromUrl } from "../utils/prefill";
+  import { getPrefillFromUrl, normalizeServiceSlug } from "../utils/prefill";
 
   type SpecialistOption = {
     slug: string;
@@ -270,7 +280,18 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     specialistsWhatsAppMessage?: string;
     quickProblemDefault?: string;
     businessName?: string;
-    prefill?: { service?: string; specialist?: string; services?: string[]; approxTotal?: number };
+    prefill?: {
+      service?: string;
+      specialist?: string;
+      services?: string[];
+      specialists?: string[];
+      waNumber?: string;
+      waMessage?: string;
+      waNumbers?: string[];
+      waMessages?: string[];
+      approxTotal?: number;
+      routing?: "general";
+    };
     specialistOptions?: SpecialistOption[];
     quoteSelectionLimit?: number;
     priceCatalog?: Array<{ title: string; category: string; priceFrom: number }>;
@@ -294,6 +315,10 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const phoneError = document.getElementById("phone-error") as HTMLParagraphElement | null;
   const timeHelp = document.getElementById("time-help") as HTMLParagraphElement | null;
   const quoteServicesEl = document.getElementById("quote-services") as HTMLParagraphElement | null;
+  const quoteRoutingTargetEl = document.getElementById("quote-routing-target") as HTMLParagraphElement | null;
+  const quoteCategoriesWrapEl = document.getElementById("quote-categories-wrap") as HTMLDivElement | null;
+  const quoteCategoriesEl = document.getElementById("quote-categories") as HTMLDivElement | null;
+  const restoreQuoteBtn = document.getElementById("restore-quote-btn") as HTMLButtonElement | null;
   const quoteTotalEl = document.getElementById("quote-total") as HTMLParagraphElement | null;
   const contextBadgeEl = document.getElementById("context-badge") as HTMLParagraphElement | null;
 
@@ -324,12 +349,98 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     services: Array.isArray(urlPrefill.services) && urlPrefill.services.length > 0
       ? urlPrefill.services
       : (Array.isArray(serverPrefill.services) ? serverPrefill.services : []),
+    specialists: Array.isArray(urlPrefill.specialists) && urlPrefill.specialists.length > 0
+      ? urlPrefill.specialists
+      : (Array.isArray(serverPrefill.specialists) ? serverPrefill.specialists : []),
+    waNumbers: Array.isArray(urlPrefill.waNumbers) && urlPrefill.waNumbers.length > 0
+      ? urlPrefill.waNumbers
+      : (Array.isArray(serverPrefill.waNumbers) ? serverPrefill.waNumbers : []),
+    waMessages: Array.isArray(urlPrefill.waMessages) && urlPrefill.waMessages.length > 0
+      ? urlPrefill.waMessages
+      : (Array.isArray(serverPrefill.waMessages) ? serverPrefill.waMessages : []),
     approxTotal: Number(urlPrefill.approxTotal || serverPrefill.approxTotal || 0),
+    routing:
+      String(urlPrefill.routing || serverPrefill.routing || "").trim().toLowerCase() === "general"
+        ? "general"
+        : undefined,
+  };
+  const noneSpecialistValue = "__none__";
+  const normalizeSpecialistSlug = (value: string) => {
+    const slug = String(value || "").trim();
+    if (!slug || slug === noneSpecialistValue) return "";
+    return slug;
   };
   const quoteLimit = Math.max(1, Number(config.quoteSelectionLimit || 6));
   let selectedServicesState = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
+  let selectedServicesSpecialistsState = Array.isArray(prefill.specialists)
+    ? prefill.specialists
+        .map((value: string) => normalizeSpecialistSlug(value))
+        .slice(0, quoteLimit)
+    : [];
+  let selectedServicesWaNumbersState = Array.isArray(prefill.waNumbers)
+    ? prefill.waNumbers
+        .map((value: string) => resolveWhatsAppNumber(value))
+        .slice(0, quoteLimit)
+    : [];
+  let selectedServicesWaMessagesState = Array.isArray(prefill.waMessages)
+    ? prefill.waMessages
+        .map((value: string) => String(value || "").trim())
+        .slice(0, quoteLimit)
+    : [];
+  if (selectedServicesSpecialistsState.length < selectedServicesState.length) {
+    selectedServicesSpecialistsState = [
+      ...selectedServicesSpecialistsState,
+      ...Array(selectedServicesState.length - selectedServicesSpecialistsState.length).fill(""),
+    ];
+  } else if (selectedServicesSpecialistsState.length > selectedServicesState.length) {
+    selectedServicesSpecialistsState = selectedServicesSpecialistsState.slice(0, selectedServicesState.length);
+  }
+  if (selectedServicesWaNumbersState.length < selectedServicesState.length) {
+    selectedServicesWaNumbersState = [
+      ...selectedServicesWaNumbersState,
+      ...Array(selectedServicesState.length - selectedServicesWaNumbersState.length).fill(""),
+    ];
+  } else if (selectedServicesWaNumbersState.length > selectedServicesState.length) {
+    selectedServicesWaNumbersState = selectedServicesWaNumbersState.slice(0, selectedServicesState.length);
+  }
+  if (selectedServicesWaMessagesState.length < selectedServicesState.length) {
+    selectedServicesWaMessagesState = [
+      ...selectedServicesWaMessagesState,
+      ...Array(selectedServicesState.length - selectedServicesWaMessagesState.length).fill(""),
+    ];
+  } else if (selectedServicesWaMessagesState.length > selectedServicesState.length) {
+    selectedServicesWaMessagesState = selectedServicesWaMessagesState.slice(0, selectedServicesState.length);
+  }
+  if (
+    selectedServicesState.length === 1 &&
+    selectedServicesSpecialistsState.every((slug: string) => !slug) &&
+    typeof prefill.specialist === "string" &&
+    prefill.specialist.trim()
+  ) {
+    selectedServicesSpecialistsState[0] = prefill.specialist.trim();
+  }
+  if (
+    selectedServicesState.length > 0 &&
+    selectedServicesWaNumbersState.every((value: string) => !value) &&
+    typeof prefill.waNumber === "string" &&
+    prefill.waNumber.trim()
+  ) {
+    selectedServicesWaNumbersState[0] = resolveWhatsAppNumber(prefill.waNumber.trim());
+  }
+  if (
+    selectedServicesState.length > 0 &&
+    selectedServicesWaMessagesState.every((value: string) => !value) &&
+    typeof prefill.waMessage === "string" &&
+    prefill.waMessage.trim()
+  ) {
+    selectedServicesWaMessagesState[0] = prefill.waMessage.trim();
+  }
   let quoteTotalState = Number(prefill.approxTotal || 0);
   const priceCatalog = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
+  const specialistBySlug = new Map<string, SpecialistOption>();
+  specialistItems.forEach((specialist) => {
+    if (specialist.slug) specialistBySlug.set(specialist.slug, specialist);
+  });
   const generalWaNumber = resolveWhatsAppNumber(config.generalWhatsappNumber);
   const specialistsWaNumber = resolveWhatsAppNumber(
     config.specialistsWhatsappNumber,
@@ -435,6 +546,158 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     return Math.min(...matches);
   };
 
+  const normalizeText = (value: string) => String(value || "").toLowerCase().trim();
+  const categoryByServiceTitle = new Map<string, string>();
+  priceCatalog.forEach((row) => {
+    const title = normalizeText(row.title || "");
+    const category = normalizeServiceSlug(row.category || "");
+    if (!title || !category || categoryByServiceTitle.has(title)) return;
+    categoryByServiceTitle.set(title, category);
+  });
+
+  const getCategoryForService = (serviceName: string) => {
+    const byCatalog = categoryByServiceTitle.get(normalizeText(serviceName));
+    if (byCatalog) return byCatalog;
+    return normalizeServiceSlug(String(serviceSelect.value || "").trim());
+  };
+
+  const getQuoteCategoryKeys = (services: string[]) => {
+    const unique = new Set<string>();
+    services.forEach((serviceName) => {
+      const categoryKey = getCategoryForService(serviceName);
+      if (categoryKey) unique.add(categoryKey);
+    });
+    return Array.from(unique.values());
+  };
+
+  const getCategoryLabel = (categoryKey: string) => {
+    const match = Array.from(serviceSelect.options).find(
+      (opt: HTMLOptionElement) => String(opt.value || "").trim() === categoryKey
+    );
+    return String(match?.textContent || categoryKey).trim();
+  };
+
+  const hasServiceOption = (categoryKey: string) =>
+    Array.from(serviceSelect.options).some(
+      (opt: HTMLOptionElement) => String(opt.value || "").trim() === categoryKey
+    );
+
+  const getApproxTotalFromSelectedServices = (services: string[]) =>
+    services.reduce((sum, serviceName) => {
+      const match = priceCatalog.find(
+        (row) => normalizeText(row.title || "") === normalizeText(serviceName)
+      );
+      const price = Number(match?.priceFrom || 0);
+      return sum + (Number.isFinite(price) && price > 0 ? price : 0);
+    }, 0);
+
+  type QuoteSnapshot = {
+    selectedServices: string[];
+    selectedSpecialists: string[];
+    selectedWaNumbers: string[];
+    selectedWaMessages: string[];
+    quoteTotal: number;
+    serviceValue: string;
+    specialistValue: string;
+  };
+
+  let lastQuoteSnapshot: QuoteSnapshot | null = null;
+
+  const setRestoreButtonVisible = (visible: boolean) => {
+    if (!restoreQuoteBtn) return;
+    restoreQuoteBtn.classList.toggle("hidden", !visible);
+  };
+
+  const clearQuoteSnapshot = () => {
+    lastQuoteSnapshot = null;
+    setRestoreButtonVisible(false);
+  };
+
+  const captureQuoteSnapshot = (): QuoteSnapshot => ({
+    selectedServices: [...selectedServicesState],
+    selectedSpecialists: [...selectedServicesSpecialistsState],
+    selectedWaNumbers: [...selectedServicesWaNumbersState],
+    selectedWaMessages: [...selectedServicesWaMessagesState],
+    quoteTotal: Number(quoteTotalState || 0),
+    serviceValue: String(serviceSelect.value || ""),
+    specialistValue: String(specialistSelect.value || ""),
+  });
+
+  const restoreQuoteSnapshot = () => {
+    if (!lastQuoteSnapshot) return;
+
+    selectedServicesState = [...lastQuoteSnapshot.selectedServices];
+    selectedServicesSpecialistsState = [...lastQuoteSnapshot.selectedSpecialists];
+    selectedServicesWaNumbersState = [...lastQuoteSnapshot.selectedWaNumbers];
+    selectedServicesWaMessagesState = [...lastQuoteSnapshot.selectedWaMessages];
+    quoteTotalState = Number(lastQuoteSnapshot.quoteTotal || 0);
+
+    if (lastQuoteSnapshot.serviceValue && hasServiceOption(lastQuoteSnapshot.serviceValue)) {
+      serviceSelect.value = lastQuoteSnapshot.serviceValue;
+    } else {
+      const categoryKeys = getQuoteCategoryKeys(selectedServicesState);
+      const fallbackCategory = categoryKeys.find((key) => hasServiceOption(key)) || "";
+      serviceSelect.value = fallbackCategory;
+    }
+
+    const preferredSpecialist =
+      selectedServicesState.length <= 1 ? String(lastQuoteSnapshot.specialistValue || "").trim() : "";
+    renderSpecialists(serviceSelect.value, preferredSpecialist);
+
+    if (selectedServicesState.length > 1) {
+      specialistSelect.value = "";
+    }
+
+    clearQuoteSnapshot();
+    updateQuoteSummary();
+    updateCta();
+  };
+
+  const removeCategoryFromQuote = (categoryKey: string) => {
+    const key = String(categoryKey || "").trim();
+    if (!key || selectedServicesState.length === 0) return;
+
+    const keepIndexes: number[] = [];
+    selectedServicesState.forEach((serviceName, index) => {
+      if (getCategoryForService(serviceName) !== key) keepIndexes.push(index);
+    });
+
+    if (keepIndexes.length === selectedServicesState.length) return;
+
+    lastQuoteSnapshot = captureQuoteSnapshot();
+    setRestoreButtonVisible(true);
+
+    selectedServicesState = keepIndexes.map((index) => selectedServicesState[index]);
+    selectedServicesSpecialistsState = keepIndexes.map(
+      (index) => selectedServicesSpecialistsState[index] || ""
+    );
+    selectedServicesWaNumbersState = keepIndexes.map(
+      (index) => selectedServicesWaNumbersState[index] || ""
+    );
+    selectedServicesWaMessagesState = keepIndexes.map(
+      (index) => selectedServicesWaMessagesState[index] || ""
+    );
+    quoteTotalState = getApproxTotalFromSelectedServices(selectedServicesState);
+
+    const remainingCategoryKeys = getQuoteCategoryKeys(selectedServicesState);
+    if (remainingCategoryKeys.length === 1 && hasServiceOption(remainingCategoryKeys[0])) {
+      serviceSelect.value = remainingCategoryKeys[0];
+      renderSpecialists(serviceSelect.value, "");
+    } else if (remainingCategoryKeys.length === 0) {
+      serviceSelect.value = "";
+      renderSpecialists("", "");
+    } else {
+      specialistSelect.value = "";
+    }
+
+    if (selectedServicesState.length !== 1) {
+      specialistSelect.value = "";
+    }
+
+    updateQuoteSummary();
+    updateCta();
+  };
+
   const getCurrentQuote = () => {
     const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
     const selectedCategory = String(serviceSelect.value || "");
@@ -451,23 +714,98 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     return { list, total };
   };
 
+  const getQuoteServiceSpecialists = () => {
+    const { list } = getCurrentQuote();
+    return list.map((serviceName: string, index: number) => {
+      const specialistSlug = normalizeSpecialistSlug(selectedServicesSpecialistsState[index] || "");
+      const waNumber = resolveWhatsAppNumber(selectedServicesWaNumbersState[index] || "");
+      const waMessage = String(selectedServicesWaMessagesState[index] || "").trim();
+      const specialist = specialistSlug ? specialistBySlug.get(specialistSlug) : undefined;
+      return {
+        service: serviceName,
+        specialistSlug,
+        specialistName: specialist?.name || "",
+        waNumber,
+        waMessage,
+        specialist: specialist || undefined,
+      };
+    });
+  };
+
+  const getQuoteUniqueSpecialists = () => {
+    const pairs = getQuoteServiceSpecialists();
+    const unique = new Map<string, SpecialistOption>();
+    pairs.forEach((pair) => {
+      if (!pair.specialistSlug || !pair.specialist) return;
+      if (!unique.has(pair.specialistSlug)) unique.set(pair.specialistSlug, pair.specialist);
+    });
+    return Array.from(unique.values());
+  };
+
+  const getQuoteUniqueWaNumbers = () => {
+    const pairs = getQuoteServiceSpecialists();
+    const unique = new Set<string>();
+    pairs.forEach((pair) => {
+      const number = resolveWhatsAppNumber(pair.waNumber || "");
+      if (number) unique.add(number);
+    });
+    return Array.from(unique.values());
+  };
+
+  const getQuoteUniqueWaMessages = () => {
+    const pairs = getQuoteServiceSpecialists();
+    const unique = new Set<string>();
+    pairs.forEach((pair) => {
+      const message = String(pair.waMessage || "").trim();
+      if (message) unique.add(message);
+    });
+    return Array.from(unique.values());
+  };
+
   const updateQuoteSummary = () => {
     const { list, total } = getCurrentQuote();
     const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
-    const selectedServiceKey = String(serviceSelect.value || "").trim();
     const specialistSlug = String(specialistSelect.value || "").trim();
     const selectedSpecialist = specialistSlug
       ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)
       : undefined;
-    const autoSpecialist = selectedSpecialist ? undefined : getAutoSpecialistForService(selectedServiceKey);
-    const routingSpecialist = selectedSpecialist || autoSpecialist;
+    const uniqueQuoteSpecialists = getQuoteUniqueSpecialists();
+    const uniqueQuoteWaNumbers = getQuoteUniqueWaNumbers();
+    const quoteHasMultipleServices = list.length > 1;
+    const quoteCategoryKeys = getQuoteCategoryKeys(list);
+    const hasMixedCategories = quoteCategoryKeys.length > 1;
+    const hasMultipleRoutingTargets =
+      uniqueQuoteSpecialists.length > 1 || uniqueQuoteWaNumbers.length > 1;
+    const forceGeneralRouting =
+      hasMixedCategories ||
+      prefill.routing === "general" ||
+      (quoteHasMultipleServices && hasMultipleRoutingTargets);
+    const singleCategoryLabel = quoteCategoryKeys.length === 1 ? getCategoryLabel(quoteCategoryKeys[0]) : "";
+    const categoryLabels = quoteCategoryKeys.map((categoryKey) => getCategoryLabel(categoryKey));
+    const routingSpecialist = forceGeneralRouting
+      ? undefined
+      : selectedSpecialist || (uniqueQuoteSpecialists.length === 1 ? uniqueQuoteSpecialists[0] : undefined);
 
     if (contextBadgeEl) {
-      if (routingSpecialist) {
+      if (forceGeneralRouting) {
         contextBadgeEl.classList.remove("hidden");
-        contextBadgeEl.textContent = selectedSpecialist
-          ? `Agendando con especialista: ${routingSpecialist.name || "Especialista"}`
-          : `Agendando con especialista de ${selectedServiceLabel || "servicio"}: ${routingSpecialist.name || "Especialista"}`;
+        contextBadgeEl.textContent = hasMixedCategories
+          ? "Agendando multiples servicios: se enviara al WhatsApp general de la clinica."
+          : "Agendando por WhatsApp general de la clinica.";
+      } else if (routingSpecialist) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Agendando con especialista: ${routingSpecialist.name || "Especialista"}`;
+      } else if (quoteHasMultipleServices && singleCategoryLabel) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Agendando varios servicios de ${singleCategoryLabel}.`;
+      } else if (uniqueQuoteSpecialists.length > 1) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Incluye varios especialistas: ${uniqueQuoteSpecialists
+          .map((specialist) => specialist.name || "Especialista")
+          .join(" · ")}`;
+      } else if (uniqueQuoteSpecialists.length === 1) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Especialista sugerido: ${uniqueQuoteSpecialists[0].name || "Especialista"}`;
       } else if (selectedServiceLabel) {
         contextBadgeEl.classList.remove("hidden");
         contextBadgeEl.textContent = `Agendando servicio: ${selectedServiceLabel}`;
@@ -476,9 +814,33 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       }
     }
 
+    if (quoteRoutingTargetEl) {
+      if (forceGeneralRouting) {
+        quoteRoutingTargetEl.classList.remove("hidden");
+        quoteRoutingTargetEl.textContent = "Destino de envío: WhatsApp general.";
+      } else if (routingSpecialist?.name) {
+        quoteRoutingTargetEl.classList.remove("hidden");
+        quoteRoutingTargetEl.textContent = `Destino de envío: WhatsApp de ${routingSpecialist.name}.`;
+      } else if (uniqueQuoteWaNumbers.length === 1) {
+        quoteRoutingTargetEl.classList.remove("hidden");
+        quoteRoutingTargetEl.textContent = "Destino de envío: WhatsApp del servicio seleccionado.";
+      } else {
+        quoteRoutingTargetEl.classList.add("hidden");
+        quoteRoutingTargetEl.textContent = "";
+      }
+    }
+
     if (quoteServicesEl) {
+      const pairs = getQuoteServiceSpecialists();
+      const hasSpecialistsInPairs = pairs.some((pair) => Boolean(pair.specialistName));
       quoteServicesEl.textContent = list.length > 0
-        ? list.join(" · ")
+        ? (hasSpecialistsInPairs
+          ? pairs
+              .map((pair) =>
+                pair.specialistName ? `${pair.service} (${pair.specialistName})` : pair.service
+              )
+              .join(" · ")
+          : list.join(" · "))
         : "Selecciona un servicio para ver precio aproximado.";
     }
 
@@ -488,6 +850,25 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
         quoteTotalEl.innerHTML = `<span class="font-semibold">Total aproximado:</span> ${toMoneyMX(total)}`;
       } else {
         quoteTotalEl.classList.add("hidden");
+      }
+    }
+
+    if (quoteCategoriesWrapEl && quoteCategoriesEl) {
+      quoteCategoriesEl.innerHTML = "";
+      if (hasMixedCategories && categoryLabels.length > 0) {
+        quoteCategoriesWrapEl.classList.remove("hidden");
+        quoteCategoryKeys.forEach((categoryKey, index) => {
+          const label = categoryLabels[index] || getCategoryLabel(categoryKey);
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.dataset.quoteCategoryChip = categoryKey;
+          chip.className = "category-chip category-chip--active";
+          chip.textContent = `${label} x`;
+          chip.setAttribute("aria-label", `Quitar categoria ${label} de la cotizacion`);
+          quoteCategoriesEl.appendChild(chip);
+        });
+      } else {
+        quoteCategoriesWrapEl.classList.add("hidden");
       }
     }
   };
@@ -595,11 +976,6 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     }
   };
 
-  const getAutoSpecialistForService = (serviceKey: string): SpecialistOption | undefined => {
-    if (!serviceKey) return undefined;
-    return specialistItems.find((sp: SpecialistOption) => sp.category === serviceKey);
-  };
-
   const applyPrefill = () => {
     let serviceValue = "";
     if (prefill.service) {
@@ -633,7 +1009,9 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       serviceSelect.value = serviceValue;
     }
 
-    renderSpecialists(serviceSelect.value, prefill.specialist);
+    const shouldPrefillSpecialist =
+      selectedServicesState.length <= 1 ? String(prefill.specialist || "").trim() : "";
+    renderSpecialists(serviceSelect.value, shouldPrefillSpecialist);
   };
 
   const updateDatePreview = () => {
@@ -761,48 +1139,93 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const selectedSpecialist = specialistValue
       ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)
       : undefined;
-    const autoSpecialist = selectedSpecialist ? undefined : getAutoSpecialistForService(service);
-    const routingSpecialist = selectedSpecialist || autoSpecialist;
-    const specialistName = routingSpecialist?.name || "Sin preferencia";
-    const targetWaNumber = routingSpecialist
+    const quote = getCurrentQuote();
+    const quotePairs = getQuoteServiceSpecialists();
+    const quoteSpecialists = getQuoteUniqueSpecialists();
+    const quoteWaNumbers = getQuoteUniqueWaNumbers();
+    const quoteWaMessages = getQuoteUniqueWaMessages();
+    const prefillWaNumber = resolveWhatsAppNumber(prefill.waNumber || "");
+    const prefillWaMessage = String(prefill.waMessage || "").trim();
+    const quoteHasMultipleServices = quote.list.length > 1;
+    const quoteCategoryKeys = getQuoteCategoryKeys(quote.list);
+    const hasMixedCategories = quoteCategoryKeys.length > 1;
+    const hasMultipleRoutingTargets =
+      quoteSpecialists.length > 1 || quoteWaNumbers.length > 1;
+    const forceGeneralRouting =
+      hasMixedCategories ||
+      prefill.routing === "general" ||
+      (quoteHasMultipleServices && hasMultipleRoutingTargets);
+    const routingSpecialist = forceGeneralRouting
+      ? undefined
+      : selectedSpecialist ||
+        (quoteSpecialists.length === 1 ? quoteSpecialists[0] : undefined);
+    const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || service;
+    const effectiveServiceLabel = quoteHasMultipleServices
+      ? "Variados"
+      : (selectedServiceLabel || service);
+    const specialistName = selectedSpecialist
+      ? selectedSpecialist.name || "Especialista"
+      : forceGeneralRouting
+        ? quoteSpecialists.length > 1
+          ? "Multiples especialistas"
+          : hasMixedCategories
+            ? "Sin preferencia (multiples servicios)"
+            : "Sin preferencia (enrutamiento general)"
+      : quoteSpecialists.length > 1
+        ? "Multiples especialistas"
+        : routingSpecialist?.name || "Sin preferencia";
+    const targetWaNumber = forceGeneralRouting
+      ? resolveWhatsAppNumber(generalWaNumber)
+      : routingSpecialist
       ? resolveWhatsAppNumber(
           routingSpecialist?.whatsAppNumber,
           specialistsWaNumber,
           generalWaNumber
         )
-      : generalWaNumber;
+      : resolveWhatsAppNumber(
+          prefillWaNumber,
+          quoteWaNumbers.length === 1 ? quoteWaNumbers[0] : "",
+          generalWaNumber
+        );
 
     if (!targetWaNumber) {
       setDisabledCta("WhatsApp no configurado");
       return;
     }
 
-    const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || service;
     const notesValue = String(notesInput.value || "").trim();
     const problemValue = notesValue || quickProblemDefault || "Por definir";
-    const introTemplate = routingSpecialist
+    const introTemplate = forceGeneralRouting
+      ? generalWhatsAppMessage
+      : routingSpecialist
       ? (routingSpecialist?.whatsAppMessage || specialistsWhatsAppMessage || generalWhatsAppMessage)
-      : generalWhatsAppMessage;
+      : prefillWaMessage ||
+        (quoteWaMessages.length === 1 ? quoteWaMessages[0] : "") ||
+        generalWhatsAppMessage;
     const introMessage = resolveWhatsAppReason(
       introTemplate,
       routingSpecialist
         ? "Hola, quiero agendar con {especialista} en {negocio}."
-        : "Hola, quiero agendar una cita en {negocio}.",
+        : quoteSpecialists.length > 1
+          ? "Hola, quiero agendar varias atenciones en {negocio}."
+          : "Hola, quiero agendar una cita en {negocio}.",
       {
         specialist: specialistName,
-        service: selectedServiceLabel,
+        service: effectiveServiceLabel,
         business: businessName,
         problem: problemValue,
       }
     );
-    const quote = getCurrentQuote();
 
     const message = buildAppointmentMessage({
       introMessage,
       name,
       phone,
-      service: selectedServiceLabel,
+      service: effectiveServiceLabel,
       selectedServices: quote.list,
+      serviceSpecialists: quotePairs
+        .filter((pair) => pair.specialistName)
+        .map((pair) => ({ service: pair.service, specialist: pair.specialistName })),
       approxTotal: quote.total > 0 ? quote.total : undefined,
       specialist: specialistName,
       date: parseDisplayDateToIso(dateInput.value) || undefined,
@@ -823,8 +1246,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   updateCta();
 
   serviceSelect.addEventListener("change", () => {
+    clearQuoteSnapshot();
     const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
     selectedServicesState = selectedLabel ? [selectedLabel] : [];
+    selectedServicesSpecialistsState = [""];
+    selectedServicesWaNumbersState = [""];
+    selectedServicesWaMessagesState = [""];
     quoteTotalState = 0;
     renderSpecialists(serviceSelect.value, "");
     updateQuoteSummary();
@@ -832,8 +1259,25 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   });
 
   specialistSelect.addEventListener("change", () => {
+    if (selectedServicesState.length <= 1) {
+      selectedServicesSpecialistsState = [String(specialistSelect.value || "").trim()];
+    }
     updateQuoteSummary();
     updateCta();
+  });
+
+  if (quoteCategoriesEl) {
+    quoteCategoriesEl.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement | null;
+      const button = target?.closest("[data-quote-category-chip]") as HTMLButtonElement | null;
+      if (!button) return;
+      const categoryKey = String(button.dataset.quoteCategoryChip || "").trim();
+      removeCategoryFromQuote(categoryKey);
+    });
+  }
+
+  restoreQuoteBtn?.addEventListener("click", () => {
+    restoreQuoteSnapshot();
   });
 
   [nameInput, phoneInput, specialistSelect, timeSlotSelect, shiftSelect, notesInput].forEach((el) => {

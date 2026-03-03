@@ -6,8 +6,12 @@ import { getPrices } from "../lib/sanity.js";
 import { clinic } from "../config/clinic";
 
 type PriceRow = {
+  _id?: string;
   serviceTitle?: string;
   category?: string;
+  leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
   priceFrom?: number;
   duration?: string;
   note?: string;
@@ -15,6 +19,7 @@ type PriceRow = {
 
 const prices: PriceRow[] = (await getPrices()) || [];
 const quoteSelectionLimit = Math.max(1, Number(clinic.quoteSelectionLimit || 6));
+const noneSpecialistValue = "__none__";
 
 const priceCategories = [
   { key: "all", label: "Todas" },
@@ -30,6 +35,7 @@ function normalizeText(value: string) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -60,12 +66,36 @@ function moneyMXN(n: number | string | null | undefined) {
   }
 }
 
+function resolvePreferredSpecialistSlug(price: PriceRow) {
+  return String(price.leadSpecialistSlug || "").trim();
+}
+
+function resolvePreferredWaNumber(price: PriceRow) {
+  return String(price.whatsAppNumber || "").trim();
+}
+
+function resolvePreferredWaMessage(price: PriceRow) {
+  return String(price.whatsAppMessage || "").trim();
+}
+
 function buildAgendarHref(price: PriceRow) {
   const category = priceCategoryKey(price);
-  const title = encodeURIComponent(price.serviceTitle || "");
+  const title = String(price.serviceTitle || "").trim();
+  const preferredSpecialistSlug = resolvePreferredSpecialistSlug(price);
+  const preferredWaNumber = resolvePreferredWaNumber(price);
+  const preferredWaMessage = resolvePreferredWaMessage(price);
   const priceFrom = Number(price.priceFrom);
-  const approxTotal = Number.isFinite(priceFrom) && priceFrom > 0 ? `&approxTotal=${priceFrom}` : "";
-  return `/agendar?service=${encodeURIComponent(category)}&services=${title}${approxTotal}`;
+  const params = new URLSearchParams();
+  if (category) params.set("service", category);
+  if (preferredSpecialistSlug) params.set("specialist", preferredSpecialistSlug);
+  if (preferredWaNumber) params.set("waNumber", preferredWaNumber);
+  if (preferredWaMessage) params.set("waMessage", preferredWaMessage);
+  if (title) params.append("services", title);
+  if (title) params.append("specialists", preferredSpecialistSlug || noneSpecialistValue);
+  if (title) params.append("waNumbers", preferredWaNumber || noneSpecialistValue);
+  if (title) params.append("waMessages", preferredWaMessage || noneSpecialistValue);
+  if (Number.isFinite(priceFrom) && priceFrom > 0) params.set("approxTotal", String(priceFrom));
+  return params.toString() ? `/agendar?${params.toString()}` : "/agendar";
 }
 ---
 
@@ -103,9 +133,9 @@ function buildAgendarHref(price: PriceRow) {
           <section class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950" id="quote-builder" data-quote-limit={quoteSelectionLimit}>
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p class="text-sm font-semibold">Cotización rápida</p>
+                <p class="text-sm font-semibold">Cotizacion rapida</p>
                 <p class="text-xs text-slate-600 dark:text-slate-300">
-                  Usa <strong>Agregar a cotización</strong> para varios servicios o <strong>Agendar solo este</strong> si solo quieres uno.
+                  <strong>Agendar solo este</strong> envia un solo servicio. <strong>Agregar a cotizacion</strong> junta varios servicios para mandarlos en una sola solicitud.
                 </p>
               </div>
               <a
@@ -120,9 +150,9 @@ function buildAgendarHref(price: PriceRow) {
               <p><span class="font-semibold">Seleccionados:</span> <span id="quote-count">0</span></p>
               <p><span class="font-semibold">Total aprox.:</span> <span id="quote-total">$0</span></p>
             </div>
-            <p id="quote-list" class="mt-2 text-xs text-slate-600 dark:text-slate-300">Aún no has seleccionado servicios.</p>
+            <p id="quote-list" class="mt-2 text-xs text-slate-600 dark:text-slate-300">Aun no has seleccionado servicios.</p>
             <p id="quote-limit-msg" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-300">
-              Llegaste al límite de {quoteSelectionLimit} servicios. Quita uno para agregar otro.
+              Llegaste al limite de {quoteSelectionLimit} servicios. Quita uno para agregar otro.
             </p>
           </section>
 
@@ -132,7 +162,11 @@ function buildAgendarHref(price: PriceRow) {
                 data-price-row
                 data-category={priceCategoryKey(p)}
                 data-service-title={p.serviceTitle || ""}
+                data-service-id={p._id || ""}
                 data-service-category={priceCategoryKey(p)}
+                data-service-specialist={resolvePreferredSpecialistSlug(p)}
+                data-service-wa-number={resolvePreferredWaNumber(p)}
+                data-service-wa-message={resolvePreferredWaMessage(p)}
                 data-service-price={Number(p.priceFrom || 0)}
                 class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950"
               >
@@ -157,7 +191,7 @@ function buildAgendarHref(price: PriceRow) {
                     data-select-service
                     class="btn-base btn-secondary w-full"
                   >
-                    Agregar a cotización
+                    Agregar a cotizacion
                   </button>
                 </div>
               </article>
@@ -181,7 +215,11 @@ function buildAgendarHref(price: PriceRow) {
                     data-price-row
                     data-category={priceCategoryKey(p)}
                     data-service-title={p.serviceTitle || ""}
+                    data-service-id={p._id || ""}
                     data-service-category={priceCategoryKey(p)}
+                    data-service-specialist={resolvePreferredSpecialistSlug(p)}
+                    data-service-wa-number={resolvePreferredWaNumber(p)}
+                    data-service-wa-message={resolvePreferredWaMessage(p)}
                     data-service-price={Number(p.priceFrom || 0)}
                     class="border-t border-slate-200 dark:border-slate-800"
                   >
@@ -202,7 +240,7 @@ function buildAgendarHref(price: PriceRow) {
                           data-select-service
                           class="btn-base btn-secondary"
                         >
-                          Agregar a cotización
+                          Agregar a cotizacion
                         </button>
                       </div>
                     </td>
@@ -246,6 +284,12 @@ function buildAgendarHref(price: PriceRow) {
   const quoteAgendarLink = document.getElementById("quote-agendar-link");
   let activePriceFilter = "all";
   const selectedServices = new Map();
+  const getRowKey = (row) =>
+    String(
+      row?.getAttribute("data-service-id") ||
+      row?.getAttribute("data-service-title") ||
+      ""
+    ).trim();
 
   const animateFilteredItems = (items) => {
     items.forEach((item, index) => {
@@ -296,7 +340,7 @@ function buildAgendarHref(price: PriceRow) {
     if (quoteList) {
       quoteList.textContent = selected.length > 0
         ? selected.map((item) => item.title).join(" | ")
-        : "Aún no has seleccionado servicios.";
+        : "Aun no has seleccionado servicios.";
     }
 
     if (!quoteAgendarLink) return;
@@ -310,7 +354,25 @@ function buildAgendarHref(price: PriceRow) {
 
     const params = new URLSearchParams();
     params.set("service", selected[0].category || "podologia");
+    const uniqueSpecialists = Array.from(
+      new Set(selected.map((item) => String(item.specialist || "").trim()).filter(Boolean))
+    );
+    const uniqueWaNumbers = Array.from(
+      new Set(selected.map((item) => String(item.waNumber || "").trim()).filter(Boolean))
+    );
+    const hasMultipleSelection = selected.length > 1;
+    const shouldSetPrimaryRouting = !hasMultipleSelection;
+
+    if (shouldSetPrimaryRouting && selected[0].specialist) params.set("specialist", selected[0].specialist);
+    if (shouldSetPrimaryRouting && selected[0].waNumber) params.set("waNumber", selected[0].waNumber);
+    if (shouldSetPrimaryRouting && selected[0].waMessage) params.set("waMessage", selected[0].waMessage);
+    if (hasMultipleSelection && (uniqueSpecialists.length > 1 || uniqueWaNumbers.length > 1)) {
+      params.set("routing", "general");
+    }
     selected.forEach((item) => params.append("services", item.title));
+    selected.forEach((item) => params.append("specialists", item.specialist || "__none__"));
+    selected.forEach((item) => params.append("waNumbers", item.waNumber || "__none__"));
+    selected.forEach((item) => params.append("waMessages", item.waMessage || "__none__"));
     if (total > 0) params.set("approxTotal", String(Math.round(total)));
     quoteAgendarLink.setAttribute("href", `/agendar?${params.toString()}`);
     quoteAgendarLink.classList.remove("pointer-events-none", "btn-muted");
@@ -319,11 +381,11 @@ function buildAgendarHref(price: PriceRow) {
 
     addButtons.forEach((button) => {
       const row = button.closest("[data-price-row]");
-      const title = String(row?.getAttribute("data-service-title") || "").trim();
-      const isSelected = selectedServices.has(title);
+      const rowKey = getRowKey(row);
+      const isSelected = selectedServices.has(rowKey);
       const disableAdd = reachedLimit && !isSelected;
 
-      button.textContent = isSelected ? "Quitar" : "Agregar a cotización";
+      button.textContent = isSelected ? "Quitar" : "Agregar a cotizacion";
       button.classList.toggle("bg-sky-100", isSelected);
       button.classList.toggle("text-sky-800", isSelected);
       button.classList.toggle("border-sky-300", isSelected);
@@ -339,19 +401,23 @@ function buildAgendarHref(price: PriceRow) {
       const row = btn.closest("[data-price-row]");
       if (!row) return;
 
+      const rowKey = getRowKey(row);
       const title = String(row.getAttribute("data-service-title") || "").trim();
       const category = String(row.getAttribute("data-service-category") || "").trim();
+      const specialist = String(row.getAttribute("data-service-specialist") || "").trim();
+      const waNumber = String(row.getAttribute("data-service-wa-number") || "").trim();
+      const waMessage = String(row.getAttribute("data-service-wa-message") || "").trim();
       const price = Number(row.getAttribute("data-service-price") || 0);
-      if (!title) return;
+      if (!rowKey || !title) return;
 
-      if (selectedServices.has(title)) {
-        selectedServices.delete(title);
+      if (selectedServices.has(rowKey)) {
+        selectedServices.delete(rowKey);
       } else {
         if (selectedServices.size >= MAX_QUOTE_ITEMS) {
           updateQuoteUI();
           return;
         }
-        selectedServices.set(title, { title, category, price });
+        selectedServices.set(rowKey, { title, category, specialist, waNumber, waMessage, price });
       }
       updateQuoteUI();
     });

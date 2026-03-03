@@ -22,10 +22,21 @@ type ServiceDetail = {
   duration?: string;
   priceFrom?: number;
   leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
 };
 
 type ServiceSlugRow = { slug?: string };
-type SpecialistRoutingItem = { _id?: string; slug?: string; specialtyCategory?: string };
+type SpecialistRoutingItem = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  specialtyCategory?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+  useWhatsAppButton?: boolean;
+};
 
 const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const routeParams = Astro.params as Record<string, string | undefined>;
@@ -44,6 +55,8 @@ const service: ServiceDetail | null =
           includes,
           duration,
           priceFrom,
+          whatsAppNumber,
+          whatsAppMessage,
           "leadSpecialistSlug": leadSpecialist->slug.current
         }
       `,
@@ -53,12 +66,11 @@ const service: ServiceDetail | null =
 const business = await getBusinessInfo();
 const specialists: SpecialistRoutingItem[] = (await getSpecialists()) || [];
 
-const firstSpecialistByCategory = new Map<string, string>();
+const specialistBySlug = new Map<string, SpecialistRoutingItem>();
 for (const specialist of specialists) {
   const slug = String(specialist?.slug || specialist?._id || "").trim();
-  const category = normalizeServiceSlug(specialist?.specialtyCategory || "");
-  if (!slug || !category || firstSpecialistByCategory.has(category)) continue;
-  firstSpecialistByCategory.set(category, slug);
+  if (!slug) continue;
+  specialistBySlug.set(slug, specialist);
 }
 
 function moneyMXN(n: number | null | undefined) {
@@ -95,7 +107,7 @@ export async function getStaticPaths() {
     }));
 }
 
-const waHref = service?.title
+let waHref = service?.title
   ? buildWhatsAppUrl(
       buildContactMessage({
         service: service.title,
@@ -120,13 +132,63 @@ const serviceKey = normalizeServiceSlug(service?.category || service?.title || s
 const agendarParams = new URLSearchParams();
 if (serviceKey) agendarParams.set("service", serviceKey);
 const preferredSpecialistSlug =
-  String(service?.leadSpecialistSlug || "").trim() || firstSpecialistByCategory.get(serviceKey) || "";
+  String(service?.leadSpecialistSlug || "").trim();
+const manualServiceWaNumber = String(service?.whatsAppNumber || "").trim();
+const manualServiceWaMessage = String(service?.whatsAppMessage || "").trim();
 if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
+if (manualServiceWaNumber) agendarParams.set("waNumber", manualServiceWaNumber);
+if (manualServiceWaMessage) agendarParams.set("waMessage", manualServiceWaMessage);
 if (service?.title) agendarParams.append("services", service.title);
+if (service?.title) agendarParams.append("waNumbers", manualServiceWaNumber || "__none__");
+if (service?.title) agendarParams.append("waMessages", manualServiceWaMessage || "__none__");
 if (typeof service?.priceFrom === "number" && service.priceFrom > 0) {
   agendarParams.set("approxTotal", String(Math.round(service.priceFrom)));
 }
 const agendarServiceHref = agendarParams.toString() ? `/agendar?${agendarParams.toString()}` : "/agendar";
+const routingSpecialist = preferredSpecialistSlug
+  ? specialistBySlug.get(preferredSpecialistSlug)
+  : undefined;
+const useSpecialistWa = !manualServiceWaNumber && routingSpecialist?.useWhatsAppButton !== false;
+const waTargetNumber = useSpecialistWa
+  ? resolveWhatsAppNumber(
+      manualServiceWaNumber,
+      routingSpecialist?.whatsAppNumber,
+      business?.whatsappSpecialistsNumber,
+      business?.whatsappCitasNumber,
+      clinic.whatsappNumber
+    )
+  : resolveWhatsAppNumber(
+      manualServiceWaNumber,
+      business?.whatsappCitasNumber,
+      clinic.whatsappNumber
+    );
+const waReasonTemplate = manualServiceWaMessage
+  ? manualServiceWaMessage
+  : useSpecialistWa
+    ? routingSpecialist?.whatsAppMessage ||
+      business?.whatsappSpecialistsMessage ||
+      business?.whatsappGeneralMessage
+    : business?.whatsappGeneralMessage;
+if (service?.title) {
+  waHref = buildWhatsAppUrl(
+    buildContactMessage({
+      service: service.title,
+      reason: resolveWhatsAppReason(
+        waReasonTemplate,
+        useSpecialistWa
+          ? "Quiero informacion y agendar {servicio} con {especialista}."
+          : "Quiero informacion y agendar este servicio.",
+        {
+          specialist: routingSpecialist?.name || "especialista disponible",
+          service: service.title,
+          business: business?.name || clinic.name,
+          problem: business?.whatsappQuickProblemDefault || "",
+        }
+      ),
+    }),
+    waTargetNumber
+  );
+}
 ---
 
 <Layout title={`${service?.title || "Servicio"} | Podologos Via Morelos`}>

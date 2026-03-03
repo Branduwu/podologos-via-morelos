@@ -65,9 +65,19 @@ Nota: si el Place ID o la API key no estan configurados, el bloque de resenas no
 ## 3) Servicios
 
 - Edita: nombre, categoria, descripcion corta/larga, incluye, duracion y precio desde.
-- `Especialista destino (Agendar/WhatsApp)` (opcional):
+- `Especialista destino (manual)` (opcional):
   - Si lo eliges, desde `Agendar este servicio` se precarga ese especialista y el WhatsApp va a su numero.
-  - Si lo dejas vacio, el sistema toma automaticamente el primer especialista activo de la misma categoria.
+  - Si lo dejas vacio, no se fuerza especialista y se usa atencion general.
+- `WhatsApp destino (manual)` (opcional):
+  - Si lo llenas, este servicio enviara WhatsApp a ese numero aunque tenga especialista ligado.
+  - Si esta vacio, se usa el especialista (si aplica) y luego el numero general.
+- `Mensaje WhatsApp (manual)` (opcional):
+  - Texto base para este servicio.
+  - Soporta placeholders: `{servicio}`, `{especialista}`, `{negocio}`, `{problema}`.
+- Regla de cotizacion multiple:
+  - Si en Agenda hay mas de un servicio, el campo `Servicio` se envia como `Variados`.
+  - Si esos servicios tienen destinos distintos (especialistas/numeros), el envio va al WhatsApp general.
+  - En Agenda se mostrara la leyenda `Destino de envio: ...` para confirmar visualmente a donde va la solicitud.
 - No borres servicios con historial. Usa `Activo = apagado`.
 
 ## 4) Especialistas
@@ -87,6 +97,20 @@ Nota: si el Place ID o la API key no estan configurados, el bloque de resenas no
 
 - Relaciona cada precio con un servicio.
 - El filtro por categoria en web depende de la categoria del servicio relacionado.
+- `Especialista destino (manual)` (opcional):
+  - Si lo eliges, ese precio enviara al especialista seleccionado en Agendar/WhatsApp.
+  - Si lo dejas vacio, usa el especialista del servicio (si esta configurado).
+- `WhatsApp destino (manual)` (opcional):
+  - Si lo llenas, ese precio enviara WhatsApp a ese numero.
+  - Tiene prioridad sobre especialista/general.
+- `Mensaje WhatsApp (manual)` (opcional):
+  - Texto base del WhatsApp para ese precio.
+  - Soporta placeholders: `{servicio}`, `{especialista}`, `{negocio}`, `{problema}`.
+- Si juntas varios precios de distintas areas, cada uno puede llevar especialista diferente. En Agendar se mostraran diferenciados por servicio.
+- En cotizacion multiple:
+  - `Servicio` se envia como `Variados`.
+  - Si hay distintos destinos (especialista/numero), se usa WhatsApp general para evitar enrutamiento ambiguo.
+  - Verifica en Agenda la leyenda `Destino de envio: ...` antes de publicar cambios.
 
 ## 6) Ubicacion
 

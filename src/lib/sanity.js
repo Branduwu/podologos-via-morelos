@@ -33,7 +33,17 @@ async function fetchSafe(query, params = {}, fallback = null) {
 }
 
 export async function getServices() {
-  return fetchSafe(`*[_type == "service" && (!defined(active) || active == true)]{ title, slug, short, priceFrom, duration, category, "leadSpecialistSlug": leadSpecialist->slug.current }|order(order asc, title asc)`, {}, []);
+  return fetchSafe(`*[_type == "service" && (!defined(active) || active == true)]{
+    title,
+    slug,
+    short,
+    priceFrom,
+    duration,
+    category,
+    whatsAppNumber,
+    whatsAppMessage,
+    "leadSpecialistSlug": leadSpecialist->slug.current
+  }|order(order asc, title asc)`, {}, []);
 }
 
 export async function getPromotions() {
@@ -60,7 +70,19 @@ export async function getGallery() {
 }
 
 export async function getPrices() {
-  return fetchSafe(`*[_type=="priceItem" && active==true]|order(order asc, _createdAt desc){ _id, order, title, "serviceTitle": select(defined(service->title) => service->title, defined(title) => title, true => "-"), "category": service->category, priceFrom, duration, note }`, {}, []);
+  return fetchSafe(`*[_type=="priceItem" && active==true]|order(order asc, _createdAt desc){
+    _id,
+    order,
+    title,
+    "serviceTitle": select(defined(service->title) => service->title, defined(title) => title, true => "-"),
+    "category": service->category,
+    "leadSpecialistSlug": coalesce(leadSpecialist->slug.current, service->leadSpecialist->slug.current),
+    "whatsAppNumber": coalesce(whatsAppNumber, service->whatsAppNumber),
+    "whatsAppMessage": coalesce(whatsAppMessage, service->whatsAppMessage),
+    priceFrom,
+    duration,
+    note
+  }`, {}, []);
 }
 
 export async function getSpecialists() {

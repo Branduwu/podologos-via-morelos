@@ -7,6 +7,7 @@ export type AppointmentMessageInput = {
   service: string;
   introMessage?: string;
   selectedServices?: string[];
+  serviceSpecialists?: Array<{ service: string; specialist: string }>;
   approxTotal?: number;
   specialist?: string;
   date?: string;
@@ -132,6 +133,21 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
     selectedServices.length > 0
       ? ["Servicios solicitados:", ...selectedServices.map((service, idx) => `${idx + 1}. ${service}`)]
       : [];
+  const serviceSpecialists = (data.serviceSpecialists || [])
+    .map((item) => ({
+      service: String(item?.service || "").trim(),
+      specialist: String(item?.specialist || "").trim(),
+    }))
+    .filter((item) => item.service && item.specialist);
+  const specialistsBlock =
+    serviceSpecialists.length > 0
+      ? [
+          "Especialistas por servicio:",
+          ...serviceSpecialists.map(
+            (item, idx) => `${idx + 1}. ${item.service} -> ${item.specialist}`
+          ),
+        ]
+      : [];
 
   return [
     intro,
@@ -140,6 +156,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
     `Telefono: ${sanitizePhone(data.phone)}`,
     `Servicio: ${data.service.trim()}`,
     ...servicesBlock,
+    ...specialistsBlock,
     ...(totalText ? [`Total aproximado: ${totalText}`] : []),
     `Especialista: ${specialist}`,
     `Fecha: ${dateText}`,

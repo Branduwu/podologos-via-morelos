@@ -23,5 +23,16 @@ describe("prefill utils", () => {
     expect(prefill.services).toEqual(["Primera sesion", "Terapia"]);
     expect(prefill.approxTotal).toBe(950);
   });
-});
 
+  it("parses manual whatsapp routing fields from URL", () => {
+    const prefill = getPrefillFromUrl(
+      "https://demo.local/agendar?service=dentista&routing=general&waNumber=5215512345678&waMessage=Mensaje%20manual&waNumbers=5215512345678&waNumbers=__none__&waMessages=Uno&waMessages=__none__"
+    );
+    expect(prefill.service).toBe("dentista");
+    expect(prefill.routing).toBe("general");
+    expect(prefill.waNumber).toBe("5215512345678");
+    expect(prefill.waMessage).toBe("Mensaje manual");
+    expect(prefill.waNumbers).toEqual(["5215512345678", ""]);
+    expect(prefill.waMessages).toEqual(["Uno", ""]);
+  });
+});

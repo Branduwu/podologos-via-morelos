@@ -2,7 +2,13 @@ export type AgendarPrefill = {
   service?: string;
   specialist?: string;
   services?: string[];
+  specialists?: string[];
+  waNumber?: string;
+  waMessage?: string;
+  waNumbers?: string[];
+  waMessages?: string[];
   approxTotal?: number;
+  routing?: "general";
 };
 
 function normalizeSlug(value: string | null | undefined): string {
@@ -35,6 +41,7 @@ export function normalizeServiceSlug(value: string | null | undefined): string {
 export function getPrefillFromUrl(urlValue: string | URL): AgendarPrefill {
   const url = typeof urlValue === "string" ? new URL(urlValue, "https://dummy.local") : urlValue;
   const params = url.searchParams;
+  const noneSpecialistValue = "__none__";
   const rawService = params.get("service") || params.get("servicio");
   const service = normalizeServiceSlug(rawService);
   const specialist = String(params.get("specialist") || "").trim();
@@ -46,6 +53,23 @@ export function getPrefillFromUrl(urlValue: string | URL): AgendarPrefill {
   const services = [...servicesFromList, ...servicesFromCsv]
     .map((v) => String(v || "").trim())
     .filter(Boolean);
+  const specialistsFromList = params
+    .getAll("specialists")
+    .map((value) => String(value || "").trim())
+    .map((value) => (value === noneSpecialistValue ? "" : value));
+  const specialists = specialistsFromList.length > 0 ? specialistsFromList : undefined;
+  const waNumber = String(params.get("waNumber") || "").trim();
+  const waMessage = String(params.get("waMessage") || "").trim();
+  const waNumbers = params
+    .getAll("waNumbers")
+    .map((value) => String(value || "").trim())
+    .map((value) => (value === noneSpecialistValue ? "" : value));
+  const waMessages = params
+    .getAll("waMessages")
+    .map((value) => String(value || "").trim())
+    .map((value) => (value === noneSpecialistValue ? "" : value));
+  const routingRaw = String(params.get("routing") || "").trim().toLowerCase();
+  const routing = routingRaw === "general" ? "general" : undefined;
   const approxTotalRaw = Number(params.get("approxTotal") || params.get("totalAprox") || "");
   const approxTotal = Number.isFinite(approxTotalRaw) && approxTotalRaw > 0 ? approxTotalRaw : undefined;
   const inferredService = service || normalizeServiceSlug(services[0] || rawService || "");
@@ -54,6 +78,12 @@ export function getPrefillFromUrl(urlValue: string | URL): AgendarPrefill {
     service: inferredService || undefined,
     specialist: specialist || undefined,
     services: services.length > 0 ? services : undefined,
+    specialists,
+    waNumber: waNumber || undefined,
+    waMessage: waMessage || undefined,
+    waNumbers: waNumbers.length > 0 ? waNumbers : undefined,
+    waMessages: waMessages.length > 0 ? waMessages : undefined,
     approxTotal,
+    routing,
   };
 }

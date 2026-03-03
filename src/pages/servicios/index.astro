@@ -20,37 +20,49 @@ type ServiceItem = {
   priceFrom?: number;
   category?: string;
   leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
 };
 
 type SpecialistRoutingItem = {
   _id?: string;
   slug?: string;
+  name?: string;
+  specialty?: string;
   specialtyCategory?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+  useWhatsAppButton?: boolean;
 };
 
 const business = await getBusinessInfo();
 const services: ServiceItem[] = (await getServices()) || [];
 const specialists: SpecialistRoutingItem[] = (await getSpecialists()) || [];
 const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const waNumber = resolveWhatsAppNumber(
+
+const generalWaNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
   clinic.whatsappNumber
 );
+const specialistsWaNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWaNumber
+);
+
 const serviceCategories = [
   { key: "all", label: "Todas" },
-  { key: "podologia", label: "Podología" },
-  { key: "psicologia", label: "Psicología" },
-  { key: "optica", label: "Óptica" },
-  { key: "quiropractica", label: "Quiropráctica" },
+  { key: "podologia", label: "Podologia" },
+  { key: "psicologia", label: "Psicologia" },
+  { key: "optica", label: "Optica" },
+  { key: "quiropractica", label: "Quiropractica" },
   { key: "dentista", label: "Dentista" },
 ];
 
-const firstSpecialistByCategory = new Map<string, string>();
+const specialistBySlug = new Map<string, SpecialistRoutingItem>();
 for (const specialist of specialists) {
   const slug = String(specialist?.slug || specialist?._id || "").trim();
-  const category = normalizeServiceSlug(specialist?.specialtyCategory || "");
-  if (!slug || !category || firstSpecialistByCategory.has(category)) continue;
-  firstSpecialistByCategory.set(category, slug);
+  if (!slug) continue;
+  specialistBySlug.set(slug, specialist);
 }
 
 function moneyMXN(n: number | string | null | undefined) {
@@ -73,11 +85,11 @@ function moneyMXN(n: number | string | null | undefined) {
 
   <main class="mx-auto max-w-6xl px-4 py-10">
     <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Servicios</h1>
-    <p class="mt-2 text-slate-800 dark:text-slate-200">Conoce qué incluye cada servicio y su precio desde.</p>
+    <p class="mt-2 text-slate-800 dark:text-slate-200">Conoce que incluye cada servicio y su precio desde.</p>
 
     {services.length === 0 && (
       <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-        Pronto compartiremos más servicios. Mientras tanto, puedes agendar tu cita.
+        Pronto compartiremos mas servicios. Mientras tanto, puedes agendar tu cita.
       </div>
     )}
 
@@ -87,10 +99,7 @@ function moneyMXN(n: number | string | null | undefined) {
           <button
             type="button"
             data-service-filter={cat.key}
-            class:list={[
-              "category-chip",
-              idx === 0 && "category-chip--active",
-            ]}
+            class:list={["category-chip", idx === 0 && "category-chip--active"]}
           >
             {cat.label}
           </button>
@@ -99,84 +108,113 @@ function moneyMXN(n: number | string | null | undefined) {
     )}
 
     <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {services.map((s: ServiceItem) => {
-        const rawSlug = typeof s.slug === "string" ? s.slug : s.slug?.current;
+      {services.map((service: ServiceItem) => {
+        const rawSlug =
+          typeof service.slug === "string" ? service.slug : service.slug?.current;
         const cleanSlug = typeof rawSlug === "string" ? rawSlug.trim() : "";
         const hasValidSlug = validSlugRe.test(cleanSlug);
         const detailHref = hasValidSlug ? `/servicios/${cleanSlug}` : "/servicios";
-        const serviceLabel = s.title || "Servicio";
-        const serviceCategory = normalizeServiceSlug(s.category || s.title || cleanSlug);
-        const servicePrice = Number(s.priceFrom || 0);
+
+        const serviceLabel = service.title || "Servicio";
+        const serviceCategory = normalizeServiceSlug(
+          service.category || service.title || cleanSlug
+        );
+        const servicePrice = Number(service.priceFrom || 0);
+
+        const preferredSpecialistSlug =
+          String(service.leadSpecialistSlug || "").trim();
+        const routingSpecialist = preferredSpecialistSlug
+          ? specialistBySlug.get(preferredSpecialistSlug)
+          : undefined;
+        const manualServiceWaNumber = String(service.whatsAppNumber || "").trim();
+        const manualServiceWaMessage = String(service.whatsAppMessage || "").trim();
+
         const agendarParams = new URLSearchParams();
         if (serviceCategory) agendarParams.set("service", serviceCategory);
-        const preferredSpecialistSlug =
-          String(s.leadSpecialistSlug || "").trim() || firstSpecialistByCategory.get(serviceCategory) || "";
         if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
+        if (manualServiceWaNumber) agendarParams.set("waNumber", manualServiceWaNumber);
+        if (manualServiceWaMessage) agendarParams.set("waMessage", manualServiceWaMessage);
         if (serviceLabel) agendarParams.append("services", serviceLabel);
-        if (servicePrice > 0) agendarParams.set("approxTotal", String(Math.round(servicePrice)));
-        const agendarHref = agendarParams.toString() ? `/agendar?${agendarParams.toString()}` : "/agendar";
+        if (serviceLabel) agendarParams.append("waNumbers", manualServiceWaNumber || "__none__");
+        if (serviceLabel) agendarParams.append("waMessages", manualServiceWaMessage || "__none__");
+        if (servicePrice > 0) {
+          agendarParams.set("approxTotal", String(Math.round(servicePrice)));
+        }
+        const agendarHref = agendarParams.toString()
+          ? `/agendar?${agendarParams.toString()}`
+          : "/agendar";
+
+        const useSpecialistWa = !manualServiceWaNumber && routingSpecialist?.useWhatsAppButton !== false;
+        const waReasonTemplate = manualServiceWaMessage
+          ? manualServiceWaMessage
+          : useSpecialistWa
+            ? routingSpecialist?.whatsAppMessage ||
+              business?.whatsappSpecialistsMessage ||
+              business?.whatsappGeneralMessage
+            : business?.whatsappGeneralMessage;
+        const waTargetNumber = resolveWhatsAppNumber(
+          manualServiceWaNumber,
+          useSpecialistWa ? routingSpecialist?.whatsAppNumber : "",
+          specialistsWaNumber,
+          generalWaNumber
+        );
         const waHref = buildWhatsAppUrl(
           buildContactMessage({
             service: serviceLabel,
             reason: resolveWhatsAppReason(
-              business?.whatsappGeneralMessage,
-              "Quiero información y agendar este servicio.",
+              waReasonTemplate,
+              useSpecialistWa
+                ? "Quiero informacion y agendar {servicio} con {especialista}."
+                : "Quiero informacion y agendar este servicio.",
               {
+                specialist: routingSpecialist?.name || "especialista disponible",
                 service: serviceLabel,
                 business: business?.name || clinic.name,
                 problem: business?.whatsappQuickProblemDefault || "",
               }
             ),
           }),
-          waNumber
+          waTargetNumber
         );
 
         return (
-          <article data-service-card data-category={serviceCategory || "general"} class="card-surface rounded-3xl p-6 shadow-sm flex h-full flex-col">
+          <article
+            data-service-card
+            data-category={serviceCategory || "general"}
+            class="card-surface flex h-full flex-col rounded-3xl p-6 shadow-sm"
+          >
             <div class="flex-1">
               <h2 class="text-lg font-semibold">{serviceLabel}</h2>
-
-              {s.short && <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{s.short}</p>}
+              {service.short && (
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{service.short}</p>
+              )}
 
               <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
-                {s.duration && (
+                {service.duration && (
                   <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
-                    Duración {s.duration}
+                    Duracion {service.duration}
                   </span>
                 )}
-
-                {!!moneyMXN(s.priceFrom) && (
+                {!!moneyMXN(service.priceFrom) && (
                   <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
-                    Desde {moneyMXN(s.priceFrom)}
+                    Desde {moneyMXN(service.priceFrom)}
                   </span>
                 )}
               </div>
             </div>
 
             <div class="mt-6 grid grid-cols-2 gap-2 pt-1">
-              <a
-                class="btn-base btn-primary w-full"
-                href={detailHref}
-              >
+              <a class="btn-base btn-primary w-full" href={detailHref}>
                 Ver detalle
               </a>
-
-              <a
-                class="btn-base btn-secondary w-full"
-                href="/precios"
-              >
+              <a class="btn-base btn-secondary w-full" href="/precios">
                 Precios
               </a>
-
-              <a
-                class="btn-base btn-secondary w-full col-span-2"
-                href={agendarHref}
-              >
+              <a class="btn-base btn-secondary col-span-2 w-full" href={agendarHref}>
                 Agendar este servicio
               </a>
-
               <a
-                class="btn-base btn-secondary w-full col-span-2"
+                class="btn-base btn-secondary col-span-2 w-full"
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -189,8 +227,11 @@ function moneyMXN(n: number | string | null | undefined) {
       })}
     </div>
 
-    <p id="services-empty" class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-      No hay servicios en esa categoría todavía.
+    <p
+      id="services-empty"
+      class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
+    >
+      No hay servicios en esa categoria todavia.
     </p>
   </main>
 
@@ -207,7 +248,6 @@ function moneyMXN(n: number | string | null | undefined) {
     items.forEach((item, index) => {
       item.classList.remove("filter-item-in", "filter-item-in-slide");
       item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
-      // Reinicia la animacion para cada cambio de filtro.
       void item.offsetWidth;
       item.classList.add("filter-item-in-slide");
     });

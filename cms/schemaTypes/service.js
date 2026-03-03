@@ -1,4 +1,5 @@
 import { isUniqueSlugWithinType, toSlug } from "../utils/slug";
+import RoutingPriorityNoteInput from "../components/RoutingPriorityNoteInput.jsx";
 
 export default {
   name: "service",
@@ -7,6 +8,7 @@ export default {
   description: "Catalogo de servicios que se muestra en home, listado y detalle. Recomendado: desactiva en vez de eliminar.",
   fieldsets: [
     { name: "basic", title: "Basico", options: { collapsible: true, collapsed: false } },
+    { name: "routing", title: "Destino de agenda/whatsapp", options: { collapsible: true, collapsed: false } },
     { name: "content", title: "Contenido", options: { collapsible: true, collapsed: false } },
     { name: "publish", title: "Publicacion", options: { collapsible: true, collapsed: true } },
     { name: "meta", title: "Meta", options: { collapsible: true, collapsed: true } },
@@ -39,13 +41,24 @@ export default {
       validation: (R) => R.required().error("Selecciona una categoria."),
     },
     {
+      name: "routingPriorityInfo",
+      title: "Prioridad de enrutamiento",
+      type: "string",
+      fieldset: "routing",
+      readOnly: true,
+      options: { source: "service" },
+      components: {
+        input: RoutingPriorityNoteInput,
+      },
+    },
+    {
       name: "leadSpecialist",
-      title: "Especialista destino (Agendar/WhatsApp)",
+      title: "Especialista destino (manual)",
       type: "reference",
       to: [{ type: "specialistProfile" }],
       description:
-        "Opcional. Si lo eliges, al dar clic en 'Agendar este servicio' se precarga ese especialista y el mensaje se dirige a su WhatsApp. Si lo dejas vacio, se usa automaticamente el primer especialista activo de la misma categoria.",
-      fieldset: "basic",
+        "Opcional. Si lo eliges, al dar clic en 'Agendar este servicio' se precarga ese especialista y el mensaje se dirige a su WhatsApp. Si lo dejas vacio, no se forzara especialista. En cotizacion con destinos distintos, se usa WhatsApp general.",
+      fieldset: "routing",
       options: {
         disableNew: true,
         filter: ({ document }) => {
@@ -57,6 +70,32 @@ export default {
           };
         },
       },
+    },
+    {
+      name: "whatsAppNumber",
+      title: "WhatsApp destino (manual)",
+      type: "string",
+      description:
+        "Opcional. Si lo llenas, este servicio enviara mensajes a este numero en Agendar/WhatsApp. Formato sugerido: 5215512345678. En cotizacion con destinos distintos, se usa WhatsApp general.",
+      fieldset: "routing",
+      validation: (R) =>
+        R.custom((value) => {
+          if (!value) return true;
+          const digits = String(value).replace(/\D/g, "");
+          if (digits.length < 10 || digits.length > 15) {
+            return "Ingresa entre 10 y 15 digitos.";
+          }
+          return true;
+        }),
+    },
+    {
+      name: "whatsAppMessage",
+      title: "Mensaje WhatsApp (manual)",
+      type: "text",
+      rows: 3,
+      description:
+        "Opcional. Mensaje base para este servicio. Puedes usar {servicio}, {especialista}, {negocio} y {problema}.",
+      fieldset: "routing",
     },
     {
       name: "slug",
