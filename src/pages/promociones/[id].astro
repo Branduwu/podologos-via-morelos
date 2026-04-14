@@ -58,6 +58,18 @@ function promotionValidityText(startDate?: string, endDate?: string) {
   return `Vigencia hasta: ${fmt(endDate)}`;
 }
 
+function promotionStatus(startDate?: string, endDate?: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = startDate ? new Date(startDate) : null;
+  const end = endDate ? new Date(endDate) : null;
+  if (start) start.setHours(0, 0, 0, 0);
+  if (end) end.setHours(0, 0, 0, 0);
+  if (start && today < start) return "Proxima";
+  if (end && today > end) return "Finalizada";
+  return "Vigente";
+}
+
 const promoServiceParam = normalizeServiceSlug(
   (promo?.targetCategories || [])[0] ||
     (promo?.appliesTo || [])[0] ||
@@ -71,6 +83,7 @@ const promoAgendarHref = (() => {
   const qs = params.toString();
   return qs ? `/agendar?${qs}` : "/agendar";
 })();
+const promoCurrentStatus = promotionStatus(promo.startDate, promo.endDate);
 ---
 
 <Layout title={`${promo.title} | Promociones`} description={promo.shortDescription || promo.description || "Detalle de promocion"}>
@@ -115,7 +128,18 @@ const promoAgendarHref = (() => {
         )}
 
         <div class="mt-8 flex flex-wrap gap-3">
-          <a href={promoAgendarHref} class="btn-base btn-primary">Agendar con esta promocion</a>
+          {promoCurrentStatus === "Finalizada" ? (
+            <span class="btn-base btn-muted cursor-not-allowed" aria-disabled="true">Promocion finalizada</span>
+          ) : (
+            <a
+              href={promoAgendarHref}
+              data-promo-detail-cta
+              data-promo-end={promo.endDate || ""}
+              class="btn-base btn-primary"
+            >
+              Agendar con esta promocion
+            </a>
+          )}
           <a href="/contacto" class="btn-base btn-secondary">Resolver dudas</a>
         </div>
       </div>
@@ -124,3 +148,22 @@ const promoAgendarHref = (() => {
 
   <Footer />
 </Layout>
+
+<script>
+  const promoDetailCta = document.querySelector("[data-promo-detail-cta]");
+  if (promoDetailCta) {
+    const endRaw = String(promoDetailCta.getAttribute("data-promo-end") || "").trim();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = endRaw ? new Date(`${endRaw}T00:00:00`) : null;
+
+    if (end && !Number.isNaN(end.getTime()) && end < today) {
+      promoDetailCta.textContent = "Promocion finalizada";
+      promoDetailCta.removeAttribute("href");
+      promoDetailCta.setAttribute("aria-disabled", "true");
+      promoDetailCta.classList.remove("btn-primary");
+      promoDetailCta.classList.add("btn-muted", "cursor-not-allowed");
+      promoDetailCta.addEventListener("click", (event) => event.preventDefault());
+    }
+  }
+</script>

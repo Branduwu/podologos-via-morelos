@@ -2,6 +2,7 @@ export type AgendarPrefill = {
   service?: string;
   specialist?: string;
   services?: string[];
+  priceIds?: string[];
   specialists?: string[];
   waNumber?: string;
   waMessage?: string;
@@ -53,6 +54,12 @@ export function getPrefillFromUrl(urlValue: string | URL): AgendarPrefill {
   const services = [...servicesFromList, ...servicesFromCsv]
     .map((v) => String(v || "").trim())
     .filter(Boolean);
+  const priceIds = [
+    ...params.getAll("priceIds"),
+    ...params.getAll("priceId"),
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
   const specialistsFromList = params
     .getAll("specialists")
     .map((value) => String(value || "").trim())
@@ -78,6 +85,7 @@ export function getPrefillFromUrl(urlValue: string | URL): AgendarPrefill {
     service: inferredService || undefined,
     specialist: specialist || undefined,
     services: services.length > 0 ? services : undefined,
+    priceIds: priceIds.length > 0 ? priceIds : undefined,
     specialists,
     waNumber: waNumber || undefined,
     waMessage: waMessage || undefined,

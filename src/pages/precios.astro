@@ -70,30 +70,17 @@ function resolvePreferredSpecialistSlug(price: PriceRow) {
   return String(price.leadSpecialistSlug || "").trim();
 }
 
-function resolvePreferredWaNumber(price: PriceRow) {
-  return String(price.whatsAppNumber || "").trim();
-}
-
-function resolvePreferredWaMessage(price: PriceRow) {
-  return String(price.whatsAppMessage || "").trim();
-}
-
 function buildAgendarHref(price: PriceRow) {
   const category = priceCategoryKey(price);
   const title = String(price.serviceTitle || "").trim();
   const preferredSpecialistSlug = resolvePreferredSpecialistSlug(price);
-  const preferredWaNumber = resolvePreferredWaNumber(price);
-  const preferredWaMessage = resolvePreferredWaMessage(price);
   const priceFrom = Number(price.priceFrom);
   const params = new URLSearchParams();
   if (category) params.set("service", category);
   if (preferredSpecialistSlug) params.set("specialist", preferredSpecialistSlug);
-  if (preferredWaNumber) params.set("waNumber", preferredWaNumber);
-  if (preferredWaMessage) params.set("waMessage", preferredWaMessage);
+  if (price._id) params.append("priceIds", price._id);
   if (title) params.append("services", title);
   if (title) params.append("specialists", preferredSpecialistSlug || noneSpecialistValue);
-  if (title) params.append("waNumbers", preferredWaNumber || noneSpecialistValue);
-  if (title) params.append("waMessages", preferredWaMessage || noneSpecialistValue);
   if (Number.isFinite(priceFrom) && priceFrom > 0) params.set("approxTotal", String(priceFrom));
   return params.toString() ? `/agendar?${params.toString()}` : "/agendar";
 }
@@ -165,8 +152,6 @@ function buildAgendarHref(price: PriceRow) {
                 data-service-id={p._id || ""}
                 data-service-category={priceCategoryKey(p)}
                 data-service-specialist={resolvePreferredSpecialistSlug(p)}
-                data-service-wa-number={resolvePreferredWaNumber(p)}
-                data-service-wa-message={resolvePreferredWaMessage(p)}
                 data-service-price={Number(p.priceFrom || 0)}
                 class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950"
               >
@@ -218,8 +203,6 @@ function buildAgendarHref(price: PriceRow) {
                     data-service-id={p._id || ""}
                     data-service-category={priceCategoryKey(p)}
                     data-service-specialist={resolvePreferredSpecialistSlug(p)}
-                    data-service-wa-number={resolvePreferredWaNumber(p)}
-                    data-service-wa-message={resolvePreferredWaMessage(p)}
                     data-service-price={Number(p.priceFrom || 0)}
                     class="border-t border-slate-200 dark:border-slate-800"
                   >
@@ -357,22 +340,18 @@ function buildAgendarHref(price: PriceRow) {
     const uniqueSpecialists = Array.from(
       new Set(selected.map((item) => String(item.specialist || "").trim()).filter(Boolean))
     );
-    const uniqueWaNumbers = Array.from(
-      new Set(selected.map((item) => String(item.waNumber || "").trim()).filter(Boolean))
-    );
     const hasMultipleSelection = selected.length > 1;
     const shouldSetPrimaryRouting = !hasMultipleSelection;
 
     if (shouldSetPrimaryRouting && selected[0].specialist) params.set("specialist", selected[0].specialist);
-    if (shouldSetPrimaryRouting && selected[0].waNumber) params.set("waNumber", selected[0].waNumber);
-    if (shouldSetPrimaryRouting && selected[0].waMessage) params.set("waMessage", selected[0].waMessage);
-    if (hasMultipleSelection && (uniqueSpecialists.length > 1 || uniqueWaNumbers.length > 1)) {
+    if (hasMultipleSelection && uniqueSpecialists.length > 1) {
       params.set("routing", "general");
     }
+    selected.forEach((item) => {
+      if (item.id) params.append("priceIds", item.id);
+    });
     selected.forEach((item) => params.append("services", item.title));
     selected.forEach((item) => params.append("specialists", item.specialist || "__none__"));
-    selected.forEach((item) => params.append("waNumbers", item.waNumber || "__none__"));
-    selected.forEach((item) => params.append("waMessages", item.waMessage || "__none__"));
     if (total > 0) params.set("approxTotal", String(Math.round(total)));
     quoteAgendarLink.setAttribute("href", `/agendar?${params.toString()}`);
     quoteAgendarLink.classList.remove("pointer-events-none", "btn-muted");
@@ -405,8 +384,6 @@ function buildAgendarHref(price: PriceRow) {
       const title = String(row.getAttribute("data-service-title") || "").trim();
       const category = String(row.getAttribute("data-service-category") || "").trim();
       const specialist = String(row.getAttribute("data-service-specialist") || "").trim();
-      const waNumber = String(row.getAttribute("data-service-wa-number") || "").trim();
-      const waMessage = String(row.getAttribute("data-service-wa-message") || "").trim();
       const price = Number(row.getAttribute("data-service-price") || 0);
       if (!rowKey || !title) return;
 
@@ -417,7 +394,7 @@ function buildAgendarHref(price: PriceRow) {
           updateQuoteUI();
           return;
         }
-        selectedServices.set(rowKey, { title, category, specialist, waNumber, waMessage, price });
+        selectedServices.set(rowKey, { id: rowKey, title, category, specialist, price });
       }
       updateQuoteUI();
     });

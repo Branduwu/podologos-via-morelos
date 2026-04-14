@@ -2,6 +2,7 @@ import { reportError } from "./reportError.js";
 
 const GOOGLE_PLACE_DETAILS_ENDPOINT =
   "https://maps.googleapis.com/maps/api/place/details/json";
+const GOOGLE_PLACES_TIMEOUT_MS = 3500;
 
 function getGooglePlacesApiKey() {
   return (
@@ -28,6 +29,16 @@ function normalizeReview(review = {}) {
   };
 }
 
+async function fetchWithTimeout(url, timeoutMs = GOOGLE_PLACES_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function getGooglePlaceReviews(
   placeId,
   { maxReviews = 4 } = {}
@@ -49,7 +60,7 @@ export async function getGooglePlaceReviews(
   url.searchParams.set("key", apiKey);
 
   try {
-    const response = await fetch(url.toString());
+    const response = await fetchWithTimeout(url.toString());
     if (!response.ok) {
       await reportError(
         "google.placeReviews.http",
@@ -93,4 +104,3 @@ export async function getGooglePlaceReviews(
     return null;
   }
 }
-

@@ -11,6 +11,10 @@ type ServiceItem = {
   title?: string;
   category?: string;
   slug?: string | { current?: string };
+  priceFrom?: number;
+  leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
 };
 
 type Specialist = {
@@ -25,8 +29,12 @@ type Specialist = {
 };
 
 type PriceRow = {
+  _id?: string;
   serviceTitle?: string;
   category?: string;
+  leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
   priceFrom?: number;
 };
 
@@ -75,14 +83,61 @@ const specialistOptions = specialists
 
 const prefill = getPrefillFromUrl(Astro.url);
 const quoteSelectionLimit = Math.max(1, Number(clinic.quoteSelectionLimit || 6));
-const prefillServices = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteSelectionLimit) : [];
-const prefillApproxTotal = typeof prefill.approxTotal === "number" ? prefill.approxTotal : 0;
+const rawPrefillServices = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteSelectionLimit) : [];
 
 const priceCatalog = prices.map((item) => ({
+  id: item._id || "",
   title: item.serviceTitle || "",
   category: normalizeServiceSlug(item.category || ""),
+  specialist: String(item.leadSpecialistSlug || "").trim(),
+  waNumber: resolveWhatsAppNumber(item.whatsAppNumber),
+  waMessage: String(item.whatsAppMessage || "").trim(),
   priceFrom: Number(item.priceFrom || 0),
 }));
+
+const serviceCatalog = services.map((item) => ({
+  title: item.title || "",
+  category: normalizeServiceSlug(item.category || item.title || ""),
+  specialist: String(item.leadSpecialistSlug || "").trim(),
+  waNumber: resolveWhatsAppNumber(item.whatsAppNumber),
+  waMessage: String(item.whatsAppMessage || "").trim(),
+  priceFrom: Number(item.priceFrom || 0),
+}));
+
+function normalizeCatalogText(value: string | null | undefined) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const prefillPriceIds = Array.isArray(prefill.priceIds) ? prefill.priceIds.slice(0, quoteSelectionLimit) : [];
+const prefillServicesFromIds = prefillPriceIds
+  .map((priceId) => priceCatalog.find((row) => row.id === priceId)?.title || "")
+  .filter(Boolean);
+const prefillServices =
+  rawPrefillServices.length > 0
+    ? rawPrefillServices.map((serviceName, index) => {
+        const priceId = prefillPriceIds[index] || "";
+        const trustedPrice = priceId ? priceCatalog.find((row) => row.id === priceId) : undefined;
+        return trustedPrice?.title || serviceName;
+      })
+    : prefillServicesFromIds;
+const prefillApproxTotal = prefillServices.reduce((sum, serviceName, index) => {
+  const priceId = prefillPriceIds[index] || "";
+  const priceMatch =
+    (priceId &&
+      priceCatalog.find(
+        (row) => row.id === priceId && normalizeCatalogText(row.title) === normalizeCatalogText(serviceName)
+      )) ||
+    priceCatalog.find(
+      (row) => normalizeCatalogText(row.title) === normalizeCatalogText(serviceName)
+    );
+  const price = Number(priceMatch?.priceFrom || 0);
+  return sum + (Number.isFinite(price) && price > 0 ? price : 0);
+}, 0);
 
 const validServiceKeys = new Set(serviceOptions.map((option) => option.key));
 let resolvedPrefillService = prefill.service || "";
@@ -203,7 +258,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
             <textarea id="notes" name="notes" rows="3" maxlength="300" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950" placeholder="Describe brevemente tu motivo"></textarea>
           </div>
 
-          <a id="send-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="btn-base btn-muted pointer-events-none w-full">
+          <a id="send-whatsapp" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1" class="btn-base btn-muted pointer-events-none w-full">
             Completa los campos para enviar por WhatsApp
           </a>
 
@@ -248,9 +303,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     prefill: {
       ...prefill,
       service: resolvedPrefillService || prefill.service,
+      services: prefillServices.length > 0 ? prefillServices : prefill.services,
+      priceIds: prefillPriceIds.length > 0 ? prefillPriceIds : prefill.priceIds,
     },
     quoteSelectionLimit,
     priceCatalog,
+    serviceCatalog,
   })}
 ></script>
 
@@ -284,6 +342,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       service?: string;
       specialist?: string;
       services?: string[];
+      priceIds?: string[];
       specialists?: string[];
       waNumber?: string;
       waMessage?: string;
@@ -294,7 +353,18 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     };
     specialistOptions?: SpecialistOption[];
     quoteSelectionLimit?: number;
-    priceCatalog?: Array<{ title: string; category: string; priceFrom: number }>;
+    priceCatalog?: CatalogRoute[];
+    serviceCatalog?: CatalogRoute[];
+  };
+
+  type CatalogRoute = {
+    id?: string;
+    title: string;
+    category: string;
+    specialist?: string;
+    waNumber?: string;
+    waMessage?: string;
+    priceFrom: number;
   };
 
   const configEl = document.getElementById("agendar-config");
@@ -349,16 +419,15 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     services: Array.isArray(urlPrefill.services) && urlPrefill.services.length > 0
       ? urlPrefill.services
       : (Array.isArray(serverPrefill.services) ? serverPrefill.services : []),
+    priceIds: Array.isArray(urlPrefill.priceIds) && urlPrefill.priceIds.length > 0
+      ? urlPrefill.priceIds
+      : (Array.isArray(serverPrefill.priceIds) ? serverPrefill.priceIds : []),
     specialists: Array.isArray(urlPrefill.specialists) && urlPrefill.specialists.length > 0
       ? urlPrefill.specialists
       : (Array.isArray(serverPrefill.specialists) ? serverPrefill.specialists : []),
-    waNumbers: Array.isArray(urlPrefill.waNumbers) && urlPrefill.waNumbers.length > 0
-      ? urlPrefill.waNumbers
-      : (Array.isArray(serverPrefill.waNumbers) ? serverPrefill.waNumbers : []),
-    waMessages: Array.isArray(urlPrefill.waMessages) && urlPrefill.waMessages.length > 0
-      ? urlPrefill.waMessages
-      : (Array.isArray(serverPrefill.waMessages) ? serverPrefill.waMessages : []),
-    approxTotal: Number(urlPrefill.approxTotal || serverPrefill.approxTotal || 0),
+    waNumbers: [],
+    waMessages: [],
+    approxTotal: 0,
     routing:
       String(urlPrefill.routing || serverPrefill.routing || "").trim().toLowerCase() === "general"
         ? "general"
@@ -371,22 +440,38 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     return slug;
   };
   const quoteLimit = Math.max(1, Number(config.quoteSelectionLimit || 6));
+  const priceCatalog: CatalogRoute[] = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
+  const serviceCatalog: CatalogRoute[] = Array.isArray(config.serviceCatalog) ? config.serviceCatalog : [];
+  const initialPriceIds = Array.isArray(prefill.priceIds)
+    ? prefill.priceIds.map((value: string) => String(value || "").trim()).slice(0, quoteLimit)
+    : [];
   let selectedServicesState = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
+  if (initialPriceIds.length > 0) {
+    selectedServicesState = selectedServicesState.length > 0
+      ? selectedServicesState.map((serviceName: string, index: number) => {
+          const trustedPrice = priceCatalog.find((row) => String(row.id || "") === initialPriceIds[index]);
+          return trustedPrice?.title || serviceName;
+        })
+      : initialPriceIds
+          .map((priceId: string) => priceCatalog.find((row) => String(row.id || "") === priceId)?.title || "")
+          .filter(Boolean);
+  }
+  let selectedPriceIdsState = initialPriceIds;
   let selectedServicesSpecialistsState = Array.isArray(prefill.specialists)
     ? prefill.specialists
         .map((value: string) => normalizeSpecialistSlug(value))
         .slice(0, quoteLimit)
     : [];
-  let selectedServicesWaNumbersState = Array.isArray(prefill.waNumbers)
-    ? prefill.waNumbers
-        .map((value: string) => resolveWhatsAppNumber(value))
-        .slice(0, quoteLimit)
-    : [];
-  let selectedServicesWaMessagesState = Array.isArray(prefill.waMessages)
-    ? prefill.waMessages
-        .map((value: string) => String(value || "").trim())
-        .slice(0, quoteLimit)
-    : [];
+  let selectedServicesWaNumbersState: string[] = [];
+  let selectedServicesWaMessagesState: string[] = [];
+  if (selectedPriceIdsState.length < selectedServicesState.length) {
+    selectedPriceIdsState = [
+      ...selectedPriceIdsState,
+      ...Array(selectedServicesState.length - selectedPriceIdsState.length).fill(""),
+    ];
+  } else if (selectedPriceIdsState.length > selectedServicesState.length) {
+    selectedPriceIdsState = selectedPriceIdsState.slice(0, selectedServicesState.length);
+  }
   if (selectedServicesSpecialistsState.length < selectedServicesState.length) {
     selectedServicesSpecialistsState = [
       ...selectedServicesSpecialistsState,
@@ -419,24 +504,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   ) {
     selectedServicesSpecialistsState[0] = prefill.specialist.trim();
   }
-  if (
-    selectedServicesState.length > 0 &&
-    selectedServicesWaNumbersState.every((value: string) => !value) &&
-    typeof prefill.waNumber === "string" &&
-    prefill.waNumber.trim()
-  ) {
-    selectedServicesWaNumbersState[0] = resolveWhatsAppNumber(prefill.waNumber.trim());
-  }
-  if (
-    selectedServicesState.length > 0 &&
-    selectedServicesWaMessagesState.every((value: string) => !value) &&
-    typeof prefill.waMessage === "string" &&
-    prefill.waMessage.trim()
-  ) {
-    selectedServicesWaMessagesState[0] = prefill.waMessage.trim();
-  }
   let quoteTotalState = Number(prefill.approxTotal || 0);
-  const priceCatalog = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
   const specialistBySlug = new Map<string, SpecialistOption>();
   specialistItems.forEach((specialist) => {
     if (specialist.slug) specialistBySlug.set(specialist.slug, specialist);
@@ -546,7 +614,39 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     return Math.min(...matches);
   };
 
-  const normalizeText = (value: string) => String(value || "").toLowerCase().trim();
+  const normalizeText = (value: string) =>
+    String(value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const findTrustedRouteForService = (serviceName: string, index: number = 0) => {
+    const priceId = String(selectedPriceIdsState[index] || "").trim();
+    const title = normalizeText(serviceName);
+    const selectedCategory = normalizeServiceSlug(String(serviceSelect.value || ""));
+
+    if (priceId) {
+      const byId = priceCatalog.find((row) => String(row.id || "") === priceId);
+      if (byId && (!title || normalizeText(byId.title) === title)) return byId;
+    }
+
+    const byPriceTitle = priceCatalog.find((row) => {
+      if (!row.title || normalizeText(row.title) !== title) return false;
+      return !selectedCategory || !row.category || row.category === selectedCategory;
+    });
+    if (byPriceTitle) return byPriceTitle;
+
+    const byServiceTitle = serviceCatalog.find((row) => {
+      if (!row.title || normalizeText(row.title) !== title) return false;
+      return !selectedCategory || !row.category || row.category === selectedCategory;
+    });
+    if (byServiceTitle) return byServiceTitle;
+
+    return undefined;
+  };
+
   const categoryByServiceTitle = new Map<string, string>();
   priceCatalog.forEach((row) => {
     const title = normalizeText(row.title || "");
@@ -555,16 +655,18 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     categoryByServiceTitle.set(title, category);
   });
 
-  const getCategoryForService = (serviceName: string) => {
+  const getCategoryForService = (serviceName: string, index: number = 0) => {
+    const trustedRoute = findTrustedRouteForService(serviceName, index);
+    if (trustedRoute?.category) return trustedRoute.category;
     const byCatalog = categoryByServiceTitle.get(normalizeText(serviceName));
     if (byCatalog) return byCatalog;
-    return normalizeServiceSlug(String(serviceSelect.value || "").trim());
+    return normalizeServiceSlug(String(serviceSelect.value || serviceName || "").trim());
   };
 
   const getQuoteCategoryKeys = (services: string[]) => {
     const unique = new Set<string>();
-    services.forEach((serviceName) => {
-      const categoryKey = getCategoryForService(serviceName);
+    services.forEach((serviceName, index) => {
+      const categoryKey = getCategoryForService(serviceName, index);
       if (categoryKey) unique.add(categoryKey);
     });
     return Array.from(unique.values());
@@ -583,16 +685,15 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     );
 
   const getApproxTotalFromSelectedServices = (services: string[]) =>
-    services.reduce((sum, serviceName) => {
-      const match = priceCatalog.find(
-        (row) => normalizeText(row.title || "") === normalizeText(serviceName)
-      );
+    services.reduce((sum, serviceName, index) => {
+      const match = findTrustedRouteForService(serviceName, index);
       const price = Number(match?.priceFrom || 0);
       return sum + (Number.isFinite(price) && price > 0 ? price : 0);
     }, 0);
 
   type QuoteSnapshot = {
     selectedServices: string[];
+    selectedPriceIds: string[];
     selectedSpecialists: string[];
     selectedWaNumbers: string[];
     selectedWaMessages: string[];
@@ -615,6 +716,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
   const captureQuoteSnapshot = (): QuoteSnapshot => ({
     selectedServices: [...selectedServicesState],
+    selectedPriceIds: [...selectedPriceIdsState],
     selectedSpecialists: [...selectedServicesSpecialistsState],
     selectedWaNumbers: [...selectedServicesWaNumbersState],
     selectedWaMessages: [...selectedServicesWaMessagesState],
@@ -627,6 +729,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     if (!lastQuoteSnapshot) return;
 
     selectedServicesState = [...lastQuoteSnapshot.selectedServices];
+    selectedPriceIdsState = [...lastQuoteSnapshot.selectedPriceIds];
     selectedServicesSpecialistsState = [...lastQuoteSnapshot.selectedSpecialists];
     selectedServicesWaNumbersState = [...lastQuoteSnapshot.selectedWaNumbers];
     selectedServicesWaMessagesState = [...lastQuoteSnapshot.selectedWaMessages];
@@ -659,7 +762,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
     const keepIndexes: number[] = [];
     selectedServicesState.forEach((serviceName, index) => {
-      if (getCategoryForService(serviceName) !== key) keepIndexes.push(index);
+      if (getCategoryForService(serviceName, index) !== key) keepIndexes.push(index);
     });
 
     if (keepIndexes.length === selectedServicesState.length) return;
@@ -668,6 +771,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     setRestoreButtonVisible(true);
 
     selectedServicesState = keepIndexes.map((index) => selectedServicesState[index]);
+    selectedPriceIdsState = keepIndexes.map((index) => selectedPriceIdsState[index] || "");
     selectedServicesSpecialistsState = keepIndexes.map(
       (index) => selectedServicesSpecialistsState[index] || ""
     );
@@ -706,7 +810,11 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       ? selectedServicesState
       : (selectedLabel ? [selectedLabel] : []);
 
-    let total = Number.isFinite(quoteTotalState) && quoteTotalState > 0 ? quoteTotalState : 0;
+    const catalogTotal = getApproxTotalFromSelectedServices(list);
+    let total = catalogTotal > 0 ? catalogTotal : 0;
+    if (total <= 0 && Number.isFinite(quoteTotalState) && quoteTotalState > 0) {
+      total = quoteTotalState;
+    }
     if (total <= 0 && selectedCategory && !hasSelectedSpecialist) {
       total = getMinPriceByCategory(selectedCategory);
     }
@@ -717,9 +825,12 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   const getQuoteServiceSpecialists = () => {
     const { list } = getCurrentQuote();
     return list.map((serviceName: string, index: number) => {
-      const specialistSlug = normalizeSpecialistSlug(selectedServicesSpecialistsState[index] || "");
-      const waNumber = resolveWhatsAppNumber(selectedServicesWaNumbersState[index] || "");
-      const waMessage = String(selectedServicesWaMessagesState[index] || "").trim();
+      const trustedRoute = findTrustedRouteForService(serviceName, index);
+      const specialistSlug = normalizeSpecialistSlug(
+        selectedServicesSpecialistsState[index] || trustedRoute?.specialist || ""
+      );
+      const waNumber = resolveWhatsAppNumber(trustedRoute?.waNumber || "");
+      const waMessage = String(trustedRoute?.waMessage || "").trim();
       const specialist = specialistSlug ? specialistBySlug.get(specialistSlug) : undefined;
       return {
         service: serviceName,
@@ -879,7 +990,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const start = openH * 60 + openM;
     const end = closeH * 60 + closeM;
     const slots: string[] = [];
-    for (let minutes = start; minutes <= end; minutes += 30) {
+    for (let minutes = start; minutes < end; minutes += 30) {
       const h = String(Math.floor(minutes / 60)).padStart(2, "0");
       const m = String(minutes % 60).padStart(2, "0");
       slots.push(`${h}:${m}`);
@@ -986,9 +1097,9 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     }
 
     if (!serviceValue && selectedServicesState.length > 0) {
-      const firstSelected = String(selectedServicesState[0] || "").toLowerCase().trim();
+      const firstSelected = normalizeText(selectedServicesState[0] || "");
       const fromCatalog = priceCatalog.find((row) => {
-        const title = String(row.title || "").toLowerCase().trim();
+        const title = normalizeText(row.title || "");
         const category = String(row.category || "").trim();
         return Boolean(title) && Boolean(category) && title === firstSelected;
       });
@@ -1106,13 +1217,17 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     sendBtn.classList.add("pointer-events-none", "btn-muted");
     sendBtn.classList.remove("btn-primary");
     sendBtn.textContent = text;
-    sendBtn.setAttribute("href", "#");
+    sendBtn.setAttribute("aria-disabled", "true");
+    sendBtn.setAttribute("tabindex", "-1");
+    sendBtn.removeAttribute("href");
   };
 
   const setEnabledCta = (href: string) => {
     sendBtn.classList.remove("pointer-events-none", "btn-muted");
     sendBtn.classList.add("btn-primary");
     sendBtn.textContent = "Enviar solicitud por WhatsApp";
+    sendBtn.setAttribute("aria-disabled", "false");
+    sendBtn.removeAttribute("tabindex");
     sendBtn.setAttribute("href", href);
   };
 
@@ -1144,8 +1259,6 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const quoteSpecialists = getQuoteUniqueSpecialists();
     const quoteWaNumbers = getQuoteUniqueWaNumbers();
     const quoteWaMessages = getQuoteUniqueWaMessages();
-    const prefillWaNumber = resolveWhatsAppNumber(prefill.waNumber || "");
-    const prefillWaMessage = String(prefill.waMessage || "").trim();
     const quoteHasMultipleServices = quote.list.length > 1;
     const quoteCategoryKeys = getQuoteCategoryKeys(quote.list);
     const hasMixedCategories = quoteCategoryKeys.length > 1;
@@ -1183,7 +1296,6 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
           generalWaNumber
         )
       : resolveWhatsAppNumber(
-          prefillWaNumber,
           quoteWaNumbers.length === 1 ? quoteWaNumbers[0] : "",
           generalWaNumber
         );
@@ -1199,8 +1311,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
       ? generalWhatsAppMessage
       : routingSpecialist
       ? (routingSpecialist?.whatsAppMessage || specialistsWhatsAppMessage || generalWhatsAppMessage)
-      : prefillWaMessage ||
-        (quoteWaMessages.length === 1 ? quoteWaMessages[0] : "") ||
+      : (quoteWaMessages.length === 1 ? quoteWaMessages[0] : "") ||
         generalWhatsAppMessage;
     const introMessage = resolveWhatsAppReason(
       introTemplate,
@@ -1249,6 +1360,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     clearQuoteSnapshot();
     const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
     selectedServicesState = selectedLabel ? [selectedLabel] : [];
+    selectedPriceIdsState = [""];
     selectedServicesSpecialistsState = [""];
     selectedServicesWaNumbersState = [""];
     selectedServicesWaMessagesState = [""];
@@ -1342,7 +1454,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
   });
 
   sendBtn.addEventListener("click", (event) => {
-    if (sendBtn.getAttribute("href") === "#") {
+    if (!sendBtn.getAttribute("href") || sendBtn.getAttribute("aria-disabled") === "true") {
       event.preventDefault();
       form.reportValidity();
     }

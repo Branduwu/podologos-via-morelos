@@ -132,11 +132,7 @@ function moneyMXN(n: number | string | null | undefined) {
         const agendarParams = new URLSearchParams();
         if (serviceCategory) agendarParams.set("service", serviceCategory);
         if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
-        if (manualServiceWaNumber) agendarParams.set("waNumber", manualServiceWaNumber);
-        if (manualServiceWaMessage) agendarParams.set("waMessage", manualServiceWaMessage);
         if (serviceLabel) agendarParams.append("services", serviceLabel);
-        if (serviceLabel) agendarParams.append("waNumbers", manualServiceWaNumber || "__none__");
-        if (serviceLabel) agendarParams.append("waMessages", manualServiceWaMessage || "__none__");
         if (servicePrice > 0) {
           agendarParams.set("approxTotal", String(Math.round(servicePrice)));
         }

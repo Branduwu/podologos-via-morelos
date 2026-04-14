@@ -2,7 +2,7 @@ export function safeCmsUrl(value: string | null | undefined, fallback = ""): str
   const raw = String(value || "").trim();
   if (!raw) return fallback;
 
-  if (raw.startsWith("/")) return raw;
+  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
 
   try {
     const parsed = new URL(raw);
@@ -15,4 +15,3 @@ export function safeCmsUrl(value: string | null | undefined, fallback = ""): str
 
   return fallback;
 }
-

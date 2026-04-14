@@ -46,6 +46,27 @@ export async function getServices() {
   }|order(order asc, title asc)`, {}, []);
 }
 
+export async function getServiceBySlug(slug) {
+  return fetchSafe(
+    `
+    *[_type=="service" && slug.current==$slug && (!defined(active) || active == true)][0]{
+      title,
+      category,
+      short,
+      long,
+      includes,
+      duration,
+      priceFrom,
+      whatsAppNumber,
+      whatsAppMessage,
+      "leadSpecialistSlug": leadSpecialist->slug.current
+    }
+  `,
+    { slug },
+    null
+  );
+}
+
 export async function getPromotions() {
   return fetchSafe(`*[_type=="promotion" && active==true]|order(pinned desc, startDate desc){
     _id,

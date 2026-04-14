@@ -65,5 +65,5 @@ export function isWithinSchedule(dateValue: string, timeValue: string): boolean 
   const openMinutes = openH * 60 + openM;
   const closeMinutes = closeH * 60 + closeM;
 
-  return minutes >= openMinutes && minutes <= closeMinutes;
+  return minutes >= openMinutes && minutes < closeMinutes;
 }

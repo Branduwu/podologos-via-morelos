@@ -77,8 +77,6 @@ const normalized: Promotion[] = promos.map((p: Partial<Promotion>, idx: number) 
 }));
 
 const ordered = [...normalized].sort((a, b) => Number(b.pinned) - Number(a.pinned));
-const featured = ordered.filter((p) => p.featured);
-const regular = ordered.filter((p) => !p.featured);
 
 function fmt(d: string | Date | null | undefined) {
   if (!d) return "";
@@ -117,6 +115,10 @@ function promoStatus(p: Promotion) {
   return "Vigente";
 }
 
+const visiblePromos = ordered.filter((p) => promoStatus(p) !== "Finalizada");
+const featured = visiblePromos.filter((p) => p.featured);
+const regular = visiblePromos.filter((p) => !p.featured);
+
 function promotionHref(p: Promotion) {
   return `/promociones/${encodeURIComponent((p.slug || p._id || "").trim())}`;
 }
@@ -153,7 +155,7 @@ function agendarPromotionHref(p: Promotion) {
       ))}
     </div>
 
-    {normalized.length === 0 && (
+    {visiblePromos.length === 0 && (
       <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 dark:border-slate-800 dark:bg-slate-950">
         <p class="font-medium">Pronto compartiremos nuevas promociones.</p>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
@@ -184,6 +186,7 @@ function agendarPromotionHref(p: Promotion) {
             <article
               data-promo-card
               data-promo-categories={p.categories.join(",")}
+              data-promo-end={p.endDate || ""}
               class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm dark:border-slate-800 dark:bg-slate-950"
             >
               {p.imageUrl ? (
@@ -253,6 +256,7 @@ function agendarPromotionHref(p: Promotion) {
             <article
               data-promo-card
               data-promo-categories={p.categories.join(",")}
+              data-promo-end={p.endDate || ""}
               class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950"
             >
               {p.imageUrl ? (
@@ -326,6 +330,16 @@ function agendarPromotionHref(p: Promotion) {
   const filterButtons = Array.from(document.querySelectorAll("[data-promo-filter]"));
   const promoCards = Array.from(document.querySelectorAll("[data-promo-card]"));
   const emptyState = document.querySelector("[data-promo-empty]");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const isExpiredCard = (card) => {
+    const endRaw = String(card.getAttribute("data-promo-end") || "").trim();
+    if (!endRaw) return false;
+    const end = new Date(`${endRaw}T00:00:00`);
+    if (Number.isNaN(end.getTime())) return false;
+    return end < today;
+  };
 
   const animateFilteredItems = (items) => {
     items.forEach((item, index) => {
@@ -347,7 +361,7 @@ function agendarPromotionHref(p: Promotion) {
         .map((x) => x.trim())
         .filter(Boolean);
 
-      const visible = category === "todas" || categories.includes(category);
+      const visible = !isExpiredCard(card) && (category === "todas" || categories.includes(category));
       card.classList.toggle("hidden", !visible);
       if (visible) {
         visibleCount += 1;

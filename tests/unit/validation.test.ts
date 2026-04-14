@@ -29,9 +29,9 @@ describe("validation utils", () => {
     expect(isSunday("2026-02-23")).toBe(false);
 
     expect(isWithinSchedule("2026-02-23", "10:00")).toBe(true); // Monday open
-    expect(isWithinSchedule("2026-02-23", "18:00")).toBe(true);
+    expect(isWithinSchedule("2026-02-23", "17:30")).toBe(true);
+    expect(isWithinSchedule("2026-02-23", "18:00")).toBe(false); // Closing time is not a start time
     expect(isWithinSchedule("2026-02-23", "09:30")).toBe(false);
     expect(isWithinSchedule("2026-02-22", "12:00")).toBe(false); // Sunday closed
   });
 });
-

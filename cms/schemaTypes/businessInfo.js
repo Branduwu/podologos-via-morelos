@@ -426,7 +426,7 @@
       type: "string",
       description: "Campo informativo no editable.",
       fieldset: "footer",
-      initialValue: "Proyecto firmado por Abraham Jimenez Valdes Dev",
+      initialValue: "Proyecto de DANA HR",
       readOnly: true,
     },
   ],

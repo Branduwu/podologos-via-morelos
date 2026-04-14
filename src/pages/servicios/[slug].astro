@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { clinic } from "../../config/clinic";
-import { getBusinessInfo, getSpecialists, sanityClient } from "../../lib/sanity.js";
+import { getBusinessInfo, getServiceBySlug, getSpecialists, sanityClient } from "../../lib/sanity.js";
 import { reportError } from "../../lib/reportError.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
 import {
@@ -45,23 +45,7 @@ const slugString = (typeof slug === "string" ? slug : "").trim();
 
 const service: ServiceDetail | null =
       slugString && validSlugRe.test(slugString)
-    ? await sanityClient.fetch(
-        `
-        *[_type=="service" && slug.current==$slug && (!defined(active) || active == true)][0]{
-          title,
-          category,
-          short,
-          long,
-          includes,
-          duration,
-          priceFrom,
-          whatsAppNumber,
-          whatsAppMessage,
-          "leadSpecialistSlug": leadSpecialist->slug.current
-        }
-      `,
-        { slug: slugString },
-      )
+    ? await getServiceBySlug(slugString)
     : null;
 const business = await getBusinessInfo();
 const specialists: SpecialistRoutingItem[] = (await getSpecialists()) || [];
@@ -136,11 +120,7 @@ const preferredSpecialistSlug =
 const manualServiceWaNumber = String(service?.whatsAppNumber || "").trim();
 const manualServiceWaMessage = String(service?.whatsAppMessage || "").trim();
 if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
-if (manualServiceWaNumber) agendarParams.set("waNumber", manualServiceWaNumber);
-if (manualServiceWaMessage) agendarParams.set("waMessage", manualServiceWaMessage);
 if (service?.title) agendarParams.append("services", service.title);
-if (service?.title) agendarParams.append("waNumbers", manualServiceWaNumber || "__none__");
-if (service?.title) agendarParams.append("waMessages", manualServiceWaMessage || "__none__");
 if (typeof service?.priceFrom === "number" && service.priceFrom > 0) {
   agendarParams.set("approxTotal", String(Math.round(service.priceFrom)));
 }
