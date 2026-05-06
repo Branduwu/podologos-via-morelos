@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#contenido-principal"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Plus Care Plus Care Cuidamos de tu salud de forma segura." [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "Plus Care" [ref=e7]
+          - generic [ref=e8]:
+            - paragraph [ref=e9]: Plus Care
+            - paragraph [ref=e10]: Cuidamos de tu salud de forma segura.
+        - generic [ref=e11]:
+          - button "Cambiar tema" [ref=e12]:
+            - img [ref=e14]
+          - button "Menu" [ref=e16]:
+            - img [ref=e17]
+            - text: Menu
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Solicitud rapida
+        - heading "Agenda tu cita" [level=1] [ref=e22]
+        - paragraph [ref=e23]: Completa tus datos y genera tu solicitud por WhatsApp en unos minutos. Si vienes desde servicios o precios, respetamos esa seleccion para que no tengas que empezar de cero.
+        - generic [ref=e24]:
+          - link "Llenar formulario" [ref=e25] [cursor=pointer]:
+            - /url: "#appointment-form"
+          - link "Ver servicios" [ref=e26] [cursor=pointer]:
+            - /url: /servicios
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - heading "Datos de la cita" [level=2] [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - paragraph [ref=e32]: Resumen de cotización
+              - paragraph [ref=e33]: Selecciona un servicio para ver precio aproximado.
+            - generic [ref=e34]:
+              - generic [ref=e35]:
+                - generic [ref=e36]: "1"
+                - generic [ref=e37]:
+                  - paragraph [ref=e38]: Paso principal
+                  - heading "Solo lo necesario para empezar" [level=3] [ref=e39]
+                  - paragraph [ref=e40]: Con servicio, nombre y telefono ya podemos recibir tu solicitud y darte seguimiento.
+              - generic [ref=e41]:
+                - generic [ref=e42]:
+                  - generic [ref=e43]: Servicio
+                  - combobox "Servicio" [ref=e44]:
+                    - option "Selecciona servicio..." [disabled] [selected]
+                    - option "Podologia"
+                    - option "Psicologia"
+                    - option "Optica / Optometria"
+                    - option "Quiropractica"
+                    - option "Dentista"
+                - generic [ref=e45]:
+                  - generic [ref=e46]: Nombre
+                  - textbox "Nombre" [ref=e47]:
+                    - /placeholder: Tu nombre completo
+                - generic [ref=e48]:
+                  - generic [ref=e49]: Telefono
+                  - textbox "Telefono" [ref=e50]:
+                    - /placeholder: Ej. 55 2538 8683
+                  - paragraph [ref=e51]: Acepta espacios o guiones. Se valida entre 10 y 15 digitos y evita numeros invalidos.
+            - group [ref=e52]:
+              - generic "2 Paso opcional Elige horario, especialista y detalles Abre esta seccion solo si quieres afinar la solicitud antes de enviarla." [ref=e53] [cursor=pointer]:
+                - generic [ref=e54]: "2"
+                - generic [ref=e55]:
+                  - paragraph [ref=e56]: Paso opcional
+                  - heading "Elige horario, especialista y detalles" [level=3] [ref=e57]
+                  - paragraph [ref=e58]: Abre esta seccion solo si quieres afinar la solicitud antes de enviarla.
+                - img [ref=e60]
+              - option "Sin preferencia (el que esté disponible)" [selected]
+              - option "Selecciona hora" [selected]
+              - option "Por definir" [selected]
+              - option "Manana"
+              - option "Tarde"
+            - generic [ref=e62]:
+              - paragraph [ref=e63]: Listo para enviar
+              - paragraph [ref=e64]: Solo necesitas servicio, nombre y telefono. Si falta algo obligatorio, te llevamos al primer campo por corregir.
+              - button "Completa los campos y abre WhatsApp" [ref=e65] [cursor=pointer]
+              - paragraph [ref=e66]: "Validamos horario: L-V 10:00-18:00, Sabado 10:00-16:00, Domingo cerrado."
+        - complementary [ref=e67]:
+          - generic [ref=e68]:
+            - paragraph [ref=e69]: Ayuda rapida
+            - generic [ref=e70]:
+              - link "WhatsApp directo" [ref=e71] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20quiero%20informacion%20para%20agendar%20una%20cita.
+              - link "Llamar" [ref=e72] [cursor=pointer]:
+                - /url: tel:5525388683
+              - link "Como llegar" [ref=e73] [cursor=pointer]:
+                - /url: https://maps.app.goo.gl/qBruvuwd52wAjKHn9
+          - generic [ref=e74]:
+            - heading "Informacion" [level=2] [ref=e75]
+            - paragraph [ref=e76]: Vía Morelos 232, Sta Maria Tulpetlac, 55400 Ecatepec de Morelos, Méx., Ecatepec de Morelos, Mexico, 55400
+            - paragraph [ref=e77]: "Telefono: 55 2538 8683"
+            - paragraph [ref=e78]: "Horarios: Lunes - Viernes 10 a.m. – 6 p.m. Sabado 10 a.m. – 4 p.m. Domingo Cerrado"
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: Que sigue despues de enviar
+            - list [ref=e81]:
+              - listitem [ref=e82]:
+                - generic [ref=e84]: Recibimos tu solicitud por WhatsApp y confirmamos disponibilidad.
+              - listitem [ref=e85]:
+                - generic [ref=e87]: Si elegiste servicio o especialista, usamos esa referencia para orientar mejor la respuesta.
+              - listitem [ref=e88]:
+                - generic [ref=e90]: "Duracion aproximada de atencion: 30 a 60 minutos segun valoracion."
+          - link "Ver ubicacion completa" [ref=e92] [cursor=pointer]:
+            - /url: /ubicacion
+    - contentinfo [ref=e93]:
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - link "Plus Care Plus Care" [ref=e97] [cursor=pointer]:
+            - /url: /
+            - img "Plus Care" [ref=e98]
+            - generic [ref=e99]: Plus Care
+          - paragraph [ref=e100]: Atención integral en podología, psicología, óptica, quiropráctica y dentista.
+          - paragraph [ref=e101]: "Tel: 55 2538 8683"
+        - generic [ref=e102]:
+          - heading "Menu" [level=3] [ref=e103]
+          - list [ref=e104]:
+            - listitem [ref=e105]:
+              - link "Inicio" [ref=e106] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e107]:
+              - link "Nuestros servicios" [ref=e108] [cursor=pointer]:
+                - /url: /servicios
+            - listitem [ref=e109]:
+              - link "Precios" [ref=e110] [cursor=pointer]:
+                - /url: /precios
+            - listitem [ref=e111]:
+              - link "Especialistas" [ref=e112] [cursor=pointer]:
+                - /url: /especialistas
+            - listitem [ref=e113]:
+              - link "Promociones" [ref=e114] [cursor=pointer]:
+                - /url: /promociones
+            - listitem [ref=e115]:
+              - link "Fotos y videos" [ref=e116] [cursor=pointer]:
+                - /url: /galeria
+            - listitem [ref=e117]:
+              - link "Nosotros" [ref=e118] [cursor=pointer]:
+                - /url: /nosotros
+            - listitem [ref=e119]:
+              - link "Ubicación" [ref=e120] [cursor=pointer]:
+                - /url: /ubicacion
+            - listitem [ref=e121]:
+              - link "Contacto" [ref=e122] [cursor=pointer]:
+                - /url: /contacto
+            - listitem [ref=e123]:
+              - link "FAQ" [ref=e124] [cursor=pointer]:
+                - /url: /faq
+            - listitem [ref=e125]:
+              - link "Agendar cita" [ref=e126] [cursor=pointer]:
+                - /url: /agendar
+        - generic [ref=e127]:
+          - heading "Sobre el sitio" [level=3] [ref=e128]
+          - list [ref=e129]:
+            - listitem [ref=e130]:
+              - link "Aviso de privacidad" [ref=e131] [cursor=pointer]:
+                - /url: /privacidad
+            - listitem [ref=e132]:
+              - link "Comunicados" [ref=e133] [cursor=pointer]:
+                - /url: /comunicados
+        - generic [ref=e134]:
+          - heading "Redes" [level=3] [ref=e135]
+          - generic [ref=e136]:
+            - link "Facebook" [ref=e137] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e138]
+            - link "Instagram" [ref=e140] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e141]
+            - link "TikTok" [ref=e143] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e144]
+      - generic [ref=e147]:
+        - paragraph [ref=e148]:
+          - link "Sitio WEB-ABJV" [ref=e149] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/ingabrahamjv/
+        - generic [ref=e150]:
+          - img "Plus Care" [ref=e151]
+          - generic [ref=e152]: Copyright (c) 2026 Plus Care | Todos los derechos reservados.
+          - img [ref=e154]
+  - link "Abrir WhatsApp" [ref=e156] [cursor=pointer]:
+    - /url: https://wa.me/5525388683?text=Me%20gustar%C3%ADa%20agendar%20una%20cita%20con%20el%2Fla%20especialista%20en%20__.
+    - img [ref=e157]
+  - generic [ref=e161]:
+    - button "Menu" [ref=e162]:
+      - img [ref=e164]
+      - generic: Menu
+    - button "Inspect" [ref=e168]:
+      - img [ref=e170]
+      - generic: Inspect
+    - button "Audit" [ref=e172]:
+      - img [ref=e174]
+      - generic: Audit
+    - button "Settings" [ref=e177]:
+      - img [ref=e179]
+      - generic: Settings

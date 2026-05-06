@@ -1,0 +1,447 @@
+- generic [active] [ref=e1]:
+  - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#contenido-principal"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - paragraph [ref=e7]: "Horario de hoy: lunes de 10 a.m. a 6 p.m."
+        - paragraph [ref=e8]: Vía Morelos 232, Sta Maria Tulpetlac, 55400 Ecatepec de Morelos, Méx., Ecatepec de Morelos, Mexico, 55400
+        - paragraph [ref=e9]: "Tel: 55 2538 8683"
+      - generic [ref=e10]:
+        - link "Plus Care Plus Care Cuidamos de tu salud de forma segura." [ref=e11] [cursor=pointer]:
+          - /url: /
+          - img "Plus Care" [ref=e12]
+          - generic [ref=e13]:
+            - paragraph [ref=e14]: Plus Care
+            - paragraph [ref=e15]: Cuidamos de tu salud de forma segura.
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - link "Facebook" [ref=e18] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e19]
+            - link "Instagram" [ref=e21] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e22]
+            - link "TikTok" [ref=e24] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e25]
+          - button "Cambiar tema" [ref=e27]:
+            - img [ref=e29]
+      - navigation [ref=e36]:
+        - link "Inicio" [ref=e37] [cursor=pointer]:
+          - /url: /
+        - link "Servicios" [ref=e38] [cursor=pointer]:
+          - /url: /servicios
+        - link "Especialistas" [ref=e39] [cursor=pointer]:
+          - /url: /especialistas
+        - link "Precios" [ref=e40] [cursor=pointer]:
+          - /url: /precios
+        - link "Ubicación" [ref=e41] [cursor=pointer]:
+          - /url: /ubicacion
+        - link "Promociones" [ref=e42] [cursor=pointer]:
+          - /url: /promociones
+        - link "Fotos y videos" [ref=e43] [cursor=pointer]:
+          - /url: /galeria
+        - link "Nosotros" [ref=e44] [cursor=pointer]:
+          - /url: /nosotros
+        - link "FAQ" [ref=e45] [cursor=pointer]:
+          - /url: /faq
+        - link "Contacto" [ref=e46] [cursor=pointer]:
+          - /url: /contacto
+        - link "Agenda tu cita" [ref=e47] [cursor=pointer]:
+          - /url: /agendar
+    - main [ref=e48]:
+      - generic [ref=e49]:
+        - paragraph [ref=e50]: Atencion especializada
+        - heading "Servicios" [level=1] [ref=e51]
+        - paragraph [ref=e52]: Conoce qué incluye cada servicio, su precio desde y la mejor ruta para agendar. Si ya sabes lo que necesitas, puedes filtrar por categoría o pasar directo a la agenda.
+        - generic [ref=e53]:
+          - link "Agendar cita" [ref=e54] [cursor=pointer]:
+            - /url: /agendar
+          - link "Ver precios" [ref=e55] [cursor=pointer]:
+            - /url: /precios
+      - generic [ref=e56]:
+        - button "Todas" [ref=e57]
+        - button "Podologia" [ref=e58]
+        - button "Psicologia" [ref=e59]
+        - button "Optica" [ref=e60]
+        - button "Quiropractica" [ref=e61]
+        - button "Dentista" [ref=e62]
+      - generic [ref=e63]:
+        - article [ref=e64]:
+          - generic [ref=e65]:
+            - heading "Aplicación de sueroterapia" [level=2] [ref=e66]
+            - paragraph [ref=e67]: Evaluación de postura, movilidad y origen del dolor.
+            - generic [ref=e68]:
+              - generic [ref=e69]: Duracion 30–60 min
+              - generic [ref=e70]: Desde $1,200
+          - generic [ref=e71]:
+            - link "Agendar este servicio" [ref=e72] [cursor=pointer]:
+              - /url: /agendar?service=quiropractica&specialist=quiropractica-elizabeth-gomez&services=Aplicaci%C3%B3n+de+sueroterapia&approxTotal=1200
+            - link "Ver detalles" [ref=e73] [cursor=pointer]:
+              - /url: /servicios/valoracion-quiropractica-primera-visita
+            - generic [ref=e74]:
+              - link "Ver precios" [ref=e75] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e76] [cursor=pointer]:
+                - /url: https://wa.me/525578690137?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20la%20Quiropr%C3%A1ctica%20Elizabeth.%20%C2%BFPodr%C3%ADan%20indicarme%20costos%20y%20horarios%20disponibles%3F
+        - article [ref=e77]:
+          - generic [ref=e78]:
+            - heading "Blanqueamiento Dental Profesional" [level=2] [ref=e79]
+            - paragraph [ref=e80]: Tratamiento estético para aclarar el tono de los dientes de manera segura y supervisada por el especialista.
+            - generic [ref=e81]:
+              - generic [ref=e82]: Duracion 25–35 min
+              - generic [ref=e83]: Desde $3,000
+          - generic [ref=e84]:
+            - link "Agendar este servicio" [ref=e85] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Blanqueamiento+Dental+Profesional&approxTotal=3000
+            - link "Ver detalles" [ref=e86] [cursor=pointer]:
+              - /url: /servicios/blanqueamiento-dental-profesional
+            - generic [ref=e87]:
+              - link "Ver precios" [ref=e88] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e89] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e90]:
+          - generic [ref=e91]:
+            - heading "Callos y durezas" [level=2] [ref=e92]
+            - paragraph [ref=e93]: Eliminación controlada de callosidades para mejorar comodidad al caminar.
+            - generic [ref=e94]:
+              - generic [ref=e95]: Duracion 25–35 min
+              - generic [ref=e96]: Desde $300
+          - generic [ref=e97]:
+            - link "Agendar este servicio" [ref=e98] [cursor=pointer]:
+              - /url: /agendar?service=podologia&specialist=podologo-a-nombre-apellido&services=Callos+y+durezas&approxTotal=300
+            - link "Ver detalles" [ref=e99] [cursor=pointer]:
+              - /url: /servicios/callos-y-durezas
+            - generic [ref=e100]:
+              - link "Ver precios" [ref=e101] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e102] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20buen%20d%C3%ADa.%20Quisiera%20agendar%20una%20cita%20para%20el%20servicio%20de%20Callos%20y%20durezas%20%C2%BFMe%20podr%C3%ADan%20indicar%20horarios%20disponibles%3F
+        - article [ref=e103]:
+          - generic [ref=e104]:
+            - heading "Cirugía y Extracción Dental" [level=2] [ref=e105]
+            - paragraph [ref=e106]: Procedimientos para retirar piezas dentales dañadas, retenidas o que afectan la salud bucal.
+            - generic [ref=e107]:
+              - generic [ref=e108]: Duracion 30 - 60 min
+              - generic [ref=e109]: Desde $800
+          - generic [ref=e110]:
+            - link "Agendar este servicio" [ref=e111] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Cirug%C3%ADa+y+Extracci%C3%B3n+Dental&approxTotal=800
+            - link "Ver detalles" [ref=e112] [cursor=pointer]:
+              - /url: /servicios/cirugia-y-extraccion-dental
+            - generic [ref=e113]:
+              - link "Ver precios" [ref=e114] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e115] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e116]:
+          - generic [ref=e117]:
+            - heading "Endodoncia" [level=2] [ref=e118]
+            - paragraph [ref=e119]: Eliminación de la infección dentro del diente para aliviar el dolor y conservar la pieza dental natural.
+            - generic [ref=e120]:
+              - generic [ref=e121]: Duracion 60 - 90 min
+              - generic [ref=e122]: Desde $1,800
+          - generic [ref=e123]:
+            - link "Agendar este servicio" [ref=e124] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Endodoncia&approxTotal=1800
+            - link "Ver detalles" [ref=e125] [cursor=pointer]:
+              - /url: /servicios/endodoncia
+            - generic [ref=e126]:
+              - link "Ver precios" [ref=e127] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e128] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e129]:
+          - generic [ref=e130]:
+            - heading "Examen de la vista (evaluación visual)" [level=2] [ref=e131]
+            - paragraph [ref=e132]: Evaluación visual para detectar necesidades de graduación y fatiga visual.
+            - generic [ref=e134]: Duracion 30–45 min
+          - generic [ref=e135]:
+            - link "Agendar este servicio" [ref=e136] [cursor=pointer]:
+              - /url: /agendar?service=optica&specialist=ortometrista-optometrista-nombre-apellido&services=Examen+de+la+vista+%28evaluaci%C3%B3n+visual%29
+            - link "Ver detalles" [ref=e137] [cursor=pointer]:
+              - /url: /servicios/examen-de-la-vista-evaluacion-visual
+            - generic [ref=e138]:
+              - link "Ver precios" [ref=e139] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e140] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20buen%20d%C3%ADa.%20Me%20gustar%C3%ADa%20agendar%20una%20cita%20para%20un%20Examen%20de%20la%20vista.%20%C2%BFPodr%C3%ADan%20compartirme%20disponibilidad%3F
+        - article [ref=e141]:
+          - generic [ref=e142]:
+            - heading "Faciales" [level=2] [ref=e143]
+            - paragraph [ref=e144]: Tratamiento facial profesional diseñado para limpiar profundamente, revitalizar y mejorar la salud de la piel mediante la combinación de productos especializados y tecnología estética no invasiva.
+            - generic [ref=e145]:
+              - generic [ref=e146]: Duracion 40–60 min
+              - generic [ref=e147]: Desde $800
+          - generic [ref=e148]:
+            - link "Agendar este servicio" [ref=e149] [cursor=pointer]:
+              - /url: /agendar?service=quiropractica&specialist=quiropractica-elizabeth-gomez&services=Faciales+&approxTotal=800
+            - link "Ver detalles" [ref=e150] [cursor=pointer]:
+              - /url: /servicios/faciales
+            - generic [ref=e151]:
+              - link "Ver precios" [ref=e152] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e153] [cursor=pointer]:
+                - /url: https://wa.me/525578690137?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20la%20Quiropr%C3%A1ctica%20Elizabeth.%20%C2%BFPodr%C3%ADan%20indicarme%20costos%20y%20horarios%20disponibles%3F
+        - article [ref=e154]:
+          - generic [ref=e155]:
+            - heading "Lentes con Tratamiento Especial" [level=2] [ref=e156]
+            - paragraph [ref=e157]: Tratamientos espcializados
+            - generic [ref=e159]: Duracion 25–35 min
+          - generic [ref=e160]:
+            - link "Agendar este servicio" [ref=e161] [cursor=pointer]:
+              - /url: /agendar?service=optica&specialist=ortometrista-optometrista-nombre-apellido&services=Lentes+con+Tratamiento+Especial
+            - link "Ver detalles" [ref=e162] [cursor=pointer]:
+              - /url: /servicios/lentes-con-tratamiento-especial
+            - generic [ref=e163]:
+              - link "Ver precios" [ref=e164] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e165] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20me%20interesa%20agendar%20en%20Podologo%20Plus%20Care.%0AServicio%20de%20interes%3A%20Lentes%20con%20Tratamiento%20Especial%0AConsulta%3A%20Quiero%20informacion%20y%20disponibilidad%20para%20agendar.
+        - article [ref=e166]:
+          - generic [ref=e167]:
+            - heading "Limpieza Dental Profesional" [level=2] [ref=e168]
+            - paragraph [ref=e169]: Eliminación de sarro, placa bacteriana y manchas para mejorar la salud de encías y prevenir enfermedades periodontales.
+            - generic [ref=e170]:
+              - generic [ref=e171]: Duracion 40–60 min
+              - generic [ref=e172]: Desde $600
+          - generic [ref=e173]:
+            - link "Agendar este servicio" [ref=e174] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Limpieza+Dental+Profesional&approxTotal=600
+            - link "Ver detalles" [ref=e175] [cursor=pointer]:
+              - /url: /servicios/limpieza-dental-profesional
+            - generic [ref=e176]:
+              - link "Ver precios" [ref=e177] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e178] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e179]:
+          - generic [ref=e180]:
+            - heading "Ortodoncia" [level=2] [ref=e181]
+            - paragraph [ref=e182]: Tratamiento para corregir la posición de los dientes y mejorar la mordida, logrando una sonrisa funcional y estética.
+            - generic [ref=e183]:
+              - generic [ref=e184]: Duracion 40–60 min
+              - generic [ref=e185]: Desde $5,500
+          - generic [ref=e186]:
+            - link "Agendar este servicio" [ref=e187] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Ortodoncia&approxTotal=5500
+            - link "Ver detalles" [ref=e188] [cursor=pointer]:
+              - /url: /servicios/ortodoncia
+            - generic [ref=e189]:
+              - link "Ver precios" [ref=e190] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e191] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e192]:
+          - generic [ref=e193]:
+            - heading "Prótesis Dental Fija y Removible" [level=2] [ref=e194]
+            - paragraph [ref=e195]: Reemplazo de piezas dentales perdidas para recuperar función, estética y seguridad al masticar y sonreír.
+            - generic [ref=e196]:
+              - generic [ref=e197]: Duracion 60 - 90 min
+              - generic [ref=e198]: Desde $2,500
+          - generic [ref=e199]:
+            - link "Agendar este servicio" [ref=e200] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Pr%C3%B3tesis+Dental+Fija+y+Removible&approxTotal=2500
+            - link "Ver detalles" [ref=e201] [cursor=pointer]:
+              - /url: /servicios/protesis-dental-fija-y-removible
+            - generic [ref=e202]:
+              - link "Ver precios" [ref=e203] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e204] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e205]:
+          - generic [ref=e206]:
+            - heading "Resinas Dentales Estéticas" [level=2] [ref=e207]
+            - paragraph [ref=e208]: Restauración de dientes dañados o con caries utilizando materiales estéticos que se adaptan al color natural del diente.
+            - generic [ref=e209]:
+              - generic [ref=e210]: Duracion 40–60 min
+              - generic [ref=e211]: Desde $800
+          - generic [ref=e212]:
+            - link "Agendar este servicio" [ref=e213] [cursor=pointer]:
+              - /url: /agendar?service=dentista&specialist=gabriel-quijas&services=Resinas+Dentales+Est%C3%A9ticas&approxTotal=800
+            - link "Ver detalles" [ref=e214] [cursor=pointer]:
+              - /url: /servicios/resinas-dentales-esteticas
+            - generic [ref=e215]:
+              - link "Ver precios" [ref=e216] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e217] [cursor=pointer]:
+                - /url: https://wa.me/525577991810?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Dentista%20Gabriel%20Quijas.%20%C2%BFPodr%C3%ADan%20indicarme%20horarios%20disponibles%3F
+        - article [ref=e218]:
+          - generic [ref=e219]:
+            - heading "Revisión Ortopedica" [level=2] [ref=e220]
+            - paragraph [ref=e221]: Diagnóstico de sus miembros inferiores general
+            - generic [ref=e222]:
+              - generic [ref=e223]: Duracion 25–35 min
+              - generic [ref=e224]: Desde $750
+          - generic [ref=e225]:
+            - link "Agendar este servicio" [ref=e226] [cursor=pointer]:
+              - /url: /agendar?service=podologia&specialist=podologo-a-nombre-apellido&services=Revisi%C3%B3n+Ortopedica&approxTotal=750
+            - link "Ver detalles" [ref=e227] [cursor=pointer]:
+              - /url: /servicios/cuidado-preventivo-pie-sensible-riesgo
+            - generic [ref=e228]:
+              - link "Ver precios" [ref=e229] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e230] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20buen%20d%C3%ADa.%20Quisiera%20agendar%20una%20cita%20para%20el%20servicio%20de%20Revisi%C3%B3n%20Ortop%C3%A9dica.%20%C2%BFMe%20podr%C3%ADan%20indicar%20horarios%20disponibles%3F
+        - article [ref=e231]:
+          - generic [ref=e232]:
+            - heading "Servicio Podologico Clínico Total" [level=2] [ref=e233]
+            - paragraph [ref=e234]: Revisión clínica del pie y plan de tratamiento personalizado.
+            - generic [ref=e235]:
+              - generic [ref=e236]: Duracion 30–45 min
+              - generic [ref=e237]: Desde $300
+          - generic [ref=e238]:
+            - link "Agendar este servicio" [ref=e239] [cursor=pointer]:
+              - /url: /agendar?service=podologia&specialist=podologo-a-nombre-apellido&services=Servicio+Podologico+Cl%C3%ADnico+Total&approxTotal=300
+            - link "Ver detalles" [ref=e240] [cursor=pointer]:
+              - /url: /servicios/consulta-podologica-valoracion
+            - generic [ref=e241]:
+              - link "Ver precios" [ref=e242] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e243] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20buen%20d%C3%ADa.%20Me%20gustar%C3%ADa%20agendar%20una%20cita%20para%20el%20Servicio%20Podol%C3%B3gico.%20%C2%BFPodr%C3%ADan%20compartirme%20disponibilidad%3F
+        - article [ref=e244]:
+          - generic [ref=e245]:
+            - heading "Sesión quiropráctica (ajuste y terapia)" [level=2] [ref=e246]
+            - paragraph [ref=e247]: Sesión para aliviar tensión y mejorar movilidad de forma segura.
+            - generic [ref=e248]:
+              - generic [ref=e249]: Duracion 30–45 min
+              - generic [ref=e250]: Desde $400
+          - generic [ref=e251]:
+            - link "Agendar este servicio" [ref=e252] [cursor=pointer]:
+              - /url: /agendar?service=quiropractica&specialist=quiropractico-a-nombre-apellido&services=Sesi%C3%B3n+quiropr%C3%A1ctica+%28ajuste+y+terapia%29&approxTotal=400
+            - link "Ver detalles" [ref=e253] [cursor=pointer]:
+              - /url: /servicios/sesion-quiropractica-ajuste-y-terapia
+            - generic [ref=e254]:
+              - link "Ver precios" [ref=e255] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e256] [cursor=pointer]:
+                - /url: https://wa.me/525637394901?text=Hola%2C%20quiero%20una%20valoraci%C3%B3n%20con%20el%20Quiropr%C3%A1ctico%20Jacob.%20%C2%BFPodr%C3%ADan%20indicarme%20costos%20y%20horarios%20disponibles%3F
+        - article [ref=e257]:
+          - generic [ref=e258]:
+            - heading "Terapia de pareja" [level=2] [ref=e259]
+            - paragraph [ref=e260]: Espacio de orientación profesional donde ambos pueden expresar sus emociones, mejorar la comunicación y trabajar en la solución de conflictos, con el objetivo de fortalecer la relación y encontrar acuerdos saludables.
+            - generic [ref=e261]:
+              - generic [ref=e262]: Duracion 60 - 90 min
+              - generic [ref=e263]: Desde $500
+          - generic [ref=e264]:
+            - link "Agendar este servicio" [ref=e265] [cursor=pointer]:
+              - /url: /agendar?service=psicologia&specialist=psicologo-a-nombre-apellido&services=Terapia+de+pareja&approxTotal=500
+            - link "Ver detalles" [ref=e266] [cursor=pointer]:
+              - /url: /servicios/terapia-de-pareja
+            - generic [ref=e267]:
+              - link "Ver precios" [ref=e268] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e269] [cursor=pointer]:
+                - /url: https://wa.me/5571848004?text=Hola%2C%20buen%20d%C3%ADa.%20Me%20gustar%C3%ADa%20agendar%20una%20cita%20para%20una%20sesi%C3%B2n%20de%20Terapia.%20%C2%BFPodr%C3%ADan%20compartirme%20disponibilidad%3F
+        - article [ref=e270]:
+          - generic [ref=e271]:
+            - heading "Terapia individual" [level=2] [ref=e272]
+            - paragraph [ref=e273]: Es un espacio seguro y confidencial donde podrás hablar sobre lo que sientes, piensas o estás viviendo.
+            - generic [ref=e274]:
+              - generic [ref=e275]: Duracion 60 min
+              - generic [ref=e276]: Desde $300
+          - generic [ref=e277]:
+            - link "Agendar este servicio" [ref=e278] [cursor=pointer]:
+              - /url: /agendar?service=psicologia&specialist=psicologo-a-nombre-apellido&services=Terapia+individual&approxTotal=300
+            - link "Ver detalles" [ref=e279] [cursor=pointer]:
+              - /url: /servicios/terapia-individual-seguimiento
+            - generic [ref=e280]:
+              - link "Ver precios" [ref=e281] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e282] [cursor=pointer]:
+                - /url: https://wa.me/5571848004?text=Hola%2C%20buen%20d%C3%ADa.%20Me%20gustar%C3%ADa%20agendar%20una%20cita%20para%20una%20sesi%C3%B2n%20de%20Terapia.%20%C2%BFPodr%C3%ADan%20compartirme%20disponibilidad%3F
+        - article [ref=e283]:
+          - generic [ref=e284]:
+            - heading "Venta de armazones y micas graduadas" [level=2] [ref=e285]
+            - paragraph [ref=e286]: Armazones y micas graduadas adaptadas a tus necesidades
+            - generic [ref=e288]: Duracion 30–45 min
+          - generic [ref=e289]:
+            - link "Agendar este servicio" [ref=e290] [cursor=pointer]:
+              - /url: /agendar?service=optica&specialist=ortometrista-optometrista-nombre-apellido&services=Venta+de+armazones+y+micas+graduadas
+            - link "Ver detalles" [ref=e291] [cursor=pointer]:
+              - /url: /servicios/actualizacion-de-graduacion
+            - generic [ref=e292]:
+              - link "Ver precios" [ref=e293] [cursor=pointer]:
+                - /url: /precios
+              - link "Escribir por WhatsApp" [ref=e294] [cursor=pointer]:
+                - /url: https://wa.me/5525388683?text=Hola%2C%20me%20interesa%20agendar%20en%20Podologo%20Plus%20Care.%0AServicio%20de%20interes%3A%20Venta%20de%20armazones%20y%20micas%20graduadas%0AConsulta%3A%20Quiero%20informacion%20y%20disponibilidad%20para%20agendar.
+    - contentinfo [ref=e295]:
+      - generic [ref=e297]:
+        - generic [ref=e298]:
+          - link "Plus Care Plus Care" [ref=e299] [cursor=pointer]:
+            - /url: /
+            - img "Plus Care" [ref=e300]
+            - generic [ref=e301]: Plus Care
+          - paragraph [ref=e302]: Atención integral en podología, psicología, óptica, quiropráctica y dentista.
+          - paragraph [ref=e303]: "Tel: 55 2538 8683"
+        - generic [ref=e304]:
+          - heading "Menu" [level=3] [ref=e305]
+          - list [ref=e306]:
+            - listitem [ref=e307]:
+              - link "Inicio" [ref=e308] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e309]:
+              - link "Nuestros servicios" [ref=e310] [cursor=pointer]:
+                - /url: /servicios
+            - listitem [ref=e311]:
+              - link "Precios" [ref=e312] [cursor=pointer]:
+                - /url: /precios
+            - listitem [ref=e313]:
+              - link "Especialistas" [ref=e314] [cursor=pointer]:
+                - /url: /especialistas
+            - listitem [ref=e315]:
+              - link "Promociones" [ref=e316] [cursor=pointer]:
+                - /url: /promociones
+            - listitem [ref=e317]:
+              - link "Fotos y videos" [ref=e318] [cursor=pointer]:
+                - /url: /galeria
+            - listitem [ref=e319]:
+              - link "Nosotros" [ref=e320] [cursor=pointer]:
+                - /url: /nosotros
+            - listitem [ref=e321]:
+              - link "Ubicación" [ref=e322] [cursor=pointer]:
+                - /url: /ubicacion
+            - listitem [ref=e323]:
+              - link "Contacto" [ref=e324] [cursor=pointer]:
+                - /url: /contacto
+            - listitem [ref=e325]:
+              - link "FAQ" [ref=e326] [cursor=pointer]:
+                - /url: /faq
+            - listitem [ref=e327]:
+              - link "Agendar cita" [ref=e328] [cursor=pointer]:
+                - /url: /agendar
+        - generic [ref=e329]:
+          - heading "Sobre el sitio" [level=3] [ref=e330]
+          - list [ref=e331]:
+            - listitem [ref=e332]:
+              - link "Aviso de privacidad" [ref=e333] [cursor=pointer]:
+                - /url: /privacidad
+            - listitem [ref=e334]:
+              - link "Comunicados" [ref=e335] [cursor=pointer]:
+                - /url: /comunicados
+        - generic [ref=e336]:
+          - heading "Redes" [level=3] [ref=e337]
+          - generic [ref=e338]:
+            - link "Facebook" [ref=e339] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e340]
+            - link "Instagram" [ref=e342] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e343]
+            - link "TikTok" [ref=e345] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e346]
+      - generic [ref=e349]:
+        - paragraph [ref=e350]:
+          - link "Sitio WEB-ABJV" [ref=e351] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/ingabrahamjv/
+        - generic [ref=e352]:
+          - img "Plus Care" [ref=e353]
+          - generic [ref=e354]: Copyright (c) 2026 Plus Care | Todos los derechos reservados.
+          - img [ref=e356]
+  - link "Abrir WhatsApp" [ref=e358] [cursor=pointer]:
+    - /url: https://wa.me/5525388683?text=Me%20gustar%C3%ADa%20agendar%20una%20cita%20con%20el%2Fla%20especialista%20en%20__.
+    - img [ref=e359]

@@ -179,7 +179,7 @@ export const structure = (S) =>
             .items([
               S.listItem()
                 .title(
-                  'Informacion del negocio (header, inicio, ubicacion, contacto, redes, footer)'
+                  'Informacion del negocio (header, inicio, servicios, precios, agenda, ubicacion, contacto, redes, footer)'
                 )
                 .icon(BusinessIcon)
                 .child(

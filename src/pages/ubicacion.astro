@@ -21,7 +21,7 @@ const normalizeComparableText = (value: string) =>
 const addressText = String(business?.address || "").trim();
 const rawZoneText = String(business?.locationZoneText || "").trim();
 const defaultZoneText =
-  String(business?.area || "").trim() || "Sta. Maria Tulpetlac, Ecatepec (sobre Via Morelos).";
+  String(business?.area || "").trim() || "Sta. María Tulpetlac, Ecatepec (sobre Vía Morelos).";
 const zoneText = (() => {
   if (!rawZoneText) return defaultZoneText;
   if (normalizeComparableText(rawZoneText) === normalizeComparableText(addressText)) return defaultZoneText;
@@ -29,16 +29,16 @@ const zoneText = (() => {
 })();
 const referencesText =
   business?.locationReferencesText ||
-  "Consulta referencias exactas por WhatsApp para llegar mas facil.";
+  "Consulta referencias exactas por WhatsApp para llegar más fácil.";
 const parkingText = String(business?.locationParkingText || "").trim();
 const accessText = String(business?.locationAccessText || "").trim();
 const guideTips =
   Array.isArray(business?.locationGuideTips) && business.locationGuideTips.length > 0
     ? business.locationGuideTips
     : [
-        'Llegas mas facil si buscas "Podologo Plus Care" en Google Maps.',
-        "Atencion con cita para evitar tiempos de espera.",
-        "Si tienes estudios o recetas previas, traelos (opcional).",
+        'Llegas más fácil si buscas "Podologo Plus Care" en Google Maps.',
+        "Atención con cita para evitar tiempos de espera.",
+        "Si tienes estudios o recetas previas, tráelos (opcional).",
       ];
 
 const serviceGuides = {
@@ -78,26 +78,26 @@ const facadeImage =
   business?.locationFacadeImageUrl ||
   "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?auto=format&fit=crop&w=1600&q=80";
 const scheduleText =
-  business?.hoursText || "Lunes a viernes: 10:00 a 18:00 · Sabado: 10:00 a 16:00 · Domingo: cerrado";
+  business?.hoursText || "Lunes a viernes: 10:00 a 18:00 · Sábado: 10:00 a 16:00 · Domingo: cerrado";
 ---
 
-<Layout title={`Ubicacion | ${business?.name || "Podologos Via Morelos"}`}>
+<Layout title={`Ubicación | ${business?.name || "Podologos Via Morelos"}`}>
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">
-    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Ubicacion</h1>
-    <p class="mt-2 text-slate-800 dark:text-slate-200">{addressText || "Direccion no configurada todavia."}</p>
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Ubicación</h1>
+    <p class="mt-2 text-slate-800 dark:text-slate-200">{addressText || "Dirección no configurada todavía."}</p>
 
     <div class="mt-8 grid gap-6 lg:grid-cols-2">
       <section class="card-surface rounded-2xl p-6">
-        <h2 class="text-lg font-semibold">Como llegar</h2>
+        <h2 class="text-lg font-semibold">Cómo llegar</h2>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
           <strong>Horario:</strong> {scheduleText}
         </p>
 
         <div class="mt-8 grid gap-2 text-sm text-slate-800 dark:text-slate-100">
-          <p><strong>Direccion:</strong> {addressText || "-"}</p>
-          <p><strong>Telefono:</strong> {business?.phone || "-"}</p>
+          <p><strong>Dirección:</strong> {addressText || "-"}</p>
+          <p><strong>Teléfono:</strong> {business?.phone || "-"}</p>
           <p><strong>WhatsApp:</strong> {whatsappDigits || "-"}</p>
           <p><strong>Horarios:</strong> {scheduleText}</p>
           <p><strong>Zona:</strong> {zoneText}</p>
@@ -119,7 +119,7 @@ const scheduleText =
         </div>
 
         <div class="mt-7 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Guia rapida</h3>
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Guía rápida</h3>
           <ul class="mt-3 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
             {guideTips.map((tip: string) => (
               <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{tip}</span></li>
@@ -164,7 +164,7 @@ const scheduleText =
       <aside class="card-surface rounded-2xl p-6">
         <h2 class="text-lg font-semibold">Mapa</h2>
         <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Si el mapa no carga, usa el boton "Como llegar" o la foto de fachada para ubicar la entrada.
+          Si el mapa no carga, usa el botón "Cómo llegar" o la foto de fachada para ubicar la entrada.
         </p>
 
         <a class="btn-base btn-secondary mt-3" href={mapsUrl} target="_blank" rel="noopener noreferrer">

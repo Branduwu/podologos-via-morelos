@@ -57,6 +57,51 @@ const serviceCategories = [
   { key: "quiropractica", label: "Quiropractica" },
   { key: "dentista", label: "Dentista" },
 ];
+const serviceCategoryLabelByKey = new Map(serviceCategories.map((item) => [item.key, item.label]));
+const servicesCategoryCount =
+  new Set(
+    services
+      .map((service) => normalizeServiceSlug(service?.category || service?.title || ""))
+      .filter(Boolean)
+  ).size || Math.max(1, serviceCategories.length - 1);
+const servicesPageContent = business?.servicesPageContent || {};
+const servicesPageText = {
+  eyebrow: String(servicesPageContent.eyebrow || "Atencion especializada").trim(),
+  title: String(servicesPageContent.title || "Servicios").trim(),
+  intro: String(
+    servicesPageContent.intro ||
+      "Conoce nuestros servicios, revisa precios desde y elige la opcion que mejor vaya contigo. Si tienes duda, tambien puedes escribirnos y te orientamos."
+  ).trim(),
+  primaryCtaText: String(servicesPageContent.primaryCtaText || "Agendar cita").trim(),
+  primaryCtaUrl: String(servicesPageContent.primaryCtaUrl || "/agendar").trim(),
+  secondaryCtaText: String(servicesPageContent.secondaryCtaText || "Ver precios").trim(),
+  secondaryCtaUrl: String(servicesPageContent.secondaryCtaUrl || "/precios").trim(),
+  panelLabel: String(servicesPageContent.panelLabel || "Te ayudamos a elegir").trim(),
+  stepOneTitle: String(servicesPageContent.stepOneTitle || "Mira por categoria").trim(),
+  stepOneBody: String(
+    servicesPageContent.stepOneBody ||
+      "Entra primero al area que mas se parezca a lo que necesitas para encontrar opciones mas rapido."
+  ).trim(),
+  stepTwoTitle: String(servicesPageContent.stepTwoTitle || "Da el siguiente paso").trim(),
+  stepTwoBody: String(
+    servicesPageContent.stepTwoBody ||
+      "Desde cada servicio puedes ver detalles, revisar precios o pedir ayuda por WhatsApp."
+  ).trim(),
+  servicesCountLabel: String(servicesPageContent.servicesCountLabel || "servicios disponibles").trim(),
+  areasCountLabel: String(servicesPageContent.areasCountLabel || "areas de atencion").trim(),
+  emptyStateText: String(
+    servicesPageContent.emptyStateText ||
+      "Pronto compartiremos mas servicios. Mientras tanto, puedes agendar tu cita."
+  ).trim(),
+  cardFallbackText: String(
+    servicesPageContent.cardFallbackText ||
+      "Te explicamos este servicio de forma clara para que decidas con tranquilidad."
+  ).trim(),
+  filteredEmptyStateText: String(
+    servicesPageContent.filteredEmptyStateText ||
+      "No hay servicios en esa categoria todavia."
+  ).trim(),
+};
 
 const specialistBySlug = new Map<string, SpecialistRoutingItem>();
 for (const specialist of specialists) {
@@ -83,18 +128,60 @@ function moneyMXN(n: number | string | null | undefined) {
 <Layout title="Servicios | Podologos Via Morelos Tulpetlac">
   <Header />
 
-  <main class="mx-auto max-w-6xl px-4 py-10">
-    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Servicios</h1>
-    <p class="mt-2 text-slate-800 dark:text-slate-200">Conoce que incluye cada servicio y su precio desde.</p>
+  <main class="mx-auto max-w-[88rem] px-4 py-10 xl:px-6">
+    <section class="page-intro">
+      <div class="page-intro__layout">
+        <div>
+          <p class="page-intro__eyebrow">{servicesPageText.eyebrow}</p>
+          <h1 class="page-intro__title mt-3">{servicesPageText.title}</h1>
+          <p class="page-intro__copy mt-3">{servicesPageText.intro}</p>
+          <div class="page-intro__actions mt-6">
+            <a class="btn-base btn-primary" href={servicesPageText.primaryCtaUrl}>{servicesPageText.primaryCtaText}</a>
+            <a class="btn-base btn-secondary" href={servicesPageText.secondaryCtaUrl}>{servicesPageText.secondaryCtaText}</a>
+          </div>
+        </div>
+
+        <aside class="page-intro__panel">
+          <p class="page-intro__panel-label">{servicesPageText.panelLabel}</p>
+          <div class="page-intro__panel-list mt-4">
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">1</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{servicesPageText.stepOneTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{servicesPageText.stepOneBody}</p>
+              </div>
+            </div>
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">2</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{servicesPageText.stepTwoTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{servicesPageText.stepTwoBody}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-intro__meta-grid">
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{services.length}</span>
+              <span class="page-intro__meta-label">{servicesPageText.servicesCountLabel}</span>
+            </div>
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{servicesCategoryCount}</span>
+              <span class="page-intro__meta-label">{servicesPageText.areasCountLabel}</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
 
     {services.length === 0 && (
       <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-        Pronto compartiremos mas servicios. Mientras tanto, puedes agendar tu cita.
+        {servicesPageText.emptyStateText}
       </div>
     )}
 
     {services.length > 0 && (
-      <div class="mt-6 flex flex-wrap gap-2" id="service-filters">
+      <div class="mt-8 flex flex-wrap gap-2.5" id="service-filters">
         {serviceCategories.map((cat, idx) => (
           <button
             type="button"
@@ -107,7 +194,7 @@ function moneyMXN(n: number | string | null | undefined) {
       </div>
     )}
 
-    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3 xl:items-stretch 2xl:gap-7">
       {services.map((service: ServiceItem) => {
         const rawSlug =
           typeof service.slug === "string" ? service.slug : service.slug?.current;
@@ -119,7 +206,9 @@ function moneyMXN(n: number | string | null | undefined) {
         const serviceCategory = normalizeServiceSlug(
           service.category || service.title || cleanSlug
         );
+        const categoryLabel = serviceCategoryLabelByKey.get(serviceCategory) || "Atencion integral";
         const servicePrice = Number(service.priceFrom || 0);
+        const summaryText = String(service.short || "").trim();
 
         const preferredSpecialistSlug =
           String(service.leadSpecialistSlug || "").trim();
@@ -177,46 +266,64 @@ function moneyMXN(n: number | string | null | undefined) {
           <article
             data-service-card
             data-category={serviceCategory || "general"}
-            class="card-surface flex h-full flex-col rounded-3xl p-6 shadow-sm"
+            class="card-surface group flex h-full flex-col rounded-3xl p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl md:p-7"
           >
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-[0.74rem] font-extrabold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
+                  {categoryLabel}
+                </p>
+                <h2 class="mt-3 text-[1.3rem] font-semibold leading-tight text-slate-900 dark:text-slate-100 md:text-[1.45rem]">
+                  {serviceLabel}
+                </h2>
+              </div>
+            </div>
+
             <div class="flex-1">
-              <h2 class="text-lg font-semibold">{serviceLabel}</h2>
-              {service.short && (
-                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{service.short}</p>
+              {summaryText ? (
+                <p class="mt-3 text-[0.98rem] leading-7 text-slate-600 dark:text-slate-300">
+                  {summaryText}
+                </p>
+              ) : (
+                <p class="mt-3 text-[0.98rem] leading-7 text-slate-500 dark:text-slate-400">
+                  {servicesPageText.cardFallbackText}
+                </p>
               )}
 
-              <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+              <div class="mt-5 flex flex-wrap gap-2 text-[0.82rem] font-medium text-slate-600 dark:text-slate-300">
                 {service.duration && (
-                  <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
+                  <span class="rounded-full border border-slate-200 px-3 py-1.5 dark:border-slate-800">
                     Duracion {service.duration}
                   </span>
                 )}
                 {!!moneyMXN(service.priceFrom) && (
-                  <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
+                  <span class="rounded-full border border-slate-200 px-3 py-1.5 dark:border-slate-800">
                     Desde {moneyMXN(service.priceFrom)}
                   </span>
                 )}
               </div>
             </div>
 
-            <div class="mt-6 grid grid-cols-2 gap-2 pt-1">
-              <a class="btn-base btn-primary w-full" href={detailHref}>
-                Ver detalle
-              </a>
-              <a class="btn-base btn-secondary w-full" href="/precios">
-                Precios
-              </a>
-              <a class="btn-base btn-secondary col-span-2 w-full" href={agendarHref}>
+            <div class="mt-7 space-y-3 pt-1">
+              <a class="btn-base btn-primary w-full" href={agendarHref}>
                 Agendar este servicio
               </a>
-              <a
-                class="btn-base btn-secondary col-span-2 w-full"
-                href={waHref}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp
+              <a class="btn-base btn-secondary w-full" href={detailHref}>
+                Ver detalles
               </a>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
+                <a class="link-inline" href="/precios">
+                  Ver precios
+                </a>
+                <a
+                  class="link-inline"
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Escribir por WhatsApp
+                </a>
+              </div>
             </div>
           </article>
         );
@@ -227,7 +334,7 @@ function moneyMXN(n: number | string | null | undefined) {
       id="services-empty"
       class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
     >
-      No hay servicios en esa categoria todavia.
+      {servicesPageText.filteredEmptyStateText}
     </p>
   </main>
 

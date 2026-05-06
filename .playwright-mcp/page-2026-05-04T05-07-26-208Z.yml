@@ -1,0 +1,379 @@
+- generic [ref=e1]:
+  - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#contenido-principal"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e10]:
+        - link "Plus Care Plus Care Cuidamos de tu salud de forma segura." [ref=e11] [cursor=pointer]:
+          - /url: /
+          - img "Plus Care" [ref=e12]
+          - generic [ref=e13]:
+            - paragraph [ref=e14]: Plus Care
+            - paragraph [ref=e15]: Cuidamos de tu salud de forma segura.
+        - generic [ref=e329]:
+          - button "Cambiar tema" [ref=e330]:
+            - img [ref=e332]
+          - button "Menu" [ref=e334]:
+            - img [ref=e335]
+            - text: Menu
+    - main [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - paragraph [ref=e46]: Cotizacion y agenda
+          - heading "Precios" [level=1] [ref=e47]
+          - paragraph [ref=e48]: Consulta precios desde, compara servicios y arma una sola solicitud para WhatsApp cuando quieras cotizar varias atenciones a la vez.
+          - generic [ref=e49]:
+            - link "Agendar cita" [ref=e50] [cursor=pointer]:
+              - /url: /agendar
+            - link "Ver servicios" [ref=e51] [cursor=pointer]:
+              - /url: /servicios
+        - generic [ref=e52]:
+          - button "Todas" [ref=e53]
+          - button "Podología" [ref=e54]
+          - button "Psicología" [ref=e55]
+          - button "Óptica" [ref=e56]
+          - button "Quiropráctica" [ref=e57]
+          - button "Dentista" [ref=e58]
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - paragraph [ref=e62]: Cotizacion rapida
+              - paragraph [ref=e63]:
+                - strong [ref=e64]: Agendar solo este
+                - text: envia un solo servicio.
+                - strong [ref=e65]: Agregar a cotizacion
+                - text: junta varios servicios para mandarlos en una sola solicitud.
+              - paragraph [ref=e337]: Mientras bajas por la lista, el resumen se queda fijo abajo para continuar cuando quieras.
+            - generic [ref=e66]:
+              - generic [ref=e67]: Hasta 6 servicios
+              - link "Cotizar servicios en agenda" [ref=e543] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=2084db81-aca0-4be0-b2e7-f7f3c6057084&services=Limpieza+Dental+Profesional&specialists=gabriel-quijas&approxTotal=600
+          - generic [ref=e68]:
+            - paragraph [ref=e69]: "Seleccionados: 1"
+            - paragraph [ref=e70]: "Total aprox.: $600"
+          - paragraph [ref=e71]: Limpieza Dental Profesional
+        - generic [ref=e545]:
+          - generic [ref=e546]:
+            - paragraph [ref=e547]: Tu cotizacion
+            - paragraph [ref=e548]: 1 servicios seleccionados
+            - paragraph [ref=e549]: "Total aprox.: $600"
+          - link "Continuar a agenda" [ref=e550] [cursor=pointer]:
+            - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=2084db81-aca0-4be0-b2e7-f7f3c6057084&services=Limpieza+Dental+Profesional&specialists=gabriel-quijas&approxTotal=600
+        - generic [ref=e338]:
+          - article [ref=e339]:
+            - paragraph [ref=e340]: Limpieza Dental Profesional
+            - generic [ref=e341]:
+              - paragraph [ref=e342]: Desde
+              - paragraph [ref=e343]: $600
+              - paragraph [ref=e344]: Duración
+              - paragraph [ref=e345]: 45–60 min
+              - paragraph [ref=e346]: Nota
+              - paragraph [ref=e347]: Realiza cepillado previo e informa cualquier molestia o sensibilidad.
+            - generic [ref=e348]:
+              - link "Agendar solo este" [ref=e349] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=2084db81-aca0-4be0-b2e7-f7f3c6057084&services=Limpieza+Dental+Profesional&specialists=gabriel-quijas&approxTotal=600
+              - button "Quitar" [active] [ref=e551]
+          - article [ref=e351]:
+            - paragraph [ref=e352]: Servicio Podologico Clínico Total
+            - generic [ref=e353]:
+              - paragraph [ref=e354]: Desde
+              - paragraph [ref=e355]: $300
+              - paragraph [ref=e356]: Duración
+              - paragraph [ref=e357]: 30–45 min aprox.
+              - paragraph [ref=e358]: Nota
+              - paragraph [ref=e359]: Evita cortar tus uñas o manipular la zona antes de la consulta.
+            - generic [ref=e360]:
+              - link "Agendar solo este" [ref=e361] [cursor=pointer]:
+                - /url: /agendar?service=podologia&specialist=podologo-a-nombre-apellido&priceIds=d128fa04-950c-4037-a57c-c7b451bc85d6&services=Servicio+Podologico+Cl%C3%ADnico+Total&specialists=podologo-a-nombre-apellido&approxTotal=300
+              - button "Agregar a cotizacion" [ref=e362]
+          - article [ref=e363]:
+            - paragraph [ref=e364]: Blanqueamiento Dental Profesional
+            - generic [ref=e365]:
+              - paragraph [ref=e366]: Desde
+              - paragraph [ref=e367]: $1,500
+              - paragraph [ref=e368]: Duración
+              - paragraph [ref=e369]: 60–90 min
+              - paragraph [ref=e370]: Nota
+              - paragraph [ref=e371]: Evita consumir café, vino tinto o refrescos oscuros 24 horas antes.
+            - generic [ref=e372]:
+              - link "Agendar solo este" [ref=e373] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=82b84c3e-d811-4743-a198-6ec4145290b6&services=Blanqueamiento+Dental+Profesional&specialists=gabriel-quijas&approxTotal=1500
+              - button "Agregar a cotizacion" [ref=e374]
+          - article [ref=e375]:
+            - paragraph [ref=e376]: Venta de armazones y micas graduadas
+            - generic [ref=e377]:
+              - paragraph [ref=e378]: Desde
+              - paragraph [ref=e379]: "-"
+              - paragraph [ref=e380]: Duración
+              - paragraph [ref=e381]: 30–45 min aprox.
+              - paragraph [ref=e382]: Nota
+              - paragraph [ref=e383]: Recomendación según tu uso (pantallas/lectura/manejo).
+            - generic [ref=e384]:
+              - link "Agendar solo este" [ref=e385] [cursor=pointer]:
+                - /url: /agendar?service=optica&specialist=ortometrista-optometrista-nombre-apellido&priceIds=5803a8d4-b4ba-4415-b3fa-7dc16aa25b9d&services=Venta+de+armazones+y+micas+graduadas&specialists=ortometrista-optometrista-nombre-apellido
+              - button "Agregar a cotizacion" [ref=e386]
+          - article [ref=e387]:
+            - paragraph [ref=e388]: Endodoncia
+            - generic [ref=e389]:
+              - paragraph [ref=e390]: Desde
+              - paragraph [ref=e391]: $1,800
+              - paragraph [ref=e392]: Duración
+              - paragraph [ref=e393]: 60 - 90 min
+              - paragraph [ref=e394]: Nota
+              - paragraph [ref=e395]: Informa si presentas dolor intenso o inflamación antes de la cita.
+            - generic [ref=e396]:
+              - link "Agendar solo este" [ref=e397] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=78b3bdd3-03c0-44f9-8b90-3405283bb49f&services=Endodoncia&specialists=gabriel-quijas&approxTotal=1800
+              - button "Agregar a cotizacion" [ref=e398]
+          - article [ref=e399]:
+            - paragraph [ref=e400]: Prótesis Dental Fija y Removible
+            - generic [ref=e401]:
+              - paragraph [ref=e402]: Desde
+              - paragraph [ref=e403]: $4,500
+              - paragraph [ref=e404]: Duración
+              - paragraph [ref=e405]: 60–90 min
+              - paragraph [ref=e406]: Nota
+              - paragraph [ref=e407]: Acude con higiene dental previa a tu cita.
+            - generic [ref=e408]:
+              - link "Agendar solo este" [ref=e409] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=131f3380-62b6-4391-b31b-b410ea1b7360&services=Pr%C3%B3tesis+Dental+Fija+y+Removible&specialists=gabriel-quijas&approxTotal=4500
+              - button "Agregar a cotizacion" [ref=e410]
+          - article [ref=e411]:
+            - paragraph [ref=e412]: Ortodoncia
+            - generic [ref=e413]:
+              - paragraph [ref=e414]: Desde
+              - paragraph [ref=e415]: $5,500
+              - paragraph [ref=e416]: Duración
+              - paragraph [ref=e417]: 40–60 min
+              - paragraph [ref=e418]: Nota
+              - paragraph [ref=e419]: Acude con higiene dental previa a tu cita.
+            - generic [ref=e420]:
+              - link "Agendar solo este" [ref=e421] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=5741acc7-8f14-48a6-8330-b96ba17f51b7&services=Ortodoncia&specialists=gabriel-quijas&approxTotal=5500
+              - button "Agregar a cotizacion" [ref=e422]
+          - article [ref=e423]:
+            - paragraph [ref=e424]: Lentes con Tratamiento Especial
+            - generic [ref=e425]:
+              - paragraph [ref=e426]: Desde
+              - paragraph [ref=e427]: "-"
+              - paragraph [ref=e428]: Duración
+              - paragraph [ref=e429]: 25–35 min
+              - paragraph [ref=e430]: Nota
+              - paragraph [ref=e431]: Informa si pasas muchas horas frente a pantallas o manejas de noche.
+            - generic [ref=e432]:
+              - link "Agendar solo este" [ref=e433] [cursor=pointer]:
+                - /url: /agendar?service=optica&specialist=ortometrista-optometrista-nombre-apellido&priceIds=0a96310b-6fb6-42bf-9395-cafbc5fde122&services=Lentes+con+Tratamiento+Especial&specialists=ortometrista-optometrista-nombre-apellido
+              - button "Agregar a cotizacion" [ref=e434]
+          - article [ref=e435]:
+            - paragraph [ref=e436]: Revisión Ortopedica
+            - generic [ref=e437]:
+              - paragraph [ref=e438]: Desde
+              - paragraph [ref=e439]: $750
+              - paragraph [ref=e440]: Duración
+              - paragraph [ref=e441]: 25–35 min
+              - paragraph [ref=e442]: Nota
+              - paragraph [ref=e443]: Usa ropa cómoda que permita explorar la zona afectada.
+            - generic [ref=e444]:
+              - link "Agendar solo este" [ref=e445] [cursor=pointer]:
+                - /url: /agendar?service=podologia&specialist=podologo-a-nombre-apellido&priceIds=ee946864-b8f7-4ecf-8a57-55addff41f3f&services=Revisi%C3%B3n+Ortopedica&specialists=podologo-a-nombre-apellido&approxTotal=750
+              - button "Agregar a cotizacion" [ref=e446]
+          - article [ref=e447]:
+            - paragraph [ref=e448]: Aplicación de sueroterapia
+            - generic [ref=e449]:
+              - paragraph [ref=e450]: Desde
+              - paragraph [ref=e451]: $1,200
+              - paragraph [ref=e452]: Duración
+              - paragraph [ref=e453]: 30 - 60 min
+              - paragraph [ref=e454]: Nota
+              - paragraph [ref=e455]: Acude bien hidratado y habiendo consumido algún alimento ligero.
+            - generic [ref=e456]:
+              - link "Agendar solo este" [ref=e457] [cursor=pointer]:
+                - /url: /agendar?service=quiropractica&specialist=quiropractica-elizabeth-gomez&priceIds=fd62f7b2-eb06-4ad3-bbeb-0dd92c36cda2&services=Aplicaci%C3%B3n+de+sueroterapia&specialists=quiropractica-elizabeth-gomez&approxTotal=1200
+              - button "Agregar a cotizacion" [ref=e458]
+          - article [ref=e459]:
+            - paragraph [ref=e460]: Faciales
+            - generic [ref=e461]:
+              - paragraph [ref=e462]: Desde
+              - paragraph [ref=e463]: $800
+              - paragraph [ref=e464]: Duración
+              - paragraph [ref=e465]: 40–60 min
+              - paragraph [ref=e466]: Nota
+              - paragraph [ref=e467]: Evita exfoliar tu piel 48 horas antes de tu sesión.
+            - generic [ref=e468]:
+              - link "Agendar solo este" [ref=e469] [cursor=pointer]:
+                - /url: /agendar?service=quiropractica&specialist=quiropractica-elizabeth-gomez&priceIds=8c6255b7-ee9f-45ad-af73-fa862259597f&services=Faciales&specialists=quiropractica-elizabeth-gomez&approxTotal=800
+              - button "Agregar a cotizacion" [ref=e470]
+          - article [ref=e471]:
+            - paragraph [ref=e472]: Sesión quiropráctica (ajuste y terapia)
+            - generic [ref=e473]:
+              - paragraph [ref=e474]: Desde
+              - paragraph [ref=e475]: $400
+              - paragraph [ref=e476]: Duración
+              - paragraph [ref=e477]: 30–45 min
+              - paragraph [ref=e478]: Nota
+              - paragraph [ref=e479]: Trae ropa comoda o facil de mover para la sesion.
+            - generic [ref=e480]:
+              - link "Agendar solo este" [ref=e481] [cursor=pointer]:
+                - /url: /agendar?service=quiropractica&specialist=quiropractico-a-nombre-apellido&priceIds=ed34bf0b-3711-4707-a225-f9ea877ce906&services=Sesi%C3%B3n+quiropr%C3%A1ctica+%28ajuste+y+terapia%29&specialists=quiropractico-a-nombre-apellido&approxTotal=400
+              - button "Agregar a cotizacion" [ref=e482]
+          - article [ref=e483]:
+            - paragraph [ref=e484]: Resinas Dentales Estéticas
+            - generic [ref=e485]:
+              - paragraph [ref=e486]: Desde
+              - paragraph [ref=e487]: $700
+              - paragraph [ref=e488]: Duración
+              - paragraph [ref=e489]: 40–60 min
+              - paragraph [ref=e490]: Nota
+              - paragraph [ref=e491]: Acude con higiene dental previa a tu cita.
+            - generic [ref=e492]:
+              - link "Agendar solo este" [ref=e493] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=349f0ab5-230e-47f1-a582-e05ce4bd07fe&services=Resinas+Dentales+Est%C3%A9ticas&specialists=gabriel-quijas&approxTotal=700
+              - button "Agregar a cotizacion" [ref=e494]
+          - article [ref=e495]:
+            - paragraph [ref=e496]: Cirugía y Extracción Dental
+            - generic [ref=e497]:
+              - paragraph [ref=e498]: Desde
+              - paragraph [ref=e499]: $900
+              - paragraph [ref=e500]: Duración
+              - paragraph [ref=e501]: 30–60 min
+              - paragraph [ref=e502]: Nota
+              - paragraph [ref=e503]: Informa si tomas medicamentos o padeces alguna enfermedad.
+            - generic [ref=e504]:
+              - link "Agendar solo este" [ref=e505] [cursor=pointer]:
+                - /url: /agendar?service=dentista&specialist=gabriel-quijas&priceIds=bb45a9b3-c897-49c8-944d-d3df947fb2b7&services=Cirug%C3%ADa+y+Extracci%C3%B3n+Dental&specialists=gabriel-quijas&approxTotal=900
+              - button "Agregar a cotizacion" [ref=e506]
+          - article [ref=e507]:
+            - paragraph [ref=e508]: Examen de la vista (evaluación visual)
+            - generic [ref=e509]:
+              - paragraph [ref=e510]: Desde
+              - paragraph [ref=e511]: "-"
+              - paragraph [ref=e512]: Duración
+              - paragraph [ref=e513]: 30–45 min aprox.
+              - paragraph [ref=e514]: Nota
+              - paragraph [ref=e515]: Informar si presentas dolores de cabeza, visión borrosa o dificultad para enfocar.
+            - generic [ref=e516]:
+              - link "Agendar solo este" [ref=e517] [cursor=pointer]:
+                - /url: /agendar?service=optica&specialist=ortometrista-optometrista-nombre-apellido&priceIds=44e21589-4595-4bbc-8a99-975695dbc049&services=Examen+de+la+vista+%28evaluaci%C3%B3n+visual%29&specialists=ortometrista-optometrista-nombre-apellido
+              - button "Agregar a cotizacion" [ref=e518]
+          - article [ref=e519]:
+            - paragraph [ref=e520]: Terapia individual
+            - generic [ref=e521]:
+              - paragraph [ref=e522]: Desde
+              - paragraph [ref=e523]: $1,200
+              - paragraph [ref=e524]: Duración
+              - paragraph [ref=e525]: 10 min
+              - paragraph [ref=e526]: Nota
+              - paragraph [ref=e527]: sesión.
+            - generic [ref=e528]:
+              - link "Agendar solo este" [ref=e529] [cursor=pointer]:
+                - /url: /agendar?service=psicologia&specialist=psicologo-a-nombre-apellido&priceIds=b51ea196-739c-40df-b0df-390c2082f90b&services=Terapia+individual&specialists=psicologo-a-nombre-apellido&approxTotal=1200
+              - button "Agregar a cotizacion" [ref=e530]
+          - article [ref=e531]:
+            - paragraph [ref=e532]: Callos y durezas
+            - generic [ref=e533]:
+              - paragraph [ref=e534]: Desde
+              - paragraph [ref=e535]: $300
+              - paragraph [ref=e536]: Duración
+              - paragraph [ref=e537]: 40–60 min aprox.
+              - paragraph [ref=e538]: Nota
+              - paragraph [ref=e539]: Informa si padeces diabetes o problemas circulatorios.
+            - generic [ref=e540]:
+              - link "Agendar solo este" [ref=e541] [cursor=pointer]:
+                - /url: /agendar?service=podologia&specialist=podologo-a-nombre-apellido&priceIds=289b7aaa-6111-4469-ab27-6cfc85b4d8ae&services=Callos+y+durezas&specialists=podologo-a-nombre-apellido&approxTotal=300
+              - button "Agregar a cotizacion" [ref=e542]
+        - link "Agendar cita" [ref=e236] [cursor=pointer]:
+          - /url: /agendar
+    - contentinfo [ref=e237]:
+      - generic [ref=e239]:
+        - generic [ref=e240]:
+          - link "Plus Care Plus Care" [ref=e241] [cursor=pointer]:
+            - /url: /
+            - img "Plus Care" [ref=e242]
+            - generic [ref=e243]: Plus Care
+          - paragraph [ref=e244]: Atención integral en podología, psicología, óptica, quiropráctica y dentista.
+          - paragraph [ref=e245]: "Tel: 55 2538 8683"
+        - generic [ref=e246]:
+          - heading "Menu" [level=3] [ref=e247]
+          - list [ref=e248]:
+            - listitem [ref=e249]:
+              - link "Inicio" [ref=e250] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e251]:
+              - link "Nuestros servicios" [ref=e252] [cursor=pointer]:
+                - /url: /servicios
+            - listitem [ref=e253]:
+              - link "Precios" [ref=e254] [cursor=pointer]:
+                - /url: /precios
+            - listitem [ref=e255]:
+              - link "Especialistas" [ref=e256] [cursor=pointer]:
+                - /url: /especialistas
+            - listitem [ref=e257]:
+              - link "Promociones" [ref=e258] [cursor=pointer]:
+                - /url: /promociones
+            - listitem [ref=e259]:
+              - link "Fotos y videos" [ref=e260] [cursor=pointer]:
+                - /url: /galeria
+            - listitem [ref=e261]:
+              - link "Nosotros" [ref=e262] [cursor=pointer]:
+                - /url: /nosotros
+            - listitem [ref=e263]:
+              - link "Ubicación" [ref=e264] [cursor=pointer]:
+                - /url: /ubicacion
+            - listitem [ref=e265]:
+              - link "Contacto" [ref=e266] [cursor=pointer]:
+                - /url: /contacto
+            - listitem [ref=e267]:
+              - link "FAQ" [ref=e268] [cursor=pointer]:
+                - /url: /faq
+            - listitem [ref=e269]:
+              - link "Agendar cita" [ref=e270] [cursor=pointer]:
+                - /url: /agendar
+        - generic [ref=e271]:
+          - heading "Sobre el sitio" [level=3] [ref=e272]
+          - list [ref=e273]:
+            - listitem [ref=e274]:
+              - link "Aviso de privacidad" [ref=e275] [cursor=pointer]:
+                - /url: /privacidad
+            - listitem [ref=e276]:
+              - link "Comunicados" [ref=e277] [cursor=pointer]:
+                - /url: /comunicados
+        - generic [ref=e278]:
+          - heading "Redes" [level=3] [ref=e279]
+          - generic [ref=e280]:
+            - link "Facebook" [ref=e281] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e282]
+            - link "Instagram" [ref=e284] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e285]
+            - link "TikTok" [ref=e287] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e288]
+      - generic [ref=e291]:
+        - paragraph [ref=e292]:
+          - link "Sitio WEB-ABJV" [ref=e293] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/ingabrahamjv/
+        - generic [ref=e294]:
+          - img "Plus Care" [ref=e295]
+          - generic [ref=e296]: Copyright (c) 2026 Plus Care | Todos los derechos reservados.
+          - img [ref=e298]
+  - link "Abrir WhatsApp" [ref=e300] [cursor=pointer]:
+    - /url: https://wa.me/5525388683?text=Me%20gustar%C3%ADa%20agendar%20una%20cita%20con%20el%2Fla%20especialista%20en%20__.
+    - img [ref=e301]
+  - button "Volver arriba" [ref=e552]:
+    - img [ref=e553]
+  - generic [ref=e305]:
+    - button "Menu" [ref=e306]:
+      - img [ref=e308]
+      - generic: Menu
+    - button "Inspect" [ref=e312]:
+      - img [ref=e314]
+      - generic: Inspect
+    - button "Audit" [ref=e316]:
+      - generic [ref=e317]:
+        - img [ref=e318]
+        - img [ref=e555]
+      - generic: Audit
+    - button "Settings" [ref=e321]:
+      - img [ref=e323]
+      - generic: Settings

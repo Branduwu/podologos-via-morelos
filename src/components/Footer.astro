@@ -27,9 +27,9 @@ const socialLinks = [
 ---
 
 <footer class="mt-12 bg-[rgb(197,226,240)] text-slate-900 dark:bg-[rgb(14,34,58)] dark:text-[rgb(232,240,250)]">
-  <div class="mx-auto max-w-6xl px-4 py-10">
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
-      <div class="sm:col-span-2 lg:col-span-1">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:py-12">
+    <div class="grid grid-cols-2 gap-8 lg:grid-cols-4 lg:gap-10">
+      <div class="col-span-2 lg:col-span-1">
         <a href="/" class="inline-flex items-center gap-3">
           <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/60 p-1 sm:h-11 md:h-12 lg:h-14 dark:bg-white/10" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
           <span class="type-card-title leading-tight">{businessName}</span>
@@ -40,20 +40,24 @@ const socialLinks = [
 
       <div>
         <h3 class="type-footer-title">{menuTitle}</h3>
-        <ul class="type-footer-body mt-3 space-y-2">
+        <ul class="type-footer-body mt-3 space-y-1.5">
           <li><a class="footer-link hover:underline" href="/">Inicio</a></li>
           <li><a class="footer-link hover:underline" href="/servicios">Nuestros servicios</a></li>
+          <li><a class="footer-link hover:underline" href="/precios">Precios</a></li>
           <li><a class="footer-link hover:underline" href="/especialistas">Especialistas</a></li>
+          <li><a class="footer-link hover:underline" href="/promociones">Promociones</a></li>
+          <li><a class="footer-link hover:underline" href="/galeria">Fotos y videos</a></li>
           <li><a class="footer-link hover:underline" href="/nosotros">Nosotros</a></li>
           <li><a class="footer-link hover:underline" href="/ubicacion">Ubicación</a></li>
           <li><a class="footer-link hover:underline" href="/contacto">Contacto</a></li>
           <li><a class="footer-link hover:underline" href="/faq">FAQ</a></li>
+          <li><a class="footer-link hover:underline" href="/agendar">Agendar cita</a></li>
         </ul>
       </div>
 
       <div>
         <h3 class="type-footer-title">{siteTitle}</h3>
-        <ul class="type-footer-body mt-3 space-y-2">
+        <ul class="type-footer-body mt-3 space-y-1.5">
           <li><a class="footer-link hover:underline" href={privacyUrl}>{privacyLabel}</a></li>
           <li><a class="footer-link hover:underline" href={noticesUrl}>{noticesLabel}</a></li>
         </ul>

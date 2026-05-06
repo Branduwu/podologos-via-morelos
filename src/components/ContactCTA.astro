@@ -33,13 +33,10 @@ const waNumber = resolveWhatsAppNumber(
 );
 const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
 
-const serviceChips = [
-  { key: "podologia", label: "Podología" },
-  { key: "psicologia", label: "Psicología" },
-  { key: "optica", label: "Óptica" },
-  { key: "quiropractica", label: "Quiropráctica" },
-  { key: "dentista", label: "Dentista" },
-];
+const serviceChips = clinic.serviceCategories.map((item) => ({
+  key: item.key,
+  label: item.label,
+}));
 
 function socialHandle(rawUrl: string): string {
   try {
@@ -56,7 +53,7 @@ function socialHandle(rawUrl: string): string {
 const primaryWaMessage = buildContactMessage({
   reason: resolveWhatsAppReason(
     business?.whatsappGeneralMessage,
-    "Quiero información y agendar una cita.",
+    "Quiero informacion y agendar una cita.",
     {
       business: business?.name || clinic.name,
       problem: business?.whatsappQuickProblemDefault || "",
@@ -82,15 +79,18 @@ const socialItems = [
     <p><span class="font-semibold">WhatsApp:</span> <a class="text-sky-700 hover:underline dark:text-sky-300" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">{waNumber}</a></p>
   </div>
 
-  <div class="mt-6 flex flex-wrap gap-3">
-    <a class="btn-base btn-primary" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">Enviar WhatsApp</a>
-    <a class="btn-base btn-secondary" href={`tel:${phoneTel}`}>Llamar</a>
-    <a class="btn-base btn-secondary" href={mapsUrl} target="_blank" rel="noopener noreferrer">Abrir en Maps</a>
-    <a class="btn-base btn-secondary" href="/agendar">Agendar en web</a>
-    <button id="copy-address-contact" type="button" class="btn-base btn-secondary">Copiar dirección</button>
+  <div class="mt-6 grid gap-3 sm:grid-cols-2">
+    <a class="btn-base btn-primary w-full" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">Enviar WhatsApp</a>
+    <a class="btn-base btn-secondary w-full" href={mapsUrl} target="_blank" rel="noopener noreferrer">Cómo llegar</a>
   </div>
 
-  <div class="mt-5">
+  <div class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+    <a class="link-inline" href={`tel:${phoneTel}`}>Llamar</a>
+    <a class="link-inline" href="/agendar">Agendar en web</a>
+    <button id="copy-address-contact" type="button" class="link-inline">Copiar dirección</button>
+  </div>
+
+  <div class="mt-5 rounded-2xl border border-slate-200/90 bg-slate-50/90 p-4 dark:border-slate-800 dark:bg-slate-900/60">
     <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Selecciona servicio</p>
     <div class="mt-2 flex flex-wrap gap-2">
       {serviceChips.map((chip) => {
@@ -99,7 +99,7 @@ const socialItems = [
             service: chip.label,
             reason: resolveWhatsAppReason(
               business?.whatsappGeneralMessage,
-              "Quiero información y agendar este servicio.",
+              "Quiero informacion y agendar este servicio.",
               {
                 service: chip.label,
                 business: business?.name || clinic.name,
@@ -111,7 +111,7 @@ const socialItems = [
         );
         return (
           <a
-            class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+            class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -148,7 +148,7 @@ const socialItems = [
         copyBtn.textContent = "No se pudo copiar";
       }
       setTimeout(() => {
-        copyBtn.textContent = "Copiar dirección";
+        copyBtn.textContent = "Copiar direccion";
       }, 1600);
     });
   }

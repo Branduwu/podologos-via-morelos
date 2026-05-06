@@ -1,0 +1,39 @@
+[    4492ms] [WARNING] The resource http://127.0.0.1:4321/placeholder.jpg was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:4321/agendar:0
+[   23787ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:4321/@vite/client:1695
+[   25799ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   28803ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   31810ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   34816ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   37822ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   40829ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   43835ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   46850ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   49857ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   52863ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   55870ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   58878ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   61882ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   64888ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   67895ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   70903ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   73910ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   76919ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   79924ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   82930ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   85937ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   88941ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   91949ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   94954ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[   97961ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  100970ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  104353ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  107915ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  111230ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  114695ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  119289ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  123537ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  127871ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  132285ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  136429ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  142026ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:4321/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:4321/@vite/client:1766
+[  155413ms] [WARNING] The resource http://127.0.0.1:4321/placeholder.jpg was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://127.0.0.1:4321/agendar:0

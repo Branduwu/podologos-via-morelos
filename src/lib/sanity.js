@@ -163,7 +163,10 @@ export async function getBusinessInfo() {
     footerMenuTitle, footerSiteTitle,
     footerPrivacyLabel, footerPrivacyUrl,
     footerNoticesLabel, footerNoticesUrl,
-    footerCopyrightText, footerProjectSignature
+    footerCopyrightText, footerProjectSignature,
+    servicesPageContent,
+    pricesPageContent,
+    bookingPageContent
   }`, {}, null);
 }
 

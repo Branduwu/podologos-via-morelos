@@ -1,0 +1,272 @@
+- generic [active] [ref=e1]:
+  - link "Saltar al contenido principal" [ref=e2] [cursor=pointer]:
+    - /url: "#contenido-principal"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Plus Care Plus Care Cuidamos de tu salud de forma segura." [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "Plus Care" [ref=e7]
+          - generic [ref=e8]:
+            - paragraph [ref=e9]: Plus Care
+            - paragraph [ref=e10]: Cuidamos de tu salud de forma segura.
+        - generic [ref=e11]:
+          - button "Cambiar tema" [ref=e12]:
+            - img [ref=e14]
+          - button "Menu" [ref=e16]:
+            - img [ref=e17]
+            - text: Menu
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - img "Consultorio medico" [ref=e22]
+          - img "Consultorio medico" [ref=e23]
+          - img "Consultorio medico" [ref=e24]
+          - img "Consultorio medico" [ref=e25]
+        - generic [ref=e27]:
+          - paragraph [ref=e28]: Bienvenido
+          - heading "Plus Care" [level=1] [ref=e29]
+          - paragraph [ref=e30]: Somos un centro de salud especializado, con mas de 20 años de experiencia cuidando tu salud.
+          - generic [ref=e31]:
+            - link "Agenda tu cita" [ref=e32] [cursor=pointer]:
+              - /url: /agendar
+            - link "Nuestros servicios" [ref=e33] [cursor=pointer]:
+              - /url: /servicios
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Elige por servicio
+            - generic [ref=e36]:
+              - link "Podologia" [ref=e37] [cursor=pointer]:
+                - /url: /agendar?service=podologia
+              - link "Psicologia" [ref=e38] [cursor=pointer]:
+                - /url: /agendar?service=psicologia
+              - link "Optica" [ref=e39] [cursor=pointer]:
+                - /url: /agendar?service=optica
+              - link "Quiropractica" [ref=e40] [cursor=pointer]:
+                - /url: /agendar?service=quiropractica
+              - link "Dentista" [ref=e41] [cursor=pointer]:
+                - /url: /agendar?service=dentista
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - heading "Promociones vigentes" [level=2] [ref=e45]
+            - paragraph [ref=e46]: Aprovecha descuentos y paquetes especiales sujetos a disponibilidad.
+          - link "Ver todas las promociones" [ref=e48] [cursor=pointer]:
+            - /url: /promociones
+        - generic [ref=e49]:
+          - article [ref=e50]:
+            - img "Plantillas Ortopédicas" [ref=e52]
+            - generic [ref=e53]:
+              - generic [ref=e54]:
+                - heading "Plantillas Ortopédicas" [level=3] [ref=e55]
+                - generic [ref=e56]: Revisión Sin costo
+              - paragraph [ref=e58]: Valoración ortopédica de pies y extremidades inferiores para detectar alteraciones y diseñar plantillas a medida.
+              - generic [ref=e59]:
+                - link "Agendar" [ref=e60] [cursor=pointer]:
+                  - /url: /agendar?service=podologia&services=Plantillas+Ortop%C3%A9dicas
+                - link "Ver promocion completa" [ref=e61] [cursor=pointer]:
+                  - /url: /promociones/plantillas-ortopedicas
+          - article [ref=e62]:
+            - img "Uñas encarnadas | Atención especializada" [ref=e64]
+            - generic [ref=e65]:
+              - heading "Uñas encarnadas | Atención especializada" [level=3] [ref=e67]
+              - paragraph [ref=e69]: Atención segura y cuidadosa para uñas encarnadas. Duración 20–30 min aprox.*
+              - generic [ref=e70]:
+                - link "Agendar" [ref=e71] [cursor=pointer]:
+                  - /url: /agendar?service=podologia&services=U%C3%B1as+encarnadas+%7C+Atenci%C3%B3n+especializada
+                - link "Ver promocion completa" [ref=e72] [cursor=pointer]:
+                  - /url: /promociones/unas-encarnadas-atencion-especializada
+          - article [ref=e73]:
+            - img "Ortodoncia" [ref=e75]
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - heading "Ortodoncia" [level=3] [ref=e78]
+                - generic [ref=e79]: Colocación de brackets
+              - paragraph [ref=e81]: Alineamos tu sonrisa con planes personalizados que mejoran estética, mordida y seguridad al sonreír.
+              - generic [ref=e82]:
+                - link "Agendar" [ref=e83] [cursor=pointer]:
+                  - /url: /agendar?service=dentista&services=Ortodoncia
+                - link "Ver promocion completa" [ref=e84] [cursor=pointer]:
+                  - /url: /promociones/ortodoncia
+      - generic [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - paragraph [ref=e88]: Conócenos
+            - heading "Más de 20 años cuidando tu salud." [level=2] [ref=e89]
+            - paragraph [ref=e90]: En Plus Care somos un centro integral comprometido con el bienestar y la salud de cada persona que confía en nosotros. Contamos con mas de 20 años de experiencia brindando atención profesional, siempre enfocandonos en la calidad, la ética y el trato homano.
+            - paragraph [ref=e91]: Nuestro objetivo es ofrecer un espacio donde nuestros pacientes se sientan escuchados, atendidos y respaldados por especialistas capacitados, trabajando cada día para mantener altos estándares de atención.
+            - list [ref=e92]:
+              - listitem [ref=e93]:
+                - generic [ref=e95]: +20 años de experiencia en atención integral
+              - listitem [ref=e96]:
+                - generic [ref=e98]: Atención segura y con mínima molestia
+              - listitem [ref=e99]:
+                - generic [ref=e101]: Higiene y esterilización en cada procedimiento
+              - listitem [ref=e102]:
+                - generic [ref=e104]: Diferentes áreas de atención para tu bienestar completo
+              - listitem [ref=e105]:
+                - generic [ref=e107]: Atención personalizada y seguimiento responsable
+              - listitem [ref=e108]:
+                - generic [ref=e110]: Agenda fácil por WhatsApp y atención cercana
+            - generic [ref=e111]:
+              - link "Agenda tu cita" [ref=e112] [cursor=pointer]:
+                - /url: /agendar
+              - link "Conocenos mas" [ref=e113] [cursor=pointer]:
+                - /url: /nosotros
+          - img "Nosotros" [ref=e115]
+        - generic [ref=e116]:
+          - generic [ref=e117]:
+            - article [ref=e118]:
+              - img "Nosotros 1" [ref=e119]
+            - article [ref=e120]:
+              - img "Nosotros 2" [ref=e121]
+            - article [ref=e122]:
+              - img "Nosotros 3" [ref=e123]
+          - link "Ver mas de nosotros" [ref=e125] [cursor=pointer]:
+            - /url: /nosotros
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - heading "Fotos y videos recomendados" [level=2] [ref=e128]
+          - link "Ver fotos y videos" [ref=e129] [cursor=pointer]:
+            - /url: /galeria
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - heading "Fotos destacadas" [level=3] [ref=e133]
+              - generic [ref=e134]: Vista rapida
+            - generic [ref=e135]:
+              - article [ref=e136]:
+                - generic [ref=e137]:
+                  - paragraph [ref=e138]: Área de atención y equipo clínico
+                  - paragraph [ref=e139]: dentista
+                - img "Área de atención y equipo clínico" [ref=e140]
+              - article [ref=e141]:
+                - generic [ref=e142]:
+                  - paragraph [ref=e143]: Consultorio podológico (vista general)
+                  - paragraph [ref=e144]: instalaciones
+                - img "Consultorio podológico (vista general)" [ref=e145]
+              - article [ref=e146]:
+                - generic [ref=e147]:
+                  - paragraph [ref=e148]: Área de atención y equipo clínico
+                  - paragraph [ref=e149]: podologia
+                - img "Área de atención y equipo clínico" [ref=e150]
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - heading "Videos recomendados" [level=3] [ref=e153]
+              - generic [ref=e154]: Seleccion curada
+            - generic [ref=e155]:
+              - article [ref=e156]:
+                - generic [ref=e157]:
+                  - paragraph [ref=e158]: ONICOMICOSIS
+                  - paragraph [ref=e159]: podologia
+                - generic [ref=e160]:
+                  - link "ONICOMICOSIS ▶ tiktok" [ref=e161] [cursor=pointer]:
+                    - /url: https://www.tiktok.com/@mipodologodice/video/7573715464522566920?_r=1&_t=ZS-94I672E3aLJ
+                    - generic [ref=e162]:
+                      - img "ONICOMICOSIS" [ref=e163]
+                      - generic [ref=e166]: ▶
+                      - generic [ref=e167]: tiktok
+                  - link "Abrir video" [ref=e168] [cursor=pointer]:
+                    - /url: https://www.tiktok.com/@mipodologodice/video/7573715464522566920?_r=1&_t=ZS-94I672E3aLJ
+              - article [ref=e169]:
+                - generic [ref=e170]:
+                  - paragraph [ref=e171]: Mal olor en los pies
+                  - paragraph [ref=e172]: podologia
+                - generic [ref=e173]:
+                  - link "Mal olor en los pies ▶ tiktok" [ref=e174] [cursor=pointer]:
+                    - /url: https://www.tiktok.com/@mipodologodice/video/7567077949107604757?embed_source=121374463%2C121468991%2C121439635%2C121749182%2C121433650%2C121404359%2C121497414%2C122122240%2C121351166%2C121811500%2C121960941%2C122122244%2C122122243%2C122122242%2C121487028%2C122237599%2C121331973%2C120811592%2C120810756%2C121885509%3Bnull%3Bembed_masking&refer=embed&referer_url=pluscaremx.netlify.app%2F&referer_video_id=7573715464522566920
+                    - generic [ref=e175]:
+                      - img "Mal olor en los pies" [ref=e176]
+                      - generic [ref=e179]: ▶
+                      - generic [ref=e180]: tiktok
+                  - link "Abrir video" [ref=e181] [cursor=pointer]:
+                    - /url: https://www.tiktok.com/@mipodologodice/video/7567077949107604757?embed_source=121374463%2C121468991%2C121439635%2C121749182%2C121433650%2C121404359%2C121497414%2C122122240%2C121351166%2C121811500%2C121960941%2C122122244%2C122122243%2C122122242%2C121487028%2C122237599%2C121331973%2C120811592%2C120810756%2C121885509%3Bnull%3Bembed_masking&refer=embed&referer_url=pluscaremx.netlify.app%2F&referer_video_id=7573715464522566920
+    - contentinfo [ref=e182]:
+      - generic [ref=e184]:
+        - generic [ref=e185]:
+          - link "Plus Care Plus Care" [ref=e186] [cursor=pointer]:
+            - /url: /
+            - img "Plus Care" [ref=e187]
+            - generic [ref=e188]: Plus Care
+          - paragraph [ref=e189]: Atención integral en podología, psicología, óptica, quiropráctica y dentista.
+          - paragraph [ref=e190]: "Tel: 55 2538 8683"
+        - generic [ref=e191]:
+          - heading "Menu" [level=3] [ref=e192]
+          - list [ref=e193]:
+            - listitem [ref=e194]:
+              - link "Inicio" [ref=e195] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e196]:
+              - link "Nuestros servicios" [ref=e197] [cursor=pointer]:
+                - /url: /servicios
+            - listitem [ref=e198]:
+              - link "Precios" [ref=e199] [cursor=pointer]:
+                - /url: /precios
+            - listitem [ref=e200]:
+              - link "Especialistas" [ref=e201] [cursor=pointer]:
+                - /url: /especialistas
+            - listitem [ref=e202]:
+              - link "Promociones" [ref=e203] [cursor=pointer]:
+                - /url: /promociones
+            - listitem [ref=e204]:
+              - link "Fotos y videos" [ref=e205] [cursor=pointer]:
+                - /url: /galeria
+            - listitem [ref=e206]:
+              - link "Nosotros" [ref=e207] [cursor=pointer]:
+                - /url: /nosotros
+            - listitem [ref=e208]:
+              - link "Ubicación" [ref=e209] [cursor=pointer]:
+                - /url: /ubicacion
+            - listitem [ref=e210]:
+              - link "Contacto" [ref=e211] [cursor=pointer]:
+                - /url: /contacto
+            - listitem [ref=e212]:
+              - link "FAQ" [ref=e213] [cursor=pointer]:
+                - /url: /faq
+            - listitem [ref=e214]:
+              - link "Agendar cita" [ref=e215] [cursor=pointer]:
+                - /url: /agendar
+        - generic [ref=e216]:
+          - heading "Sobre el sitio" [level=3] [ref=e217]
+          - list [ref=e218]:
+            - listitem [ref=e219]:
+              - link "Aviso de privacidad" [ref=e220] [cursor=pointer]:
+                - /url: /privacidad
+            - listitem [ref=e221]:
+              - link "Comunicados" [ref=e222] [cursor=pointer]:
+                - /url: /comunicados
+        - generic [ref=e223]:
+          - heading "Redes" [level=3] [ref=e224]
+          - generic [ref=e225]:
+            - link "Facebook" [ref=e226] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e227]
+            - link "Instagram" [ref=e229] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e230]
+            - link "TikTok" [ref=e232] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=61586875048698
+              - img [ref=e233]
+      - generic [ref=e236]:
+        - paragraph [ref=e237]:
+          - link "Sitio WEB-ABJV" [ref=e238] [cursor=pointer]:
+            - /url: https://www.linkedin.com/in/ingabrahamjv/
+        - generic [ref=e239]:
+          - img "Plus Care" [ref=e240]
+          - generic [ref=e241]: Copyright (c) 2026 Plus Care | Todos los derechos reservados.
+          - img [ref=e243]
+  - link "Abrir WhatsApp" [ref=e245] [cursor=pointer]:
+    - /url: https://wa.me/5525388683?text=Me%20gustar%C3%ADa%20agendar%20una%20cita%20con%20el%2Fla%20especialista%20en%20__.
+    - img [ref=e246]
+  - generic [ref=e250]:
+    - button "Menu" [ref=e251]:
+      - img [ref=e253]
+      - generic: Menu
+    - button "Inspect" [ref=e257]:
+      - img [ref=e259]
+      - generic: Inspect
+    - button "Audit" [ref=e261]:
+      - img [ref=e263]
+      - generic: Audit
+    - button "Settings" [ref=e266]:
+      - img [ref=e268]
+      - generic: Settings

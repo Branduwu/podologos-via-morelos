@@ -121,6 +121,11 @@ const heroPrimaryCtaText = business?.homePrimaryCtaText || "Agenda tu cita";
 const heroPrimaryCtaUrl = business?.homePrimaryCtaUrl || "/agendar";
 const heroSecondaryCtaText = business?.homeSecondaryCtaText || "Nuestros servicios";
 const heroSecondaryCtaUrl = business?.homeSecondaryCtaUrl || "/servicios";
+const heroServiceChips = clinic.serviceCategories.map((category) => ({
+  key: category.key,
+  label: category.key === "optica" ? "Optica" : category.label,
+  href: `/agendar?service=${encodeURIComponent(category.key)}`,
+}));
 
 const promotionsTitle = business?.homePromotionsTitle || "Promociones vigentes";
 const promotionsSubtitle =
@@ -144,11 +149,7 @@ const aboutSecondary =
   about?.secondary ||
   "Nuestro objetivo es ayudarte a mejorar tu bienestar con tratamientos personalizados, explicaciones claras y seguimiento continuo.";
 const aboutGallery = Array.isArray(about?.galleryImageUrls) ? about?.galleryImageUrls.filter(Boolean).slice(0, 4) : [];
-const aboutGalleryAutoplayMsRaw = Number(about?.galleryCarouselIntervalMs);
-const aboutGalleryAutoplayMs =
-  Number.isFinite(aboutGalleryAutoplayMsRaw) && aboutGalleryAutoplayMsRaw >= 1200 && aboutGalleryAutoplayMsRaw <= 10000
-    ? Math.round(aboutGalleryAutoplayMsRaw)
-    : 2200;
+const aboutGalleryPreview = aboutGallery.slice(0, 3);
 const aboutMainImage =
   about?.mainImageUrl ||
   (aboutGallery[0] ||
@@ -289,9 +290,9 @@ function getVideoPreviewSource(it: HomeGalleryItem) {
 }
 
 function getVideoAspectClass(it: HomeGalleryItem) {
-  if (it.platform === "tiktok") return "aspect-[9/16]";
-  if (it.platform === "facebook" || it.platform === "youtube") return "aspect-video";
-  return "aspect-video";
+  if (it.platform === "tiktok") return "aspect-[4/3] w-full";
+  if (it.platform === "facebook" || it.platform === "youtube") return "aspect-video w-full";
+  return "aspect-video w-full";
 }
 
 function formatGoogleReviewDate(unixTime?: number) {
@@ -335,17 +336,35 @@ function trimGoogleReviewText(text?: string) {
       <div class="absolute inset-0 bg-gradient-to-r from-sky-950/78 via-sky-900/65 to-slate-900/52"></div>
 
       <div class="relative mx-auto max-w-6xl px-4 py-16 text-white md:py-20">
-        <p class="type-hero-eyebrow text-sky-100">{heroEyebrow}</p>
-        <h1 class="type-hero-title mt-3 max-w-4xl">{heroTitle}</h1>
-        <p class="type-hero-subtitle mt-4 max-w-3xl text-sky-50">{heroSubtitle}</p>
+        <div class="max-w-4xl">
+          <div>
+            <p class="type-hero-eyebrow text-sky-100">{heroEyebrow}</p>
+            <h1 class="type-hero-title mt-3 max-w-4xl">{heroTitle}</h1>
+            <p class="type-hero-subtitle mt-4 max-w-3xl text-sky-50">{heroSubtitle}</p>
 
-        <div class="mt-7 flex flex-wrap gap-3">
-            <a class="btn-base btn-primary" href={heroPrimaryCtaUrl}>
-              {heroPrimaryCtaText}
-            </a>
-          <a class="btn-base border border-white/70 bg-white/10 text-white shadow-none hover:bg-white/20" href={heroSecondaryCtaUrl}>
-              {heroSecondaryCtaText}
-            </a>
+            <div class="mt-7 flex flex-wrap gap-3">
+              <a class="btn-base btn-primary" href={heroPrimaryCtaUrl}>
+                {heroPrimaryCtaText}
+              </a>
+              <a class="btn-base border border-white/70 bg-white/10 text-white shadow-none hover:bg-white/20" href={heroSecondaryCtaUrl}>
+                {heroSecondaryCtaText}
+              </a>
+            </div>
+
+            <div class="mt-7 max-w-4xl">
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100/85">Elige por servicio</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                {heroServiceChips.map((chip) => (
+                  <a
+                    href={chip.href}
+                    class="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/18"
+                  >
+                    {chip.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -364,7 +383,7 @@ function trimGoogleReviewText(text?: string) {
       </div>
 
       {homePromos.length === 0 ? (
-        <div data-home-promos-empty class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
           Pronto compartiremos promociones vigentes. Mientras tanto, puedes agendar tu cita.
         </div>
       ) : (
@@ -422,7 +441,7 @@ function trimGoogleReviewText(text?: string) {
                       Agendar
                     </a>
                     <a class="btn-base btn-secondary" href={promotionHref(p)}>
-                      Ver promoción
+                      Ver promocion
                     </a>
                   </div>
                 </div>
@@ -433,15 +452,10 @@ function trimGoogleReviewText(text?: string) {
 
         </div>
       )}
-      {homePromos.length > 0 && (
-        <div data-home-promos-empty class="mt-4 hidden rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-          Pronto compartiremos promociones vigentes. Mientras tanto, puedes agendar tu cita.
-        </div>
-      )}
     </section>
 
     <section class="mx-auto mt-12 max-w-6xl px-4">
-      <div class="grid gap-8 rounded-3xl border border-sky-100 bg-white p-8 md:grid-cols-[1.15fr,0.85fr] md:items-center dark:border-slate-800 dark:bg-slate-950 md:p-10">
+      <div class="grid gap-6 rounded-3xl border border-sky-100 bg-white p-6 md:grid-cols-[1.08fr,0.92fr] md:items-center dark:border-slate-800 dark:bg-slate-950 md:p-10">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Conócenos</p>
           <h2 class="type-section-title mt-2">{aboutTitle}</h2>
@@ -467,12 +481,28 @@ function trimGoogleReviewText(text?: string) {
         </div>
 
         <div>
-          <img class="h-80 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[30rem] dark:ring-slate-700" src={aboutMainImage} alt="Nosotros" loading="lazy" data-fallback-src="/placeholder.jpg" />
+          <img class="h-72 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[30rem] dark:ring-slate-700" src={aboutMainImage} alt="Nosotros" loading="eager" data-fallback-src="/placeholder.jpg" />
         </div>
       </div>
 
+      {aboutGalleryPreview.length > 0 && (
+        <div class="mt-5">
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+            {aboutGalleryPreview.map((img, idx) => (
+              <article class:list={["overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950", idx === 0 && "col-span-2 md:col-span-1"]}>
+                <img class="h-44 w-full object-cover md:h-48" src={img} alt={`Nosotros ${idx + 1}`} loading="eager" data-fallback-src="/placeholder.jpg" />
+              </article>
+            ))}
+          </div>
+          <div class="mt-4">
+            <a class="link-inline" href="/nosotros">Conoce más sobre nosotros</a>
+          </div>
+        </div>
+      )}
+
+      <div class="hidden" aria-hidden="true">
       {aboutGallery.length > 0 && (
-        <div class="mt-5" data-about-gallery-carousel data-about-gallery-autoplay-ms={String(aboutGalleryAutoplayMs)}>
+        <div class="mt-5" data-about-gallery-carousel data-about-gallery-autoplay-ms="2200">
           <div class="relative">
             <button
               type="button"
@@ -501,11 +531,12 @@ function trimGoogleReviewText(text?: string) {
           </div>
         </div>
       )}
+      </div>
     </section>
 
     <section class="mx-auto mt-12 max-w-6xl px-4">
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="type-section-title">Fotos y videos recomendados</h2>
+      <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <h2 class="type-section-title">Fotos y videos destacados</h2>
         <a class="text-sm font-medium hover:underline" href="/galeria">Ver fotos y videos</a>
       </div>
 
@@ -517,8 +548,8 @@ function trimGoogleReviewText(text?: string) {
         <div class="mt-6 space-y-10">
           {homeGalleryPhotos.length > 0 && (
             <div>
-              <h3 class="mb-3 text-xl font-bold">Fotos recomendadas</h3>
-              <div class="relative">
+              <h3 class="mb-3 text-xl font-bold">Fotos destacadas</h3>
+              <div class="relative" data-photo-carousel-wrap>
                 <button
                   type="button"
                   data-photo-carousel-prev
@@ -558,8 +589,8 @@ function trimGoogleReviewText(text?: string) {
 
           {homeGalleryVideos.length > 0 && (
             <div>
-              <h3 class="mb-3 text-xl font-bold">Videos recomendados</h3>
-              <div class="relative">
+              <h3 class="mb-3 text-xl font-bold">Videos destacados</h3>
+              <div class="relative" data-video-carousel-wrap>
                 {homeGalleryVideos.length > 1 && (
                   <>
                     <button
@@ -629,7 +660,7 @@ function trimGoogleReviewText(text?: string) {
                           rel={it.url ? "noopener noreferrer" : undefined}
                           class="btn-base btn-secondary mt-3"
                         >
-                          Abrir video
+                          Ver video
                         </a>
                       </div>
                     </article>
@@ -793,161 +824,6 @@ function trimGoogleReviewText(text?: string) {
     start();
   };
 
-  const initCarousel = ({ trackSelector, itemSelector, prevSelector, nextSelector, dotSelector, autoplayMs, loop = false }) => {
-    const track = document.querySelector(trackSelector);
-    const prev = document.querySelector(prevSelector);
-    const next = document.querySelector(nextSelector);
-    const dots = dotSelector ? Array.from(document.querySelectorAll(dotSelector)) : [];
-    if (!track || !prev || !next) return;
-
-    let intervalId;
-    let currentIndex = 0;
-
-    const getItems = () => Array.from(track.querySelectorAll(itemSelector));
-
-    const updateCurrentIndex = () => {
-      const items = getItems();
-      if (!items.length) return;
-      currentIndex = items.reduce(
-        (best, item, index) => {
-          const dist = Math.abs(item.offsetLeft - track.scrollLeft);
-          return dist < best.dist ? { index, dist } : best;
-        },
-        { index: 0, dist: Number.POSITIVE_INFINITY }
-      ).index;
-    };
-
-    const updateDots = () => {
-      if (!dots.length) return;
-      const items = getItems();
-      if (!items.length) return;
-
-      dots.forEach((dot, i) => {
-        dot.classList.toggle("bg-sky-600", i === currentIndex);
-        dot.classList.toggle("dark:bg-sky-400", i === currentIndex);
-        dot.classList.toggle("bg-slate-300", i !== currentIndex);
-        dot.classList.toggle("dark:bg-slate-700", i !== currentIndex);
-      });
-    };
-
-    const updateControls = () => {
-      const items = getItems();
-      if (!items.length) {
-        prev.disabled = true;
-        next.disabled = true;
-        return;
-      }
-
-      const isSingleItem = items.length <= 1;
-      if (isSingleItem) {
-        prev.disabled = true;
-        next.disabled = true;
-        prev.classList.add("opacity-50", "cursor-not-allowed");
-        next.classList.add("opacity-50", "cursor-not-allowed");
-        return;
-      }
-
-      if (loop) {
-        prev.disabled = false;
-        next.disabled = false;
-        prev.classList.remove("opacity-50", "cursor-not-allowed");
-        next.classList.remove("opacity-50", "cursor-not-allowed");
-        return;
-      }
-
-      const atStart = currentIndex <= 0;
-      const atEnd = currentIndex >= items.length - 1;
-
-      prev.disabled = atStart;
-      next.disabled = atEnd;
-
-      prev.classList.toggle("opacity-50", atStart);
-      prev.classList.toggle("cursor-not-allowed", atStart);
-      next.classList.toggle("opacity-50", atEnd);
-      next.classList.toggle("cursor-not-allowed", atEnd);
-    };
-
-    const syncUiState = () => {
-      updateCurrentIndex();
-      updateDots();
-      updateControls();
-    };
-
-    const goToIndex = (index) => {
-      const items = getItems();
-      if (!items.length) return;
-      const bounded = Math.max(0, Math.min(index, items.length - 1));
-      const target = items[bounded];
-      if (!target) return;
-      currentIndex = bounded;
-      track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
-      updateDots();
-      updateControls();
-    };
-
-    const move = (dir) => {
-      const items = getItems();
-      if (!items.length) return false;
-      let target = currentIndex + dir;
-      if (target < 0 || target > items.length - 1) {
-        if (!loop) return false;
-        target = target < 0 ? items.length - 1 : 0;
-      }
-      goToIndex(target);
-      return true;
-    };
-
-    const stopAutoplay = () => {
-      if (!intervalId) return;
-      clearInterval(intervalId);
-      intervalId = undefined;
-    };
-
-    const startAutoplay = () => {
-      stopAutoplay();
-      if (getItems().length <= 1) return;
-      if (document.hidden) return;
-      intervalId = setInterval(() => {
-        syncUiState();
-        const moved = move(1);
-        if (!moved && !loop) stopAutoplay();
-      }, autoplayMs);
-    };
-
-    prev.addEventListener("click", () => {
-      move(-1);
-      startAutoplay();
-    });
-
-    next.addEventListener("click", () => {
-      move(1);
-      startAutoplay();
-    });
-
-    dots.forEach((dot, index) => {
-      dot.addEventListener("click", () => {
-        goToIndex(index);
-        startAutoplay();
-      });
-    });
-
-    track.addEventListener("scroll", syncUiState, { passive: true });
-    track.addEventListener("mouseenter", stopAutoplay);
-    track.addEventListener("mouseleave", startAutoplay);
-    track.addEventListener("focusin", stopAutoplay);
-    track.addEventListener("focusout", startAutoplay);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        stopAutoplay();
-      } else {
-        startAutoplay();
-      }
-    });
-
-    syncUiState();
-    startAutoplay();
-  };
-
   const heroCarouselNode = document.querySelector("[data-hero-carousel]");
   const heroAutoplayFromDom = Number(heroCarouselNode?.getAttribute("data-hero-autoplay-ms") || "5000");
   const heroAutoplayFinal =
@@ -959,83 +835,6 @@ function trimGoogleReviewText(text?: string) {
     selector: "[data-hero-carousel]",
     slideSelector: "[data-hero-slide]",
     autoplayMs: heroAutoplayFinal,
-  });
-
-  const removeExpiredHomePromos = () => {
-    const promoWrap = document.querySelector("[data-home-promos-wrap]");
-    const promoEmpty = document.querySelector("[data-home-promos-empty]");
-    const cards = Array.from(document.querySelectorAll("[data-promo-carousel-item]"));
-    if (!cards.length) return;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    cards.forEach((card) => {
-      const endRaw = String(card.getAttribute("data-promo-end") || "").trim();
-      if (!endRaw) return;
-      const end = new Date(`${endRaw}T00:00:00`);
-      if (!Number.isNaN(end.getTime()) && end < today) {
-        card.remove();
-      }
-    });
-
-    const remainingCards = document.querySelectorAll("[data-promo-carousel-item]");
-    if (remainingCards.length === 0) {
-      promoWrap?.classList.add("hidden");
-      promoEmpty?.classList.remove("hidden");
-    }
-  };
-
-  removeExpiredHomePromos();
-
-  const aboutGalleryNode = document.querySelector("[data-about-gallery-carousel]");
-  const aboutGalleryAutoplayFromDom = Number(
-    aboutGalleryNode?.getAttribute("data-about-gallery-autoplay-ms") || "2200"
-  );
-  const aboutGalleryAutoplayFinal =
-    Number.isFinite(aboutGalleryAutoplayFromDom) &&
-    aboutGalleryAutoplayFromDom >= 1200 &&
-    aboutGalleryAutoplayFromDom <= 10000
-      ? aboutGalleryAutoplayFromDom
-      : 2200;
-
-  initCarousel({
-    trackSelector: "[data-about-gallery-track]",
-    itemSelector: "[data-about-gallery-item]",
-    prevSelector: "[data-about-gallery-prev]",
-    nextSelector: "[data-about-gallery-next]",
-    dotSelector: null,
-    autoplayMs: aboutGalleryAutoplayFinal,
-    loop: true,
-  });
-
-  initCarousel({
-    trackSelector: "[data-promo-carousel-track]",
-    itemSelector: "[data-promo-carousel-item]",
-    prevSelector: "[data-promo-carousel-prev]",
-    nextSelector: "[data-promo-carousel-next]",
-    dotSelector: null,
-    autoplayMs: 4500,
-    loop: true,
-  });
-
-  initCarousel({
-    trackSelector: "[data-photo-carousel-track]",
-    itemSelector: "[data-photo-carousel-item]",
-    prevSelector: "[data-photo-carousel-prev]",
-    nextSelector: "[data-photo-carousel-next]",
-    dotSelector: null,
-    autoplayMs: 3200,
-    loop: true,
-  });
-
-  initCarousel({
-    trackSelector: "[data-video-carousel-track]",
-    itemSelector: "[data-video-carousel-item]",
-    prevSelector: "[data-video-carousel-prev]",
-    nextSelector: "[data-video-carousel-next]",
-    dotSelector: null,
-    autoplayMs: 3200,
-    loop: true,
   });
 
   const promoImages = Array.from(document.querySelectorAll("[data-promo-image]"));
@@ -1055,5 +854,63 @@ function trimGoogleReviewText(text?: string) {
     } else {
       img.addEventListener("load", applyRatio, { once: true });
     }
+  });
+
+  const initScrollCarousel = ({ rootSelector, trackSelector, prevSelector, nextSelector, itemSelector }) => {
+    const root = document.querySelector(rootSelector);
+    if (!root) return;
+
+    const track = root.querySelector(trackSelector);
+    const prev = root.querySelector(prevSelector);
+    const next = root.querySelector(nextSelector);
+    const items = Array.from(root.querySelectorAll(itemSelector));
+
+    if (!track || items.length <= 1) {
+      prev?.classList.add("hidden");
+      next?.classList.add("hidden");
+      return;
+    }
+
+    const getStep = () => {
+      const firstItem = items[0];
+      if (!firstItem) return track.clientWidth * 0.9;
+      const styles = window.getComputedStyle(track);
+      const gap = Number.parseFloat(styles.columnGap || styles.gap || "16");
+      return firstItem.getBoundingClientRect().width + (Number.isFinite(gap) ? gap : 16);
+    };
+
+    const scrollByStep = (direction) => {
+      track.scrollBy({
+        left: getStep() * direction,
+        behavior: "smooth",
+      });
+    };
+
+    prev?.addEventListener("click", () => scrollByStep(-1));
+    next?.addEventListener("click", () => scrollByStep(1));
+  };
+
+  initScrollCarousel({
+    rootSelector: "[data-home-promos-wrap]",
+    trackSelector: "[data-promo-carousel-track]",
+    prevSelector: "[data-promo-carousel-prev]",
+    nextSelector: "[data-promo-carousel-next]",
+    itemSelector: "[data-promo-carousel-item]",
+  });
+
+  initScrollCarousel({
+    rootSelector: "[data-photo-carousel-wrap]",
+    trackSelector: "[data-photo-carousel-track]",
+    prevSelector: "[data-photo-carousel-prev]",
+    nextSelector: "[data-photo-carousel-next]",
+    itemSelector: "[data-photo-carousel-item]",
+  });
+
+  initScrollCarousel({
+    rootSelector: "[data-video-carousel-wrap]",
+    trackSelector: "[data-video-carousel-track]",
+    prevSelector: "[data-video-carousel-prev]",
+    nextSelector: "[data-video-carousel-next]",
+    itemSelector: "[data-video-carousel-item]",
   });
 </script>

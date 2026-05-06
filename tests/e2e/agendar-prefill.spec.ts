@@ -20,7 +20,7 @@ test("telefono invalido bloquea CTA", async ({ page }) => {
   await page.fill("#phone", "0000000000");
 
   const sendBtn = page.locator("#send-whatsapp");
-  await expect(sendBtn).toContainText("Completa los campos");
+  await expect(sendBtn).toContainText("Completa tus datos para continuar por WhatsApp");
   await expect(page.locator("#phone-error")).toBeVisible();
 });
 
