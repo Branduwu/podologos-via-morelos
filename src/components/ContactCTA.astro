@@ -53,7 +53,7 @@ function socialHandle(rawUrl: string): string {
 const primaryWaMessage = buildContactMessage({
   reason: resolveWhatsAppReason(
     business?.whatsappGeneralMessage,
-    "Quiero informacion y agendar una cita.",
+    "Hola, me gustaría agendar en {negocio} y conocer sus servicios. ¿Me pueden orientar?",
     {
       business: business?.name || clinic.name,
       problem: business?.whatsappQuickProblemDefault || "",
@@ -99,7 +99,7 @@ const socialItems = [
             service: chip.label,
             reason: resolveWhatsAppReason(
               business?.whatsappGeneralMessage,
-              "Quiero informacion y agendar este servicio.",
+              "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
               {
                 service: chip.label,
                 business: business?.name || clinic.name,

@@ -252,8 +252,8 @@ function moneyMXN(n: number | string | null | undefined) {
             reason: resolveWhatsAppReason(
               waReasonTemplate,
               useSpecialistWa
-                ? "Quiero informacion y agendar {servicio} con {especialista}."
-                : "Quiero informacion y agendar este servicio.",
+                ? "Hola, me interesa {servicio} y me gustaría agendar con {especialista} en {negocio}. ¿Tienen disponibilidad?"
+                : "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
               {
                 specialist: routingSpecialist?.name || "especialista disponible",
                 service: serviceLabel,

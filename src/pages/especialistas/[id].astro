@@ -63,7 +63,7 @@ const waNumber = resolveWhatsAppNumber(
 const customReasonRaw = String(specialist?.whatsAppMessage || "").trim();
 const specialistReason = resolveWhatsAppReason(
   customReasonRaw || business?.whatsappSpecialistsMessage,
-  "Quiero agendar con {especialista}.",
+  "Hola, me gustaría agendar con {especialista} en {negocio}. ¿Tienen disponibilidad?",
   {
     specialist: specialist?.name || "este especialista",
     service: specialist?.specialty || "Especialista",

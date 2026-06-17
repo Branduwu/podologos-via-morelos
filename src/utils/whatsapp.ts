@@ -44,7 +44,7 @@ const normalizeBaseText = (value: string) =>
 
 export function sanitizeDirectReason(reason?: string): string {
   const raw = String(reason || "").trim();
-  if (!raw) return "Quiero informacion y disponibilidad para agendar.";
+  if (!raw) return "Me gustaría agendar una cita y saber más de sus servicios.";
 
   const normalized = normalizeBaseText(raw);
   const hasNamePlaceholder =
@@ -56,7 +56,7 @@ export function sanitizeDirectReason(reason?: string): string {
     normalized.includes("tu nombre");
 
   if (hasNamePlaceholder) {
-    return "Quiero informacion y disponibilidad para agendar.";
+    return "Me gustaría agendar una cita y saber más de sus servicios.";
   }
 
   return raw;
@@ -72,17 +72,25 @@ function applyTemplate(
     especialista: String(values.specialist || "este especialista").trim(),
     servicio: String(values.service || "General").trim(),
     negocio: fallbackBusiness,
-    problema: String(values.problem || "Por definir").trim(),
+    problema: String(values.problem || "").trim(),
   };
 
   Object.entries(replacements).forEach(([key, value]) => {
     output = output.split(`{${key}}`).join(value);
   });
 
-  // Compatibilidad: si el editor usa "_____" en lugar de {problema}, lo rellenamos igual.
-  output = output.replace(/_{3,}/g, replacements.problema || "Por definir");
+  // Compatibilidad: si el editor usa "___" en lugar de {problema}, lo rellenamos igual.
+  output = output.replace(/_{2,}/g, replacements.problema);
 
-  return output.trim();
+  // Limpia espacios, puntuación y preposiciones huérfanas de placeholders vacíos
+  output = output
+    .replace(/\s+([.,!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\b(en|con|de|para|por)\s*[.,!?]?\s*$/i, "")
+    .trim();
+  if (output && !/[.,!?]$/.test(output)) output += ".";
+
+  return output;
 }
 
 function isLikelyFullMessage(text: string): boolean {
@@ -168,10 +176,10 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
 }
 
 export function buildContactMessage(data: ContactMessageInput): string {
-  const service = data.service?.trim() || "General";
+  const service = data.service?.trim() || "";
   const reason = normalizeMessage(sanitizeDirectReason(data.reason));
 
-  // Si el editor escribio un mensaje completo (ej. "Hola ..."), se envia tal cual.
+  // Si el mensaje ya es un saludo completo, se envía tal cual.
   if (reason && isLikelyFullMessage(reason)) {
     return reason;
   }
@@ -179,12 +187,17 @@ export function buildContactMessage(data: ContactMessageInput): string {
   const intro =
     data.introMessage && String(data.introMessage).trim()
       ? sanitizeDirectReason(data.introMessage)
-      : `Hola, me interesa agendar en ${clinic.name}.`;
-  return [
-    intro,
-    `Servicio de interes: ${service}`,
-    `Consulta: ${reason}`,
-  ].join("\n");
+      : `Hola, me gustaría agendar en ${clinic.name}.`;
+
+  const lines = [intro];
+  if (service && service.toLowerCase() !== "general") {
+    lines.push(`Servicio: ${service}`);
+  }
+  if (reason) {
+    lines.push(reason);
+  }
+
+  return lines.join("\n");
 }
 
 export function buildWhatsAppUrl(
