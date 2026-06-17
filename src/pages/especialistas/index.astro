@@ -5,6 +5,7 @@ import Footer from "../../components/Footer.astro";
 import { clinic } from "../../config/clinic";
 import { getBusinessInfo, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
+import { normalizeCategory } from "../../utils/category";
 import {
   buildContactMessage,
   buildWhatsAppUrl,
@@ -44,16 +45,8 @@ const specialistCategories = [
   { key: "dentista", label: "Dentista" },
 ];
 
-function normalizeText(value: string) {
-  return (value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
-
 function specialistCategoryKey(specialty: string | undefined) {
-  const text = normalizeText(specialty || "");
+  const text = normalizeCategory(specialty || "");
   if (!text) return "general";
   if (text.includes("podolog")) return "podologia";
   if (text.includes("psicolog")) return "psicologia";
@@ -64,7 +57,7 @@ function specialistCategoryKey(specialty: string | undefined) {
 }
 
 function specialistCategoryFromData(specialist: Specialist) {
-  const fromCms = normalizeText(specialist.specialtyCategory || "");
+  const fromCms = normalizeCategory(specialist.specialtyCategory || "");
   if (["podologia", "psicologia", "optica", "quiropractica", "dentista"].includes(fromCms)) return fromCms;
   return specialistCategoryKey(specialist.specialty);
 }
@@ -125,7 +118,10 @@ function canUseSpecialistWhatsApp(specialist: Specialist) {
 }
 ---
 
-<Layout title={`Especialistas | ${business?.name || "Podologos Via Morelos"}`} description="Conoce a nuestros especialistas y su enfoque de atención.">
+<Layout
+  title={`Especialistas | ${business?.name || "Podologos Via Morelos"}`}
+  description={`Conoce a los especialistas de ${business?.name || "Podólogos Vía Morelos"} en ${business?.area || "Tulpetlac"}. Profesionales en podología, psicología, óptica, quiropráctica y dentista.`}
+>
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">

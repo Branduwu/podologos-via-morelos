@@ -73,39 +73,23 @@ export default {
     {
       name: "startDate",
       title: "Fecha de inicio",
-      type: "string",
-      description: "Aqui editas cuando inicia la promocion. Formato: AAAA-MM-DD (ejemplo: 2026-03-01).",
+      type: "date",
+      description: "Cuando inicia la promocion. Si no tiene fecha especifica, dejala vacia.",
       fieldset: "timing",
-      validation: (R) =>
-        R.regex(/^\d{4}-\d{2}-\d{2}$/)
-          .warning("Usa formato AAAA-MM-DD.")
-          .custom((value) => {
-            if (!value) return true;
-            const date = new Date(`${value}T00:00:00Z`);
-            return Number.isNaN(date.getTime()) ? "Fecha invalida." : true;
-          }),
     },
     {
       name: "endDate",
       title: "Fecha de fin",
-      type: "string",
-      description: "Aqui editas cuando termina la promocion. Formato: AAAA-MM-DD (ejemplo: 2026-03-31).",
+      type: "date",
+      description: "Cuando termina la promocion. Si es indefinida, dejala vacia.",
       fieldset: "timing",
       validation: (R) =>
-        R.regex(/^\d{4}-\d{2}-\d{2}$/)
-          .warning("Usa formato AAAA-MM-DD.")
-          .custom((value, context) => {
-            if (!value) return true;
-
-            const endDate = new Date(`${value}T00:00:00Z`);
-            if (Number.isNaN(endDate.getTime())) {
-              return "Fecha invalida.";
-            }
-
-            const start = context.document?.startDate;
-            if (!start) return true;
-            return value >= start || "La fecha de fin debe ser igual o posterior al inicio.";
-          }),
+        R.custom((value, context) => {
+          if (!value) return true;
+          const start = context.document?.startDate;
+          if (!start) return true;
+          return value >= start || "La fecha de fin debe ser igual o posterior a la fecha de inicio.";
+        }),
     },
     {
       name: "image",

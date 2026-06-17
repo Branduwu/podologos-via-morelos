@@ -9,15 +9,24 @@ const businessName = business?.name || "Podologos Via Morelos";
 const businessArea = business?.area || "Tulpetlac, Ecatepec";
 const address = business?.address || "Dirección pendiente";
 const phone = business?.phone || "Teléfono pendiente";
+const weekdayHours = business?.weekdayHours || "10 a.m. – 6 p.m.";
+const saturdayHours = business?.saturdayHours || "10 a.m. – 4 p.m.";
+const sundayOpen = Boolean(business?.sundayOpen);
+const sundayHours = business?.sundayHours || "";
+
 const currentDay = new Date().getDay();
 const dayNames = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const todayName = dayNames[currentDay] || "hoy";
 const scheduleLabel =
   currentDay >= 1 && currentDay <= 5
-    ? `Horario de hoy: ${todayName} de 10 a.m. a 6 p.m.`
-    : currentDay === 6
-      ? `Horario de hoy: ${todayName} de 10 a.m. a 4 p.m.`
-      : "Horario de hoy: domingo cerrado";
+    ? `Horario de hoy: ${todayName} de ${weekdayHours}`
+    : currentDay === 6 && saturdayHours
+      ? `Horario de hoy: ${todayName} de ${saturdayHours}`
+      : currentDay === 6
+        ? `Horario de hoy: ${todayName} cerrado`
+        : sundayOpen && sundayHours
+          ? `Horario de hoy: ${todayName} de ${sundayHours}`
+          : "Horario de hoy: domingo cerrado";
 const logoUrl = business?.logoImageUrl || "/default-logo-clinica.svg";
 
 const facebookUrl = safeCmsUrl(business?.facebookUrl, "");
@@ -67,10 +76,17 @@ const isActive = (href: string) => {
 };
 ---
 
-<header class="sticky top-0 z-50 border-b border-slate-200 bg-[rgb(197,226,240)]/95 backdrop-blur dark:border-[rgb(36,58,86)] dark:bg-[rgb(12,28,50)]/95">
-  <div class="hidden border-b border-slate-200 bg-[rgb(197,226,240)] md:block dark:border-[rgb(36,58,86)] dark:bg-[rgb(16,35,60)]/90">
+<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur dark:border-[rgb(36,58,86)] dark:bg-[rgb(8,20,38)]/95">
+  <div class="hidden border-b border-slate-100 bg-white md:block dark:border-[rgb(28,48,74)] dark:bg-[rgb(6,16,32)]">
     <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-5 py-2.5 text-[13px] text-slate-600 dark:text-[rgb(186,205,227)]">
-      <p id="today-hours" class="min-w-[14rem] flex-1 truncate">
+      <p
+        id="today-hours"
+        class="min-w-[14rem] flex-1 truncate"
+        data-weekday-hours={weekdayHours}
+        data-saturday-hours={saturdayHours}
+        data-sunday-open={sundayOpen ? "true" : "false"}
+        data-sunday-hours={sundayHours}
+      >
         {scheduleLabel}
       </p>
       <p class="hidden min-w-[18rem] flex-[1.2] truncate text-center lg:block">{address}</p>
@@ -120,15 +136,18 @@ const isActive = (href: string) => {
       <ThemeToggle compact />
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-[rgb(59,87,120)] dark:text-[rgb(214,228,245)] dark:hover:bg-[rgb(25,48,76)]"
+        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-[rgb(59,87,120)] dark:text-[rgb(214,228,245)] dark:hover:bg-[rgb(25,48,76)]"
         data-mobile-menu-button
         aria-expanded="false"
         aria-controls="mobile-nav-panel"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon-open h-5 w-5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"></path>
         </svg>
-        Menú
+        <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon-close h-5 w-5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <span data-menu-label>Menú</span>
       </button>
     </div>
   </div>
@@ -147,7 +166,7 @@ const isActive = (href: string) => {
     </nav>
   </div>
 
-  <div id="mobile-nav-panel" class="hidden border-t border-sky-100 bg-[rgb(197,226,240)] px-4 pb-5 pt-4 md:hidden dark:border-[rgb(36,58,86)] dark:bg-[rgb(12,28,50)]">
+  <div id="mobile-nav-panel" class="hidden border-t border-slate-100 bg-white px-4 pb-5 pt-4 md:hidden dark:border-[rgb(36,58,86)] dark:bg-[rgb(8,20,38)]">
     <a href={primaryCta.href} class={`btn-base w-full ${isActive(primaryCta.href) ? "btn-primary" : "btn-secondary"}`}>
       {primaryCta.label}
     </a>
@@ -189,29 +208,48 @@ const isActive = (href: string) => {
     if (!button || !panel) return;
 
     if (todayHoursEl) {
+      const weekdayHours = todayHoursEl.dataset.weekdayHours || "10 a.m. – 6 p.m.";
+      const saturdayHours = todayHoursEl.dataset.saturdayHours || "10 a.m. – 4 p.m.";
+      const sundayOpen = todayHoursEl.dataset.sundayOpen === "true";
+      const sundayHours = todayHoursEl.dataset.sundayHours || "";
+
       const day = new Date().getDay();
       const dayNames = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
       const todayName = dayNames[day] || "hoy";
 
       const todayText =
         day >= 1 && day <= 5
-          ? `Horario de hoy: ${todayName} de 10 a.m. a 6 p.m.`
-          : day === 6
-            ? `Horario de hoy: ${todayName} de 10 a.m. a 4 p.m.`
-            : "Horario de hoy: domingo cerrado";
+          ? `Horario de hoy: ${todayName} de ${weekdayHours}`
+          : day === 6 && saturdayHours
+            ? `Horario de hoy: ${todayName} de ${saturdayHours}`
+            : day === 6
+              ? `Horario de hoy: ${todayName} cerrado`
+              : sundayOpen && sundayHours
+                ? `Horario de hoy: ${todayName} de ${sundayHours}`
+                : "Horario de hoy: domingo cerrado";
 
       todayHoursEl.textContent = todayText;
     }
 
     const closeMenu = () => {
       panel.classList.add("hidden");
+      panel.classList.remove("menu-slide-in");
       button.setAttribute("aria-expanded", "false");
+      const label = button.querySelector("[data-menu-label]");
+      if (label) label.textContent = "Menú";
     };
 
     button.addEventListener("click", () => {
       const willOpen = panel.classList.contains("hidden");
       panel.classList.toggle("hidden");
       button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      const label = button.querySelector("[data-menu-label]");
+      if (label) label.textContent = willOpen ? "Cerrar" : "Menú";
+      if (willOpen) {
+        panel.classList.remove("menu-slide-in");
+        void panel.offsetWidth;
+        panel.classList.add("menu-slide-in");
+      }
     });
 
     panel.querySelectorAll("a").forEach((link) => {

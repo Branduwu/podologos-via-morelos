@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import VideoEmbed from "../components/VideoEmbed.astro";
 import { getGallery } from "../lib/sanity.js";
+import { getCategoryLabel } from "../utils/category";
 
 type GalleryItem = {
   _id?: string;
@@ -42,30 +43,12 @@ const mediaFilters = [
   { key: "facebook", label: "Facebook" },
 ];
 
-const categoryLabel: Record<string, string> = {
-  podologia: "Podologia",
-  psicologia: "Psicologia",
-  optica: "Optica",
-  quiropractica: "Quiropractica",
-  dentista: "Dentista",
-  instalaciones: "Instalaciones",
-  otros: "Otros",
-};
-
-function normalizeCategory(raw: string | undefined | null) {
-  return String(raw || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function getCategoryLabel(raw: string | undefined | null) {
-  return categoryLabel[normalizeCategory(raw)] || "Otros";
-}
 ---
 
-<Layout title="Galeria | Podologos Via Morelos Tulpetlac">
+<Layout
+  title="Galería | Podologos Via Morelos Tulpetlac"
+  description="Fotos y videos de nuestras instalaciones, atenciones y resultados en la Clínica Podólogos Vía Morelos en Tulpetlac."
+>
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">

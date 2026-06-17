@@ -44,10 +44,45 @@
     },
     {
       name: "hoursText",
-      title: "Texto de horario en Header",
+      title: "Horario para SEO (Google)",
       type: "string",
-      description: "Ejemplo: Horario de hoy: lunes de 10 a.m. a 6 p.m.",
+      description: "Solo para buscadores. Ejemplo: Mo-Fr 10:00-18:00, Sa 10:00-16:00",
       fieldset: "general",
+    },
+    {
+      name: "weekdayHours",
+      title: "Horario Lunes – Viernes",
+      type: "string",
+      description: "Texto que aparece en header y footer. Ejemplo: 10 a.m. – 6 p.m.",
+      fieldset: "general",
+      initialValue: "10 a.m. – 6 p.m.",
+      validation: (R) => R.max(30).warning("Maximo 30 caracteres."),
+    },
+    {
+      name: "saturdayHours",
+      title: "Horario Sabado",
+      type: "string",
+      description: "Deja vacio si el sabado esta cerrado.",
+      fieldset: "general",
+      initialValue: "10 a.m. – 4 p.m.",
+      validation: (R) => R.max(30).warning("Maximo 30 caracteres."),
+    },
+    {
+      name: "sundayOpen",
+      title: "Abierto el domingo",
+      type: "boolean",
+      description: "Activa si el negocio abre en domingo.",
+      fieldset: "general",
+      initialValue: false,
+    },
+    {
+      name: "sundayHours",
+      title: "Horario Domingo (si abre)",
+      type: "string",
+      description: "Solo aplica si marcas Abierto el domingo arriba.",
+      fieldset: "general",
+      hidden: ({ document }) => !document?.sundayOpen,
+      validation: (R) => R.max(30).warning("Maximo 30 caracteres."),
     },
 
     {
@@ -365,6 +400,15 @@
       validation: (R) => R.uri({ scheme: ["http", "https"] }),
     },
 
+    {
+      name: "footerTagline",
+      title: "Descripcion corta (pie de pagina)",
+      type: "string",
+      description: "Texto debajo del logo en el pie de pagina.",
+      fieldset: "footer",
+      initialValue: "Atencion integral en podologia, psicologia, optica, quiropractica y dentista.",
+      validation: (R) => R.max(160).warning("Recomendado: maximo 160 caracteres."),
+    },
     {
       name: "footerMenuTitle",
       title: "Titulo columna menu (pie de pagina)",

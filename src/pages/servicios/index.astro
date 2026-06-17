@@ -125,7 +125,10 @@ function moneyMXN(n: number | string | null | undefined) {
 }
 ---
 
-<Layout title="Servicios | Podologos Via Morelos Tulpetlac">
+<Layout
+  title={`Servicios | ${business?.name || "Podologos Via Morelos Tulpetlac"}`}
+  description={`Servicios de podología, psicología, óptica, quiropráctica y dentista en ${business?.area || "Tulpetlac"}. Revisa opciones, precios desde y agenda tu cita en línea.`}
+>
   <Header />
 
   <main class="mx-auto max-w-[88rem] px-4 py-10 xl:px-6">

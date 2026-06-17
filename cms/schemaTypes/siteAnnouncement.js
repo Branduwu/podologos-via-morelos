@@ -27,6 +27,13 @@ export default {
       validation: (R) => R.required().error("El contenido es obligatorio."),
     },
     {
+      name: "featured",
+      title: "Destacado",
+      type: "boolean",
+      initialValue: false,
+      description: "Si esta activo, este comunicado aparece primero y con mayor prominencia.",
+    },
+    {
       name: "active",
       title: "Activo",
       type: "boolean",
@@ -37,7 +44,7 @@ export default {
       name: "order",
       title: "Orden",
       type: "number",
-      description: "Menor numero = aparece primero.",
+      description: "Menor numero = aparece primero (los destacados van antes de todos).",
     },
   ],
   preview: {
@@ -45,11 +52,14 @@ export default {
       title: "title",
       subtitle: "publishDate",
       active: "active",
+      featured: "featured",
     },
-    prepare({ title, subtitle, active }) {
+    prepare({ title, subtitle, active, featured }) {
+      const status = active === false ? "Inactivo" : "Activo";
+      const featuredLabel = featured ? " ⭐ Destacado" : "";
       return {
         title: title || "Comunicado",
-        subtitle: `${active === false ? "Inactivo" : "Activo"}${subtitle ? ` | ${subtitle}` : ""}`,
+        subtitle: `${status}${featuredLabel}${subtitle ? ` | ${subtitle}` : ""}`,
       };
     },
   },

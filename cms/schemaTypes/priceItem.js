@@ -101,6 +101,7 @@ export default {
       type: "string",
       description: "Aclaracion breve. Ejemplo: Sujeto a valoracion.",
       fieldset: "detail",
+      validation: (R) => R.max(100).warning("Recomendado: maximo 100 caracteres para que no se corte en pantalla."),
     },
     {
       name: "order",

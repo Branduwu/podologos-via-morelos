@@ -93,7 +93,10 @@ const prefilledAgendarHref = (() => {
 })();
 ---
 
-<Layout title={`${specialist.name || "Especialista"} | Especialistas`} description={specialist.shortBio || specialist.specialty || "Perfil de especialista"}>
+<Layout
+  title={`${specialist.name || "Especialista"} | ${specialist.specialty || "Especialista"} | ${business?.name || "Podologos Via Morelos"}`}
+  description={`${specialist.name} — ${specialist.specialty} en ${business?.name || "Podólogos Vía Morelos"}, ${business?.area || "Tulpetlac"}. ${(specialist.shortBio || "").slice(0, 100)}`}
+>
   <Header />
 
   <main class="mx-auto max-w-5xl px-4 py-8 md:py-10">

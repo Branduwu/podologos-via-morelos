@@ -3,20 +3,20 @@
 
 @layer base {
   :root {
-    --brand-primary: #0369a1;
-    --brand-primary-strong: #075985;
-    --brand-primary-soft: #0284c7;
-    --brand-soft: #e0f2fe;
-    --page-bg-light: #eef5fb;
-    --page-bg-light-top: #f8fbff;
-    --page-bg-light-accent: rgb(2 132 199 / 0.1);
-    --page-bg-light-accent-2: rgb(14 116 144 / 0.06);
-    --page-pattern-light: rgb(15 23 42 / 0.018);
-    --page-bg-dark: #071428;
-    --page-bg-dark-top: #0b1d33;
-    --page-bg-dark-accent: rgb(56 189 248 / 0.12);
-    --page-bg-dark-accent-2: rgb(14 165 233 / 0.08);
-    --page-pattern-dark: rgb(148 163 184 / 0.05);
+    --brand-primary: #0255a3;
+    --brand-primary-strong: #023e80;
+    --brand-primary-soft: #1278d6;
+    --brand-soft: #d0e9ff;
+    --page-bg-light: #f2f8ff;
+    --page-bg-light-top: #fafcff;
+    --page-bg-light-accent: rgb(2 120 212 / 0.13);
+    --page-bg-light-accent-2: rgb(0 100 168 / 0.08);
+    --page-pattern-light: rgb(15 23 42 / 0.02);
+    --page-bg-dark: #050e1e;
+    --page-bg-dark-top: #081826;
+    --page-bg-dark-accent: rgb(56 189 248 / 0.15);
+    --page-bg-dark-accent-2: rgb(14 165 233 / 0.10);
+    --page-pattern-dark: rgb(148 163 184 / 0.055);
   }
 
   body {
@@ -96,15 +96,15 @@
   }
 
   .btn-primary {
-    border: 1px solid rgb(2 132 199 / 1);
-    background: linear-gradient(180deg, var(--brand-primary-soft), var(--brand-primary));
+    border: 1px solid rgb(1 90 180 / 0.85);
+    background: linear-gradient(155deg, #1a82de 0%, #0255a3 60%, #023e80 100%);
     color: #ffffff;
   }
 
   .btn-primary:hover {
-    background: linear-gradient(180deg, #0b87bf, var(--brand-primary-strong));
+    background: linear-gradient(155deg, #1070cc 0%, #023e80 60%, #012f60 100%);
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgb(2 132 199 / 0.24);
+    box-shadow: 0 10px 24px rgb(2 100 180 / 0.35);
   }
 
   .btn-secondary {
@@ -190,14 +190,14 @@
   }
 
   .dark .btn-primary {
-    border-color: rgb(56 189 248 / 0.8);
-    background: linear-gradient(180deg, rgb(14 116 144 / 1), rgb(6 78 99 / 1));
+    border-color: rgb(56 189 248 / 0.7);
+    background: linear-gradient(155deg, rgb(22 140 228 / 1) 0%, rgb(7 100 175 / 1) 60%, rgb(5 70 130 / 1) 100%);
     color: rgb(240 249 255 / 1);
   }
 
   .dark .btn-primary:hover {
-    background: linear-gradient(180deg, rgb(8 145 178 / 1), rgb(8 93 122 / 1));
-    box-shadow: 0 10px 20px rgb(6 78 99 / 0.45);
+    background: linear-gradient(155deg, rgb(14 120 208 / 1) 0%, rgb(5 82 148 / 1) 60%, rgb(4 58 108 / 1) 100%);
+    box-shadow: 0 10px 24px rgb(7 100 175 / 0.50);
   }
 
   .dark .btn-secondary {
@@ -711,6 +711,126 @@
     .filter-item-in,
     .filter-item-in-slide {
       animation: none !important;
+    }
+  }
+
+  /* ─── Scroll Reveal System ─── */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-delay-1 { transition-delay: 80ms; }
+  .reveal-delay-2 { transition-delay: 160ms; }
+  .reveal-delay-3 { transition-delay: 240ms; }
+  .reveal-delay-4 { transition-delay: 320ms; }
+
+  /* ─── Hero Entrance Stagger ─── */
+  .hero-animate {
+    animation: heroFadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero-delay-1 { animation-delay: 50ms; }
+  .hero-delay-2 { animation-delay: 200ms; }
+  .hero-delay-3 { animation-delay: 350ms; }
+  .hero-delay-4 { animation-delay: 500ms; }
+  .hero-delay-5 { animation-delay: 650ms; }
+
+  /* ─── Primary Button Shimmer ─── */
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    inset-y: 0;
+    left: 0;
+    width: 50%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.22), transparent);
+    transform: translateX(-130%) skewX(-20deg);
+  }
+  .btn-primary:hover::after {
+    animation: shimmerSlide 0.5s ease forwards;
+  }
+
+  /* ─── Mobile Menu Slide ─── */
+  .menu-slide-in {
+    animation: menuReveal 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ─── Menu Icon Toggle (hamburger ↔ X) ─── */
+  [data-mobile-menu-button] .menu-icon-close {
+    display: none;
+  }
+  [data-mobile-menu-button][aria-expanded="true"] .menu-icon-open {
+    display: none;
+  }
+  [data-mobile-menu-button][aria-expanded="true"] .menu-icon-close {
+    display: block;
+  }
+
+  /* ─── WhatsApp Pulse Ring ─── */
+  .wa-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: rgb(16 185 129);
+    animation: waPulseRing 2.2s ease-out infinite;
+    pointer-events: none;
+  }
+
+  /* ─── Scroll-to-top Reveal ─── */
+  #scroll-to-top {
+    opacity: 0;
+    transform: scale(0.72) translateY(4px);
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #scroll-to-top.is-visible {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes menuReveal {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmerSlide {
+    from { transform: translateX(-130%) skewX(-20deg); }
+    to { transform: translateX(260%) skewX(-20deg); }
+  }
+  @keyframes waPulseRing {
+    0% { transform: scale(1); opacity: 0.55; }
+    80%, 100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      transition: none;
+      opacity: 1;
+      transform: none;
+    }
+    .hero-animate,
+    .menu-slide-in {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+    }
+    .wa-pulse-ring {
+      animation: none;
+      opacity: 0;
+    }
+    .btn-primary:hover::after {
+      animation: none;
     }
   }
 }

@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getBusinessInfo, getPrices } from "../lib/sanity.js";
 import { clinic } from "../config/clinic";
+import { normalizeCategory } from "../utils/category";
 
 type PriceRow = {
   _id?: string;
@@ -32,15 +33,6 @@ const priceCategories = [
 ];
 const priceCategoryLabelByKey = new Map(priceCategories.map((item) => [item.key, item.label]));
 
-function normalizeText(value: string) {
-  return (value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function applyTemplate(value: string | null | undefined, replacements: Record<string, string | number>) {
   let resolved = String(value || "");
   Object.entries(replacements).forEach(([key, replacement]) => {
@@ -50,9 +42,9 @@ function applyTemplate(value: string | null | undefined, replacements: Record<st
 }
 
 function priceCategoryKey(price: PriceRow) {
-  const fromCms = normalizeText(price.category || "");
+  const fromCms = normalizeCategory(price.category || "");
   if (["podologia", "psicologia", "optica", "quiropractica", "dentista"].includes(fromCms)) return fromCms;
-  const text = normalizeText(`${price.serviceTitle || ""} ${price.note || ""}`);
+  const text = normalizeCategory(`${price.serviceTitle || ""} ${price.note || ""}`);
   if (!text) return "general";
   if (text.includes("podolog")) return "podologia";
   if (text.includes("psicolog")) return "psicologia";
@@ -172,7 +164,10 @@ function buildAgendarHref(price: PriceRow) {
 }
 ---
 
-<Layout title="Precios | Podologos Via Morelos Tulpetlac">
+<Layout
+  title={`Precios | ${business?.name || "Podologos Via Morelos Tulpetlac"}`}
+  description={`Consulta los precios desde de todos nuestros servicios médicos en ${business?.area || "Tulpetlac"}. Cotiza varios servicios y agenda tu cita directamente.`}
+>
   <Header />
 
   <main class="mx-auto max-w-[92rem] px-4 py-10 pb-36 xl:px-6 md:pb-10">

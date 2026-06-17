@@ -97,7 +97,10 @@ export async function getPrices() {
     title,
     "serviceTitle": select(defined(service->title) => service->title, defined(title) => title, true => "-"),
     "category": service->category,
-    "leadSpecialistSlug": coalesce(leadSpecialist->slug.current, service->leadSpecialist->slug.current),
+    "leadSpecialistSlug": select(
+      defined(leadSpecialist) && leadSpecialist->active != false => leadSpecialist->slug.current,
+      defined(service->leadSpecialist) && service->leadSpecialist->active != false => service->leadSpecialist->slug.current
+    ),
     "whatsAppNumber": coalesce(whatsAppNumber, service->whatsAppNumber),
     "whatsAppMessage": coalesce(whatsAppMessage, service->whatsAppMessage),
     priceFrom,
@@ -134,11 +137,12 @@ export async function getPrivacyPage() {
 
 export async function getSiteAnnouncements() {
   return fetchSafe(
-    `*[_type=="siteAnnouncement" && (!defined(active) || active == true)]|order(order asc, publishDate desc, _createdAt desc){
+    `*[_type=="siteAnnouncement" && (!defined(active) || active == true)]|order(featured desc, order asc, publishDate desc, _createdAt desc){
       _id,
       title,
       publishDate,
-      body
+      body,
+      featured
     }`,
     {},
     []
@@ -160,10 +164,12 @@ export async function getBusinessInfo() {
     googlePlaceId, homeGoogleReviewsTitle, homeGoogleReviewsSubtitle, homeGoogleReviewsCtaText,
     "logoImageUrl": logoImage.asset->url,
     facebookUrl, instagramUrl, tiktokUrl,
+    weekdayHours, saturdayHours, sundayOpen, sundayHours,
+    footerTagline,
     footerMenuTitle, footerSiteTitle,
     footerPrivacyLabel, footerPrivacyUrl,
     footerNoticesLabel, footerNoticesUrl,
-    footerCopyrightText, footerProjectSignature,
+    footerCopyrightText,
     servicesPageContent,
     pricesPageContent,
     bookingPageContent
