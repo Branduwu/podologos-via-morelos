@@ -44,7 +44,7 @@ const normalizeBaseText = (value: string) =>
 
 export function sanitizeDirectReason(reason?: string): string {
   const raw = String(reason || "").trim();
-  if (!raw) return "Me gustaría agendar una cita y saber más de sus servicios.";
+  if (!raw) return "Me gustaría solicitar un servicio de fumigación y saber más de sus precios.";
 
   const normalized = normalizeBaseText(raw);
   const hasNamePlaceholder =
@@ -56,7 +56,7 @@ export function sanitizeDirectReason(reason?: string): string {
     normalized.includes("tu nombre");
 
   if (hasNamePlaceholder) {
-    return "Me gustaría agendar una cita y saber más de sus servicios.";
+    return "Me gustaría solicitar un servicio de fumigación y saber más de sus precios.";
   }
 
   return raw;
@@ -69,7 +69,7 @@ function applyTemplate(
   let output = String(template || "");
   const fallbackBusiness = String(values.business || clinic.name || "nuestro negocio").trim();
   const replacements: Record<string, string> = {
-    especialista: String(values.specialist || "este especialista").trim(),
+    especialista: String(values.specialist || "este técnico").trim(),
     servicio: String(values.service || "General").trim(),
     negocio: fallbackBusiness,
     problema: String(values.problem || "").trim(),
@@ -127,7 +127,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
   const intro =
     data.introMessage && String(data.introMessage).trim()
       ? sanitizeDirectReason(data.introMessage)
-      : `Hola, quiero agendar una cita en ${clinic.name}.`;
+      : `Hola, quiero solicitar un servicio de fumigacion en ${clinic.name}.`;
   const specialist = data.specialist?.trim() || "Sin preferencia";
   const dateText = data.date ? formatDateMX(data.date) : "Por definir";
   const timeText = data.time || data.shift || "Por definir";
@@ -135,7 +135,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
   const selectedServices = (data.selectedServices || []).map((s) => s.trim()).filter(Boolean);
   const totalText =
     typeof data.approxTotal === "number" && data.approxTotal > 0
-      ? new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(data.approxTotal)
+      ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.approxTotal)
       : null;
   const servicesBlock =
     selectedServices.length > 0
@@ -150,7 +150,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
   const specialistsBlock =
     serviceSpecialists.length > 0
       ? [
-          "Especialistas por servicio:",
+          "Técnicos por servicio:",
           ...serviceSpecialists.map(
             (item, idx) => `${idx + 1}. ${item.service} -> ${item.specialist}`
           ),
@@ -166,7 +166,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
     ...servicesBlock,
     ...specialistsBlock,
     ...(totalText ? [`Total aproximado: ${totalText}`] : []),
-    `Especialista: ${specialist}`,
+    `Técnico: ${specialist}`,
     `Fecha: ${dateText}`,
     `Hora/Turno: ${timeText}`,
     `Motivo/Notas: ${notes}`,
@@ -187,7 +187,7 @@ export function buildContactMessage(data: ContactMessageInput): string {
   const intro =
     data.introMessage && String(data.introMessage).trim()
       ? sanitizeDirectReason(data.introMessage)
-      : `Hola, me gustaría agendar en ${clinic.name}.`;
+      : `Hola, me gustaria solicitar un servicio de fumigacion en ${clinic.name}.`;
 
   const lines = [intro];
   if (service && service.toLowerCase() !== "general") {
