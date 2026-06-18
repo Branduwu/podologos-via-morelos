@@ -62,7 +62,7 @@ const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sábado 10:00 a 1
 const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
 const hasQuickWhatsApp = Boolean(generalWhatsappNumber);
 const quickWhatsAppHref = hasQuickWhatsApp
-  ? `https://wa.me/${generalWhatsappNumber}?text=${encodeURIComponent("Hola, quiero informacion para agendar una cita.")}`
+  ? `https://wa.me/${generalWhatsappNumber}?text=${encodeURIComponent("Hola, quiero informacion para solicitar un servicio de fumigacion.")}`
   : "/contacto";
 
 const categoryMap = new Map<string, string>();
@@ -148,11 +148,11 @@ const prefillApproxTotal = prefillServices.reduce((sum, serviceName, index) => {
 }, 0);
 const bookingPageContent = business?.bookingPageContent || {};
 const bookingPageText = {
-  eyebrow: String(bookingPageContent.eyebrow || "Agenda facil").trim(),
-  title: String(bookingPageContent.title || "Agenda tu cita").trim(),
+  eyebrow: String(bookingPageContent.eyebrow || "Solicitud rapida").trim(),
+  title: String(bookingPageContent.title || "Solicita tu servicio").trim(),
   intro: String(
     bookingPageContent.intro ||
-      "Dejanos tus datos y te ayudamos a pedir tu cita por WhatsApp. Si vienes desde servicios o precios, tu seleccion ya aparece aqui para que sigas sin empezar otra vez."
+      "Dejanos tus datos y te ayudamos a solicitar tu servicio por WhatsApp. Si vienes desde servicios o precios, tu seleccion ya aparece aqui para que sigas sin empezar otra vez."
   ).trim(),
   primaryCtaText: String(bookingPageContent.primaryCtaText || "Llenar formulario").trim(),
   primaryCtaUrl: String(bookingPageContent.primaryCtaUrl || "#appointment-form").trim(),
@@ -165,13 +165,13 @@ const bookingPageText = {
   ).trim(),
   stepTwoTitle: String(bookingPageContent.stepTwoTitle || "Lo demas lo vemos contigo").trim(),
   stepTwoBody: String(
-    bookingPageContent.stepTwoBody || "Si aun no sabes fecha, hora o especialista, puedes decidirlo despues."
+    bookingPageContent.stepTwoBody || "Si aun no sabes fecha, hora o tecnico disponible, puedes decidirlo despues."
   ).trim(),
   metaOneValue: String(bookingPageContent.metaOneValue || "WhatsApp").trim(),
   metaOneLabel: String(bookingPageContent.metaOneLabel || "te respondemos por mensaje").trim(),
   metaTwoValue: String(bookingPageContent.metaTwoValue || "Sin prisa").trim(),
   metaTwoLabel: String(bookingPageContent.metaTwoLabel || "fecha y hora pueden esperar").trim(),
-  formTitle: String(bookingPageContent.formTitle || "Datos de la cita").trim(),
+  formTitle: String(bookingPageContent.formTitle || "Datos del servicio").trim(),
   summaryTitle: String(bookingPageContent.summaryTitle || "Resumen de tu solicitud").trim(),
   summaryEmptyStateText: String(
     bookingPageContent.summaryEmptyStateText || "Selecciona un servicio y te mostramos un precio aproximado."
@@ -282,7 +282,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
               </span>
               <div class="min-w-0 flex-1">
                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">Datos básicos</p>
-                <h3 class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">Datos básicos de tu cita</h3>
+                <h3 class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">Datos básicos del servicio</h3>
                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Con servicio, nombre y teléfono ya podemos recibir tu solicitud y darte seguimiento.</p>
               </div>
             </div>
@@ -1478,10 +1478,10 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     const introMessage = resolveWhatsAppReason(
       introTemplate,
       routingSpecialist
-        ? "Hola, quiero agendar con {especialista} en {negocio}."
+        ? "Hola, quiero solicitar servicio con {especialista} en {negocio}."
         : quoteSpecialists.length > 1
-          ? "Hola, quiero agendar varias atenciones en {negocio}."
-          : "Hola, quiero agendar una cita en {negocio}.",
+          ? "Hola, quiero solicitar varios servicios de fumigacion en {negocio}."
+          : "Hola, quiero solicitar un servicio de fumigacion en {negocio}.",
       {
         specialist: specialistName,
         service: effectiveServiceLabel,

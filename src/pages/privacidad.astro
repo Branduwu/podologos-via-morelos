@@ -15,7 +15,7 @@ const privacy: PrivacyPage | null = await getPrivacyPage();
 
 const title = privacy?.title || "Aviso de privacidad";
 const subtitle =
-  privacy?.subtitle || "Aviso de privacidad para atencion y contacto de pacientes.";
+  privacy?.subtitle || "Aviso de privacidad para clientes y contacto de FumiPro NC.";
 const updatedAtLabel = privacy?.updatedAt
   ? new Date(`${privacy.updatedAt}T12:00:00`).toLocaleDateString("es-US", {
       year: "numeric",
@@ -25,11 +25,11 @@ const updatedAtLabel = privacy?.updatedAt
   : "22 de febrero de 2026";
 
 const fallbackParagraphs = [
-  "Este sitio solicita datos de contacto para responder dudas y gestionar citas. Los datos se usan para atencion al paciente, seguimiento de servicios y comunicacion relacionada con la solicitud.",
-  "Los datos que se pueden solicitar incluyen nombre, telefono, servicio de interes, fecha y hora preferida, y notas opcionales de atencion.",
-  "Los datos no se venden a terceros. Solo se comparten cuando sea necesario para operar el servicio, por ejemplo con plataformas de mensajeria, agenda, analitica tecnica u hospedaje web.",
-  "Puedes solicitar acceso, correccion, actualizacion o eliminacion de tus datos contactando al consultorio por WhatsApp o telefono.",
-  "La informacion se conserva solo durante el tiempo necesario para atender la solicitud, dar seguimiento al servicio y cumplir obligaciones aplicables.",
+  "Este sitio solicita datos de contacto para responder dudas y gestionar solicitudes de servicio. Los datos se usan para atención al cliente, seguimiento de tratamientos y comunicación relacionada con la solicitud.",
+  "Los datos que se pueden solicitar incluyen nombre, teléfono, servicio de interés, fecha y hora preferida, y notas opcionales sobre la plaga o área afectada.",
+  "Los datos no se venden a terceros. Solo se comparten cuando sea necesario para operar el servicio, por ejemplo con plataformas de mensajería, agenda, analítica técnica u hospedaje web.",
+  "Puedes solicitar acceso, corrección, actualización o eliminación de tus datos contactando a FumiPro NC por WhatsApp o teléfono.",
+  "La información se conserva solo durante el tiempo necesario para atender la solicitud, dar seguimiento al servicio y cumplir obligaciones aplicables.",
 ];
 
 const paragraphs = String(privacy?.body || "")

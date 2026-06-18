@@ -64,27 +64,27 @@ const priceCategoryCount =
   Math.max(1, priceCategories.length - 1);
 const pricesPageContent = business?.pricesPageContent || {};
 const pricesPageText = {
-  eyebrow: String(pricesPageContent.eyebrow || "Cotizacion y agenda").trim(),
-  title: String(pricesPageContent.title || "Precios").trim(),
+  eyebrow: String(pricesPageContent.eyebrow || "Cotizacion y servicio").trim(),
+  title: String(pricesPageContent.title || "Precios de fumigación").trim(),
   intro: String(
     pricesPageContent.intro ||
-      "Revisa precios desde y compara opciones con calma. Si te interesan varios servicios, puedes juntarlos en una sola solicitud por WhatsApp."
+      "Revisa los precios de cada tratamiento y compara opciones. Si necesitas varios servicios, inclúyelos en una sola cotización por WhatsApp."
   ).trim(),
-  primaryCtaText: String(pricesPageContent.primaryCtaText || "Agendar cita").trim(),
+  primaryCtaText: String(pricesPageContent.primaryCtaText || "Solicitar inspección").trim(),
   primaryCtaUrl: String(pricesPageContent.primaryCtaUrl || "/agendar").trim(),
   secondaryCtaText: String(pricesPageContent.secondaryCtaText || "Ver servicios").trim(),
   secondaryCtaUrl: String(pricesPageContent.secondaryCtaUrl || "/servicios").trim(),
   panelLabel: String(pricesPageContent.panelLabel || "Antes de decidir").trim(),
-  stepOneTitle: String(pricesPageContent.stepOneTitle || "Revisa precios desde").trim(),
+  stepOneTitle: String(pricesPageContent.stepOneTitle || "Elige tu tratamiento").trim(),
   stepOneBody: String(
-    pricesPageContent.stepOneBody || "Asi puedes darte una idea del costo antes de escribirnos."
+    pricesPageContent.stepOneBody || "Así puedes estimar el costo antes de contactarnos."
   ).trim(),
-  stepTwoTitle: String(pricesPageContent.stepTwoTitle || "Junta varias opciones").trim(),
+  stepTwoTitle: String(pricesPageContent.stepTwoTitle || "Combina tratamientos").trim(),
   stepTwoBody: String(
-    pricesPageContent.stepTwoBody || "Si te interesan varios servicios, mandalos juntos y te ayudamos a seguir."
+    pricesPageContent.stepTwoBody || "Si necesitas tratar varias plagas, inclúyelas en un mensaje y te hacemos una cotización completa."
   ).trim(),
-  pricesCountLabel: String(pricesPageContent.pricesCountLabel || "precios disponibles").trim(),
-  areasCountLabel: String(pricesPageContent.areasCountLabel || "areas de atencion").trim(),
+  pricesCountLabel: String(pricesPageContent.pricesCountLabel || "tratamientos con precio").trim(),
+  areasCountLabel: String(pricesPageContent.areasCountLabel || "tipos de plaga").trim(),
   emptyStateText: String(pricesPageContent.emptyStateText || "Aun no tenemos precios publicados.").trim(),
   filterLabel: String(pricesPageContent.filterLabel || "Elige un area").trim(),
   quoteTitle: String(pricesPageContent.quoteTitle || "Tu cotizacion").trim(),

@@ -159,7 +159,7 @@ if (service?.title) {
           ? "Hola, me interesa {servicio} y me gustaría agendar con {especialista} en {negocio}. ¿Tienen disponibilidad?"
           : "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
         {
-          specialist: routingSpecialist?.name || "especialista disponible",
+          specialist: routingSpecialist?.name || "técnico disponible",
           service: service.title,
           business: business?.name || clinic.name,
           problem: business?.whatsappQuickProblemDefault || "",

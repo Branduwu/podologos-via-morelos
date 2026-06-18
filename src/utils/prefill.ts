@@ -25,17 +25,20 @@ function normalizeSlug(value: string | null | undefined): string {
 export function normalizeServiceSlug(value: string | null | undefined): string {
   const raw = normalizeSlug(value);
 
-  if (raw.startsWith("dent")) return "dentista";
-  if (raw.startsWith("odont")) return "dentista";
-  if (raw.startsWith("optometr")) return "optica";
-  if (raw.startsWith("podolog")) return "podologia";
-  if (raw.startsWith("psicolog")) return "psicologia";
-  if (raw.startsWith("quiropr")) return "quiropractica";
-  if (raw.includes("dent") || raw.includes("odont")) return "dentista";
-  if (raw.includes("una") || raw.includes("callo") || raw.includes("pie")) return "podologia";
-  if (raw.includes("ansiedad") || raw.includes("terapia")) return "psicologia";
-  if (raw.includes("vista") || raw.includes("lente")) return "optica";
-  if (raw.includes("espalda") || raw.includes("postura")) return "quiropractica";
+  if (raw.startsWith("roed") || raw.includes("rata") || raw.includes("raton")) return "roedores";
+  if (raw.startsWith("cucar")) return "cucarachas";
+  if (raw.startsWith("termit")) return "termitas";
+  if (raw.startsWith("chinch")) return "chinches";
+  if (raw.startsWith("hormig")) return "hormigas";
+  if (raw.startsWith("avispa") || raw.startsWith("abeja")) return "avispas";
+  if (raw.startsWith("inspec")) return "inspeccion";
+  if (raw.includes("roed") || raw.includes("rata")) return "roedores";
+  if (raw.includes("cucar")) return "cucarachas";
+  if (raw.includes("termit")) return "termitas";
+  if (raw.includes("chinch")) return "chinches";
+  if (raw.includes("hormig")) return "hormigas";
+  if (raw.includes("avispa") || raw.includes("abeja")) return "avispas";
+  if (raw.includes("inspec") || raw.includes("revision")) return "inspeccion";
   return raw;
 }
 

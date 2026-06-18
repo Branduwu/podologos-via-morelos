@@ -19,7 +19,7 @@ function toSafeNumber(value, fallback = 0) {
 
 function normalizeReview(review = {}) {
   return {
-    authorName: String(review.author_name || "Paciente"),
+    authorName: String(review.author_name || "Cliente"),
     authorUrl: String(review.author_url || ""),
     profilePhotoUrl: String(review.profile_photo_url || ""),
     rating: toSafeNumber(review.rating, 0),

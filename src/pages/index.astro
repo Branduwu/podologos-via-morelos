@@ -100,14 +100,14 @@ const googleReviews: GoogleReviewsData | null = await getGooglePlaceReviews(busi
   maxReviews: 4,
 });
 
-const heroEyebrow = business?.homeHeroEyebrow || "Atención integral";
-const heroTitle = business?.homeHeroTitle || "Cuidado profesional para tus pies y bienestar integral";
+const heroEyebrow = business?.homeHeroEyebrow || "Control de plagas profesional";
+const heroTitle = business?.homeHeroTitle || "Protección total contra plagas en tu hogar y negocio";
 const heroSubtitle =
   business?.homeHeroSubtitle ||
-  "Más de 10 años eliminando plagas en Charlotte, NC. Fumigación de roedores, cucarachas, termitas, chinches y más.";
+  "Más de 10 años eliminando plagas en Charlotte, NC. Roedores, cucarachas, termitas, chinches y más — garantía de resultados.";
 const heroImageUrl =
   business?.homeHeroImageUrl ||
-  "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1800&q=80";
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1800&q=80";
 const heroCarouselFromCms = Array.isArray(business?.homeHeroCarouselImageUrls)
   ? business.homeHeroCarouselImageUrls.filter(Boolean)
   : [];
@@ -118,7 +118,7 @@ const heroAutoplayMs =
     ? Math.round(heroAutoplayMsRaw)
     : 5000;
 
-const heroPrimaryCtaText = business?.homePrimaryCtaText || "Agenda tu cita";
+const heroPrimaryCtaText = business?.homePrimaryCtaText || "Solicitar inspección";
 const heroPrimaryCtaUrl = business?.homePrimaryCtaUrl || "/agendar";
 const heroSecondaryCtaText = business?.homeSecondaryCtaText || "Nuestros servicios";
 const heroSecondaryCtaUrl = business?.homeSecondaryCtaUrl || "/servicios";
@@ -128,37 +128,37 @@ const heroServiceChips = clinic.serviceCategories.map((category) => ({
   href: `/agendar?service=${encodeURIComponent(category.key)}`,
 }));
 
-const promotionsTitle = business?.homePromotionsTitle || "Promociones vigentes";
+const promotionsTitle = business?.homePromotionsTitle || "Ofertas especiales";
 const promotionsSubtitle =
-  business?.homePromotionsSubtitle || "Aprovecha descuentos y paquetes especiales sujetos a disponibilidad.";
+  business?.homePromotionsSubtitle || "Aprovecha nuestros paquetes de fumigación con garantía de resultados.";
 const promotionsFallbackImage =
   business?.homePromotionFallbackImageUrl ||
-  "https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?auto=format&fit=crop&w=1400&q=80";
-const googleReviewsTitle = business?.homeGoogleReviewsTitle || "Resenas de nuestros pacientes";
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1400&q=80";
+const googleReviewsTitle = business?.homeGoogleReviewsTitle || "Reseñas de nuestros clientes";
 const googleReviewsSubtitle =
   business?.homeGoogleReviewsSubtitle ||
-  "Conoce experiencias reales publicadas en Google Maps.";
-const googleReviewsCtaText = business?.homeGoogleReviewsCtaText || "Ver resenas en Google";
+  "Opiniones de clientes reales en Charlotte, NC publicadas en Google Maps.";
+const googleReviewsCtaText = business?.homeGoogleReviewsCtaText || "Ver reseñas en Google";
 const googleReviewsCtaUrl =
   googleReviews?.googleMapsUrl || business?.mapsUrl || clinic.googleMapsUrl;
 
-const aboutTitle = about?.title || "Nosotros";
+const aboutTitle = about?.title || "Sobre FumiPro NC";
 const aboutIntro =
   about?.intro ||
-  "Somos un empresa de control de plagas en Charlotte, NC con tratamientos profesionales para roedores, cucarachas, termitas, chinches, hormigas y más.";
+  "Somos una empresa de control de plagas en Charlotte, NC con atención rápida, técnicos certificados y garantía de resultados en cada tratamiento.";
 const aboutSecondary =
   about?.secondary ||
-  "Nuestro objetivo es ayudarte a mejorar tu bienestar con tratamientos personalizados, explicaciones claras y seguimiento continuo.";
+  "Eliminamos roedores, cucarachas, termitas, chinches, hormigas y avispas con métodos seguros para tu familia y mascotas.";
 const aboutGallery = Array.isArray(about?.galleryImageUrls) ? about?.galleryImageUrls.filter(Boolean).slice(0, 4) : [];
 const aboutGalleryPreview = aboutGallery.slice(0, 3);
 const aboutMainImage =
   about?.mainImageUrl ||
   (aboutGallery[0] ||
-    "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?auto=format&fit=crop&w=1600&q=80");
+    "https://images.unsplash.com/photo-1601615588175-d81f02cbef0a?auto=format&fit=crop&w=1600&q=80");
 const aboutKeyPoints = Array.isArray(about?.keyPoints) ? about.keyPoints.filter(Boolean).slice(0, 6) : [];
-const aboutCtaText = about?.ctaText || "Agenda tu cita";
+const aboutCtaText = about?.ctaText || "Solicitar inspección";
 const aboutCtaUrl = about?.ctaUrl || "/agendar";
-const aboutSecondaryCtaText = about?.secondaryCtaText || "Conócenos más";
+const aboutSecondaryCtaText = about?.secondaryCtaText || "Conoce al equipo";
 const aboutSecondaryCtaUrl = about?.secondaryCtaUrl || "/nosotros";
 
 function fmt(d: string | Date | null | undefined) {
@@ -315,7 +315,7 @@ function trimGoogleReviewText(text?: string) {
             class={`hero-slide absolute inset-0 h-full w-full object-cover ${index === 0 ? "is-active" : ""}`}
             data-hero-slide={index}
             src={slide}
-            alt="Consultorio medico"
+            alt="Técnico de fumigación en Charlotte NC"
             loading={index === 0 ? "eager" : "lazy"}
             data-fallback-src="/placeholder.jpg"
           />
@@ -386,12 +386,12 @@ function trimGoogleReviewText(text?: string) {
     <div data-reveal class="relative z-10 mx-auto -mt-4 max-w-4xl px-4">
       <div class="grid grid-cols-3 divide-x divide-red-200/60 overflow-hidden rounded-2xl border border-red-200/80 bg-white/96 shadow-[0_20px_48px_-18px_rgb(14_116_144/0.24)] backdrop-blur-md dark:divide-slate-700/60 dark:border-slate-800/80 dark:bg-slate-900/96 dark:shadow-[0_20px_48px_-18px_rgb(2_6_23/0.9)]">
         <div class="flex flex-col items-center gap-1 py-4 text-center sm:py-5">
-          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-red-700 dark:text-red-300 sm:text-3xl">20+</span>
-          <span class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:text-xs">años de exp.</span>
+          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-red-700 dark:text-red-300 sm:text-3xl">10+</span>
+          <span class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:text-xs">años en Charlotte</span>
         </div>
         <div class="flex flex-col items-center gap-1 py-4 text-center sm:py-5">
-          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-red-700 dark:text-red-300 sm:text-3xl">5</span>
-          <span class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:text-xs">especialidades</span>
+          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-red-700 dark:text-red-300 sm:text-3xl">8</span>
+          <span class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:text-xs">tipos de plagas</span>
         </div>
         <div class="flex flex-col items-center gap-1 py-4 text-center sm:py-5">
           <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-amber-500 dark:text-amber-400 sm:text-3xl">
@@ -420,7 +420,7 @@ function trimGoogleReviewText(text?: string) {
 
       {homePromos.length === 0 ? (
         <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-          Pronto compartiremos promociones vigentes. Mientras tanto, puedes agendar tu cita.
+          Pronto compartiremos ofertas especiales. Contáctanos para una inspección gratuita.
         </div>
       ) : (
         <div data-home-promos-wrap class="mt-5">
@@ -584,16 +584,16 @@ function trimGoogleReviewText(text?: string) {
       <div data-reveal class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p class="mb-1.5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-red-700 dark:text-red-300">
-            <span class="h-px w-5 bg-red-500" aria-hidden="true"></span>Galería
+            <span class="h-px w-5 bg-red-500" aria-hidden="true"></span>Trabajos
           </p>
-          <h2 class="type-section-title">Fotos y videos destacados</h2>
+          <h2 class="type-section-title">Nuestros trabajos realizados</h2>
         </div>
-        <a class="text-sm font-semibold text-red-700 hover:underline dark:text-red-300" href="/galeria">Ver fotos y videos</a>
+        <a class="text-sm font-semibold text-red-700 hover:underline dark:text-red-300" href="/galeria">Ver galería de trabajos</a>
       </div>
 
       {homeGallery.length === 0 ? (
         <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-          Pronto compartiremos más fotos y videos. Mientras tanto, puedes agendar tu cita.
+          Pronto compartiremos fotos de nuestros trabajos. Contáctanos para más información.
         </div>
       ) : (
         <div class="mt-6 space-y-10">

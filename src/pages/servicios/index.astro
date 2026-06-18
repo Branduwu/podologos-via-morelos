@@ -69,40 +69,40 @@ const servicesCategoryCount =
   ).size || Math.max(1, serviceCategories.length - 1);
 const servicesPageContent = business?.servicesPageContent || {};
 const servicesPageText = {
-  eyebrow: String(servicesPageContent.eyebrow || "Atencion especializada").trim(),
-  title: String(servicesPageContent.title || "Servicios").trim(),
+  eyebrow: String(servicesPageContent.eyebrow || "Fumigación certificada").trim(),
+  title: String(servicesPageContent.title || "Fumigación").trim(),
   intro: String(
     servicesPageContent.intro ||
-      "Conoce nuestros servicios, revisa precios desde y elige la opcion que mejor vaya contigo. Si tienes duda, tambien puedes escribirnos y te orientamos."
+      "Conoce nuestros tratamientos de fumigación, revisa precios y elige el plan que mejor se adapte. ¿Tienes dudas? Escríbenos y te orientamos."
   ).trim(),
-  primaryCtaText: String(servicesPageContent.primaryCtaText || "Agendar cita").trim(),
+  primaryCtaText: String(servicesPageContent.primaryCtaText || "Solicitar inspección").trim(),
   primaryCtaUrl: String(servicesPageContent.primaryCtaUrl || "/agendar").trim(),
   secondaryCtaText: String(servicesPageContent.secondaryCtaText || "Ver precios").trim(),
   secondaryCtaUrl: String(servicesPageContent.secondaryCtaUrl || "/precios").trim(),
   panelLabel: String(servicesPageContent.panelLabel || "Te ayudamos a elegir").trim(),
-  stepOneTitle: String(servicesPageContent.stepOneTitle || "Mira por categoria").trim(),
+  stepOneTitle: String(servicesPageContent.stepOneTitle || "Elige el tipo de plaga").trim(),
   stepOneBody: String(
     servicesPageContent.stepOneBody ||
-      "Entra primero al area que mas se parezca a lo que necesitas para encontrar opciones mas rapido."
+      "Selecciona el tipo de plaga para ver los tratamientos disponibles y encontrar la solución más rápida."
   ).trim(),
-  stepTwoTitle: String(servicesPageContent.stepTwoTitle || "Da el siguiente paso").trim(),
+  stepTwoTitle: String(servicesPageContent.stepTwoTitle || "Solicita tu servicio").trim(),
   stepTwoBody: String(
     servicesPageContent.stepTwoBody ||
-      "Desde cada servicio puedes ver detalles, revisar precios o pedir ayuda por WhatsApp."
+      "Desde cada tratamiento puedes ver detalles, revisar precios o pedir una inspección por WhatsApp."
   ).trim(),
-  servicesCountLabel: String(servicesPageContent.servicesCountLabel || "servicios disponibles").trim(),
-  areasCountLabel: String(servicesPageContent.areasCountLabel || "areas de atencion").trim(),
+  servicesCountLabel: String(servicesPageContent.servicesCountLabel || "tratamientos disponibles").trim(),
+  areasCountLabel: String(servicesPageContent.areasCountLabel || "tipos de plaga").trim(),
   emptyStateText: String(
     servicesPageContent.emptyStateText ||
-      "Pronto compartiremos mas servicios. Mientras tanto, puedes agendar tu cita."
+      "Pronto publicaremos nuestros tratamientos. Contáctanos para una inspección gratuita."
   ).trim(),
   cardFallbackText: String(
     servicesPageContent.cardFallbackText ||
-      "Te explicamos este servicio de forma clara para que decidas con tranquilidad."
+      "Tratamiento profesional con garantía de resultados y productos seguros para tu familia."
   ).trim(),
   filteredEmptyStateText: String(
     servicesPageContent.filteredEmptyStateText ||
-      "No hay servicios en esa categoria todavia."
+      "No hay tratamientos en esa categoría todavía."
   ).trim(),
 };
 
@@ -212,7 +212,7 @@ function moneyUSD(n: number | string | null | undefined) {
         const serviceCategory = normalizeServiceSlug(
           service.category || service.title || cleanSlug
         );
-        const categoryLabel = serviceCategoryLabelByKey.get(serviceCategory) || "Atencion integral";
+        const categoryLabel = serviceCategoryLabelByKey.get(serviceCategory) || "Fumigación";
         const servicePrice = Number(service.priceFrom || 0);
         const summaryText = String(service.short || "").trim();
 
@@ -258,7 +258,7 @@ function moneyUSD(n: number | string | null | undefined) {
                 ? "Hola, me interesa {servicio} y me gustaría agendar con {especialista} en {negocio}. ¿Tienen disponibilidad?"
                 : "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
               {
-                specialist: routingSpecialist?.name || "especialista disponible",
+                specialist: routingSpecialist?.name || "técnico disponible",
                 service: serviceLabel,
                 business: business?.name || clinic.name,
                 problem: business?.whatsappQuickProblemDefault || "",
@@ -312,7 +312,7 @@ function moneyUSD(n: number | string | null | undefined) {
 
             <div class="mt-7 space-y-3 pt-1">
               <a class="btn-base btn-primary w-full" href={agendarHref}>
-                Agendar este servicio
+                Solicitar este servicio
               </a>
               <a class="btn-base btn-secondary w-full" href={detailHref}>
                 Ver detalles

@@ -54,16 +54,16 @@ const specialistsWaNumber = resolveWhatsAppNumber(
   generalWaNumber
 );
 
-const title = about?.title || "Nosotros";
+const title = about?.title || "Sobre FumiPro NC";
 const intro =
   about?.intro ||
-  "Somos una empresa de control de plagas en Charlotte, NC con atención rápida, certificada y enfocada en resultados reales para tu hogar o negocio.";
+  "Somos una empresa de control de plagas en Charlotte, NC con atención rápida, técnicos certificados y garantía de resultados en cada tratamiento.";
 const secondary =
   about?.secondary ||
-  "Eliminamos roedores, cucarachas, termitas, chinches, hormigas y avispas con técnicas certificadas y seguras para tu familia y mascotas.";
+  "Eliminamos roedores, cucarachas, termitas, chinches, hormigas y avispas con métodos seguros, probados y certificados para proteger tu familia y mascotas.";
 const mainImage =
   about?.mainImageUrl ||
-  "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1400&q=80";
+  "https://images.unsplash.com/photo-1601615588175-d81f02cbef0a?auto=format&fit=crop&w=1400&q=80";
 const points = Array.isArray(about?.keyPoints) ? about.keyPoints.filter(Boolean).slice(0, 8) : [];
 const gallery = Array.isArray(about?.galleryImageUrls) ? about.galleryImageUrls.filter(Boolean).slice(0, 6) : [];
 const galleryAutoplayMsRaw = Number(about?.galleryCarouselIntervalMs);
@@ -71,11 +71,11 @@ const galleryAutoplayMs =
   Number.isFinite(galleryAutoplayMsRaw) && galleryAutoplayMsRaw >= 1200 && galleryAutoplayMsRaw <= 10000
     ? Math.round(galleryAutoplayMsRaw)
     : 2200;
-const specialistsTitle = about?.specialistsTitle || "Nuestros especialistas";
+const specialistsTitle = about?.specialistsTitle || "Nuestros técnicos";
 const specialistsSubtitle =
-  about?.specialistsSubtitle || "Conoce a las personas que atienden cada especialidad en nuestra clinica.";
-const servicesTitle = about?.servicesTitle || "Especialidades que atendemos";
-const servicesSubtitle = about?.servicesSubtitle || "Atendemos diferentes necesidades de salud con enfoque integral.";
+  about?.specialistsSubtitle || "Conoce a los técnicos certificados que protegen tu hogar o negocio en Charlotte, NC.";
+const servicesTitle = about?.servicesTitle || "Servicios de fumigación";
+const servicesSubtitle = about?.servicesSubtitle || "Tratamientos profesionales para todo tipo de plaga con garantía de resultados.";
 
 function specialistLink(specialist: Specialist) {
   const shouldUseWhatsApp = specialist.useWhatsAppButton !== false;
@@ -136,7 +136,7 @@ function specialistProfileHref(specialist: Specialist) {
         <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{secondary}</p>
 
         <div class="mt-6 flex flex-wrap gap-3">
-          <a class="btn-base btn-primary" href="/agendar">Agenda tu cita</a>
+          <a class="btn-base btn-primary" href="/agendar">Solicitar servicio</a>
           <a class="btn-base btn-secondary" href="/servicios">Nuestros servicios</a>
         </div>
       </div>

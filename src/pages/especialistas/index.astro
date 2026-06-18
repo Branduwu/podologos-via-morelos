@@ -130,8 +130,8 @@ function canUseSpecialistWhatsApp(specialist: Specialist) {
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">
-      <h1 class="max-w-4xl text-left text-3xl font-bold tracking-tight md:text-4xl">Especialistas</h1>
-      <p class="max-w-4xl mt-2 text-left text-slate-800 dark:text-slate-200">Conoce al equipo que te atiende en cada área.</p>
+      <h1 class="max-w-4xl text-left text-3xl font-bold tracking-tight md:text-4xl">Nuestros técnicos</h1>
+      <p class="max-w-4xl mt-2 text-left text-slate-800 dark:text-slate-200">Conoce al equipo certificado que protege tu hogar o negocio en Charlotte, NC.</p>
 
       {specialists.length === 0 ? (
         <div class="mt-6 max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
@@ -189,7 +189,7 @@ function canUseSpecialistWhatsApp(specialist: Specialist) {
                     class="btn-base btn-secondary w-full"
                     href={agendarSpecialistHref(specialist)}
                   >
-                    Agendar con este especialista
+                    Solicitar con este técnico
                   </a>
                   {canUseSpecialistWhatsApp(specialist) && (
                     <a
