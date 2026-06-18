@@ -8,7 +8,14 @@ import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.PUBLIC_SITE_URL || "https://podologos-via-morelos.vercel.app",
+  site: process.env.PUBLIC_SITE_URL || "https://fumipronc.vercel.app",
+  i18n: {
+    defaultLocale: "es",
+    locales: ["es", "en"],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   integrations: [sentry({
     sourceMapsUploadOptions:
       process.env.SENTRY_AUTH_TOKEN &&
@@ -20,7 +27,15 @@ export default defineConfig({
             project: process.env.SENTRY_PROJECT,
           }
         : undefined,
-  }), sitemap()],
+  }), sitemap({
+    i18n: {
+      defaultLocale: "es",
+      locales: {
+        es: "es-US",
+        en: "en-US",
+      },
+    },
+  })],
   vite: {
     plugins: [tailwindcss()]
   }

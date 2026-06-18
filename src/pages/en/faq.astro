@@ -1,0 +1,92 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { getBusinessInfo, getFaqs } from "../../lib/sanity.js";
+import { business } from "../../config/clinic";
+
+type FaqItem = {
+  _id?: string;
+  question?: string;
+  questionEn?: string;
+  answer?: string;
+  answerEn?: string;
+  category?: string;
+  featured?: boolean;
+};
+
+const cms = await getBusinessInfo();
+const faqs: FaqItem[] = (await getFaqs()) || [];
+const businessName = cms?.name || business.name;
+
+const categoryLabels: Record<string, string> = {
+  general:    "General",
+  roedores:   "Rodents",
+  cucarachas: "Cockroaches",
+  termitas:   "Termites",
+  chinches:   "Bed Bugs",
+  hormigas:   "Ants",
+  avispas:    "Wasps & Bees",
+  inspeccion: "Inspection",
+  fumigacion: "General Fumigation",
+};
+
+const grouped = Object.entries(categoryLabels).map(([key, label]) => ({
+  key,
+  label,
+  items: faqs.filter((f) => f.category === key),
+})).filter((g) => g.items.length > 0);
+---
+
+<Layout
+  title={`FAQ – ${businessName}`}
+  description="Frequently asked questions about pest control services in Charlotte, NC."
+>
+  <Header />
+  <main id="contenido-principal">
+
+    <section class="bg-gradient-to-b from-sky-50 to-white py-16 dark:from-[rgb(6,16,30)] dark:to-[rgb(8,20,38)]">
+      <div class="mx-auto max-w-3xl px-4">
+        <p class="text-sm font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">FAQ</p>
+        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">
+          Frequently Asked Questions
+        </h1>
+        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(186,205,227)]">
+          Common questions about our pest control services in Charlotte, NC.
+        </p>
+      </div>
+    </section>
+
+    <section class="pb-20">
+      <div class="mx-auto max-w-3xl px-4 space-y-10">
+        {grouped.length === 0 ? (
+          <p class="text-slate-500 dark:text-[rgb(150,175,205)]">No FAQ items available yet.</p>
+        ) : (
+          grouped.map((group) => (
+            <div data-reveal>
+              <h2 class="font-['Manrope',sans-serif] mb-4 text-xl font-bold text-slate-900 dark:text-white">{group.label}</h2>
+              <div class="space-y-3">
+                {group.items.map((faq) => {
+                  const q = faq.questionEn || faq.question || "";
+                  const a = faq.answerEn || faq.answer || "";
+                  return (
+                    <details class="rounded-xl border border-slate-100 bg-white dark:border-[rgb(36,58,86)] dark:bg-[rgb(12,28,50)]">
+                      <summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">
+                        {q}
+                      </summary>
+                      <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:border-[rgb(36,58,86)] dark:text-[rgb(186,205,227)]">
+                        {a}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>

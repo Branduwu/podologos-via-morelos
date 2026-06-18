@@ -1,0 +1,64 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { getBusinessInfo, getGallery } from "../../lib/sanity.js";
+import { business } from "../../config/clinic";
+
+const cms = await getBusinessInfo();
+const galleryItems = (await getGallery()) || [];
+const businessName = cms?.name || business.name;
+
+const photos = galleryItems.filter((it: any) => it.type !== "video");
+const videos = galleryItems.filter((it: any) => it.type === "video");
+---
+
+<Layout
+  title={`Gallery – ${businessName}`}
+  description={`See our pest control work in Charlotte, NC. Before and after photos from ${businessName}.`}
+>
+  <Header />
+  <main id="contenido-principal">
+
+    <section class="bg-gradient-to-b from-sky-50 to-white py-16 dark:from-[rgb(6,16,30)] dark:to-[rgb(8,20,38)]">
+      <div class="mx-auto max-w-6xl px-4">
+        <p class="text-sm font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">Our work</p>
+        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">Gallery</h1>
+        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(186,205,227)]">
+          Before and after photos from our pest control treatments in Charlotte, NC.
+        </p>
+      </div>
+    </section>
+
+    <section class="pb-20">
+      <div class="mx-auto max-w-6xl px-4">
+        {galleryItems.length === 0 ? (
+          <p class="text-slate-500 dark:text-[rgb(150,175,205)]">Gallery coming soon.</p>
+        ) : (
+          <>
+            {photos.length > 0 && (
+              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal>
+                {photos.map((item: any) => (
+                  <div class="overflow-hidden rounded-xl border border-slate-100 bg-white dark:border-[rgb(36,58,86)] dark:bg-[rgb(12,28,50)]">
+                    <img
+                      src={item.imageUrl || "/placeholder.jpg"}
+                      alt={item.title || "Gallery image"}
+                      class="h-52 w-full object-cover"
+                      loading="lazy"
+                      data-fallback-src="/placeholder.jpg"
+                    />
+                    {item.title && (
+                      <p class="px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-[rgb(196,216,240)]">{item.title}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>

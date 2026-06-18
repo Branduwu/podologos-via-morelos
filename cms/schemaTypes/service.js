@@ -1,41 +1,56 @@
 import { isUniqueSlugWithinType, toSlug } from "../utils/slug";
 import RoutingPriorityNoteInput from "../components/RoutingPriorityNoteInput.jsx";
 
+const CATEGORIES = [
+  { title: "Roedores / Rodents",             value: "roedores"   },
+  { title: "Cucarachas / Cockroaches",        value: "cucarachas" },
+  { title: "Termitas / Termites",             value: "termitas"   },
+  { title: "Chinches de cama / Bed Bugs",     value: "chinches"   },
+  { title: "Hormigas / Ants",                 value: "hormigas"   },
+  { title: "Avispas y abejas / Wasps & Bees", value: "avispas"    },
+  { title: "Inspeccion / Inspection",         value: "inspeccion" },
+  { title: "Fumigacion general / General",    value: "general"    },
+];
+
+const categoryMap = Object.fromEntries(CATEGORIES.map(({ title, value }) => [value, title]));
+
 export default {
   name: "service",
   title: "Servicios",
   type: "document",
-  description: "Catalogo de servicios que se muestra en home, listado y detalle. Recomendado: desactiva en vez de eliminar.",
+  description: "Catalogo de servicios de fumigacion. Recomendado: desactiva en vez de eliminar.",
   fieldsets: [
-    { name: "basic", title: "Basico", options: { collapsible: true, collapsed: false } },
-    { name: "routing", title: "Destino de agenda/whatsapp", options: { collapsible: true, collapsed: false } },
-    { name: "content", title: "Contenido", options: { collapsible: true, collapsed: false } },
-    { name: "publish", title: "Publicacion", options: { collapsible: true, collapsed: true } },
-    { name: "meta", title: "Meta", options: { collapsible: true, collapsed: true } },
+    { name: "basic",   title: "Basico",                         options: { collapsible: true, collapsed: false } },
+    { name: "content", title: "Contenido (Espanol)",            options: { collapsible: true, collapsed: false } },
+    { name: "contentEn", title: "Content (English)",            options: { collapsible: true, collapsed: false } },
+    { name: "routing", title: "Destino de contacto/whatsapp",   options: { collapsible: true, collapsed: false } },
+    { name: "publish", title: "Publicacion",                    options: { collapsible: true, collapsed: true  } },
+    { name: "meta",    title: "Meta",                           options: { collapsible: true, collapsed: true  } },
   ],
   fields: [
     {
       name: "title",
-      title: "Nombre del servicio",
+      title: "Nombre del servicio (ES)",
       type: "string",
-      description: "Aqui editas el nombre del servicio.",
+      description: "Nombre del servicio en espanol.",
       fieldset: "basic",
       validation: (R) => R.required().error("El nombre del servicio es obligatorio."),
+    },
+    {
+      name: "titleEn",
+      title: "Service name (EN)",
+      type: "string",
+      description: "Service name in English.",
+      fieldset: "basic",
     },
     {
       name: "category",
       title: "Categoria del servicio",
       type: "string",
-      description: "Selecciona el area para filtros de precios y servicios.",
+      description: "Selecciona el tipo de plaga o servicio.",
       fieldset: "basic",
       options: {
-        list: [
-          { title: "Podologia", value: "podologia" },
-          { title: "Psicologia", value: "psicologia" },
-          { title: "Optica / Optometria", value: "optica" },
-          { title: "Quiropractica", value: "quiropractica" },
-          { title: "Dentista", value: "dentista" },
-        ],
+        list: CATEGORIES,
         layout: "dropdown",
       },
       validation: (R) => R.required().error("Selecciona una categoria."),
@@ -53,11 +68,11 @@ export default {
     },
     {
       name: "leadSpecialist",
-      title: "Especialista destino (manual)",
+      title: "Tecnico destino (manual)",
       type: "reference",
       to: [{ type: "specialistProfile" }],
       description:
-        "Opcional. Si lo eliges, al dar clic en 'Agendar este servicio' se precarga ese especialista y el mensaje se dirige a su WhatsApp. Si lo dejas vacio, no se forzara especialista. En cotizacion con destinos distintos, se usa WhatsApp general.",
+        "Opcional. Si lo eliges, al solicitar este servicio se precarga ese tecnico y el mensaje se dirige a su WhatsApp.",
       fieldset: "routing",
       options: {
         disableNew: true,
@@ -76,7 +91,7 @@ export default {
       title: "WhatsApp destino (manual)",
       type: "string",
       description:
-        "Opcional. Si lo llenas, este servicio enviara mensajes a este numero en Agendar/WhatsApp. Formato sugerido: 5215512345678. En cotizacion con destinos distintos, se usa WhatsApp general.",
+        "Opcional. Formato: 17041234567 (con codigo de pais 1 para USA). Si se deja vacio se usa el WhatsApp general.",
       fieldset: "routing",
       validation: (R) =>
         R.custom((value) => {
@@ -94,14 +109,14 @@ export default {
       type: "text",
       rows: 3,
       description:
-        "Opcional. Mensaje base para este servicio. Puedes usar {servicio}, {especialista}, {negocio} y {problema}.",
+        "Opcional. Puedes usar {servicio}, {tecnico}, {negocio} y {problema}.",
       fieldset: "routing",
     },
     {
       name: "slug",
       title: "Slug (URL)",
       type: "slug",
-      description: "Aqui editas la URL del servicio. Si se repite en este mismo tipo, agrega una variacion corta.",
+      description: "URL del servicio. Se genera automaticamente desde el nombre.",
       fieldset: "meta",
       options: {
         source: "title",
@@ -113,45 +128,69 @@ export default {
         R.required().custom((value) => {
           const current = value?.current || "";
           const isValid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(current);
-          return isValid || "Usa solo minusculas, numeros y guiones (sin espacios ni simbolos).";
+          return isValid || "Usa solo minusculas, numeros y guiones.";
         }),
     },
     {
       name: "short",
-      title: "Descripcion corta",
+      title: "Descripcion corta (ES)",
       type: "string",
-      description: "Aqui editas un resumen en una linea.",
+      description: "Resumen en una linea en espanol.",
       fieldset: "content",
       validation: (R) => R.max(140).warning("Recomendado: maximo 140 caracteres."),
     },
     {
       name: "long",
-      title: "Descripcion larga",
+      title: "Descripcion larga (ES)",
       type: "text",
       rows: 5,
-      description: "Aqui explicas que incluye el servicio.",
+      description: "Explicacion del servicio en espanol.",
       fieldset: "content",
     },
     {
       name: "includes",
-      title: "Incluye",
+      title: "Incluye (ES)",
       type: "array",
-      description: "Aqui agregas puntos clave de la atencion.",
+      description: "Puntos clave del servicio en espanol.",
       fieldset: "content",
       of: [{ type: "string" }],
     },
     {
-      name: "duration",
-      title: "Duracion",
+      name: "shortEn",
+      title: "Short description (EN)",
       type: "string",
-      description: "Aqui editas la duracion aproximada.",
+      description: "One-line summary in English.",
+      fieldset: "contentEn",
+      validation: (R) => R.max(140).warning("Recommended: max 140 characters."),
+    },
+    {
+      name: "longEn",
+      title: "Long description (EN)",
+      type: "text",
+      rows: 5,
+      description: "Full service description in English.",
+      fieldset: "contentEn",
+    },
+    {
+      name: "includesEn",
+      title: "Includes (EN)",
+      type: "array",
+      description: "Key points of the service in English.",
+      fieldset: "contentEn",
+      of: [{ type: "string" }],
+    },
+    {
+      name: "duration",
+      title: "Duracion / Duration",
+      type: "string",
+      description: "Duracion aproximada del servicio.",
       fieldset: "basic",
     },
     {
       name: "priceFrom",
-      title: "Precio desde",
+      title: "Precio desde (USD)",
       type: "number",
-      description: "Aqui editas el precio base en MXN (sin simbolo $).",
+      description: "Precio base en dolares (sin simbolo $).",
       fieldset: "basic",
       validation: (R) => R.min(0).warning("El precio no puede ser negativo."),
     },
@@ -179,13 +218,6 @@ export default {
       active: "active",
     },
     prepare({ title, subtitle, category, active }) {
-      const categoryMap = {
-        podologia: "Podologia",
-        psicologia: "Psicologia",
-        optica: "Optica/Optometria",
-        quiropractica: "Quiropractica",
-        dentista: "Dentista",
-      };
       const cat = categoryMap[category] || "Sin categoria";
       const short = (subtitle || "").slice(0, 44);
       return {

@@ -12,12 +12,14 @@ import { SafeDeletePromotionAction } from "./actions/safeDeletePromotionAction.j
 import { SafeDeleteSpecialistAction } from "./actions/safeDeleteSpecialistAction.jsx";
 import { SafeDeletePriceItemAction } from "./actions/safeDeletePriceItemAction.jsx";
 
-const projectId = process.env.SANITY_STUDIO_PROJECT_ID || process.env.SANITY_PROJECT_ID || "yb71w9t5";
+// IMPORTANTE: Este proyecto usa su propio Sanity project ID separado del de podologos.
+// Crea un nuevo proyecto en https://www.sanity.io/manage y pon el ID en las variables de entorno.
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID || process.env.SANITY_PROJECT_ID || "REEMPLAZA_CON_NUEVO_PROJECT_ID";
 const dataset = process.env.SANITY_STUDIO_DATASET || process.env.SANITY_DATASET || "production";
 
 export default defineConfig({
   name: "default",
-  title: "CMS Podologos Via Morelos",
+  title: "CMS FumiPro NC",
 
   projectId,
   dataset,
@@ -34,6 +36,14 @@ export default defineConfig({
         title: "Espanol",
         weekInfo: {
           firstDay: 1,
+          weekend: [6, 7],
+        },
+      },
+      {
+        id: "en",
+        title: "English",
+        weekInfo: {
+          firstDay: 0,
           weekend: [6, 7],
         },
       },

@@ -2,76 +2,91 @@
 import { getBusinessInfo } from "../lib/sanity.js";
 import ThemeToggle from "./ThemeToggle.astro";
 import { safeCmsUrl } from "../utils/url";
+import { getLangFromUrl, getAlternatePath, useTranslations } from "../i18n/utils";
+import { business } from "../config/clinic";
 
-const business = await getBusinessInfo();
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const altLang = lang === "es" ? "en" : "es";
+const altPath = getAlternatePath(Astro.url?.pathname || "/", altLang);
 
-const businessName = business?.name || "Podologos Via Morelos";
-const businessArea = business?.area || "Tulpetlac, Ecatepec";
-const address = business?.address || "Dirección pendiente";
-const phone = business?.phone || "Teléfono pendiente";
-const weekdayHours = business?.weekdayHours || "10 a.m. – 6 p.m.";
-const saturdayHours = business?.saturdayHours || "10 a.m. – 4 p.m.";
-const sundayOpen = Boolean(business?.sundayOpen);
-const sundayHours = business?.sundayHours || "";
+const cms = await getBusinessInfo();
+
+const businessName = cms?.name || business.name;
+const businessArea = cms?.area || (lang === "en" ? "Charlotte, NC" : "Charlotte, Carolina del Norte");
+const address = cms?.address || business.address;
+const phone = cms?.phone || business.phoneDisplay;
+const weekdayHours = cms?.weekdayHours || (lang === "en" ? "8 a.m. – 5 p.m." : "8 a.m. – 5 p.m.");
+const saturdayHours = cms?.saturdayHours || (lang === "en" ? "8 a.m. – 12 p.m." : "8 a.m. – 12 p.m.");
+const sundayOpen = Boolean(cms?.sundayOpen);
+const sundayHours = cms?.sundayHours || "";
 
 const currentDay = new Date().getDay();
-const dayNames = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-const todayName = dayNames[currentDay] || "hoy";
+const dayNamesEs = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+const dayNamesEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const dayNames = lang === "en" ? dayNamesEn : dayNamesEs;
+const todayName = dayNames[currentDay] || (lang === "en" ? "today" : "hoy");
+
+const schedulePrefix = lang === "en" ? "Today" : "Hoy";
+const closedLabel = lang === "en" ? "closed" : "cerrado";
+
 const scheduleLabel =
   currentDay >= 1 && currentDay <= 5
-    ? `Horario de hoy: ${todayName} de ${weekdayHours}`
+    ? `${schedulePrefix}: ${todayName} ${weekdayHours}`
     : currentDay === 6 && saturdayHours
-      ? `Horario de hoy: ${todayName} de ${saturdayHours}`
+      ? `${schedulePrefix}: ${todayName} ${saturdayHours}`
       : currentDay === 6
-        ? `Horario de hoy: ${todayName} cerrado`
+        ? `${schedulePrefix}: ${todayName} – ${closedLabel}`
         : sundayOpen && sundayHours
-          ? `Horario de hoy: ${todayName} de ${sundayHours}`
-          : "Horario de hoy: domingo cerrado";
-const logoUrl = business?.logoImageUrl || "/default-logo-clinica.svg";
+          ? `${schedulePrefix}: ${todayName} ${sundayHours}`
+          : `${schedulePrefix}: ${todayName} – ${closedLabel}`;
 
-const facebookUrl = safeCmsUrl(business?.facebookUrl, "");
-const instagramUrl = safeCmsUrl(business?.instagramUrl, "");
-const tiktokUrl = safeCmsUrl(business?.tiktokUrl, "");
+const logoUrl = cms?.logoImageUrl || "/default-logo.svg";
+
+const facebookUrl = safeCmsUrl(cms?.facebookUrl, "");
+const instagramUrl = safeCmsUrl(cms?.instagramUrl, "");
 
 const socialLinks = [
   { key: "facebook", label: "Facebook", url: facebookUrl },
   { key: "instagram", label: "Instagram", url: instagramUrl },
-  { key: "tiktok", label: "TikTok", url: tiktokUrl },
 ];
 
+const pfx = lang === "en" ? "/en" : "";
+
 const primaryNavItems = [
-  { href: "/servicios", label: "Servicios" },
-  { href: "/precios", label: "Precios" },
-  { href: "/ubicacion", label: "Ubicación" },
+  { href: `${pfx}/servicios`, label: lang === "en" ? t.nav.services : "Servicios" },
+  { href: `${pfx}/precios`,   label: lang === "en" ? t.nav.prices   : "Precios"   },
+  { href: `${pfx}/ubicacion`, label: lang === "en" ? t.nav.location : "Ubicación" },
 ];
-const primaryCta = { href: "/agendar", label: "Agenda tu cita" };
+const primaryCta = { href: `${pfx}/agendar`, label: lang === "en" ? t.nav.book : "Solicitar servicio" };
+
 const secondaryNavItems = [
-  { href: "/", label: "Inicio" },
-  { href: "/especialistas", label: "Especialistas" },
-  { href: "/promociones", label: "Promociones" },
-  { href: "/galeria", label: "Fotos y videos" },
-  { href: "/nosotros", label: "Nosotros" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/contacto", label: "Contacto" },
+  { href: `${pfx}/`,            label: lang === "en" ? t.nav.home     : "Inicio"          },
+  { href: `${pfx}/especialistas`,label: lang === "en" ? "Technicians" : "Técnicos"        },
+  { href: `${pfx}/promociones`, label: lang === "en" ? "Offers"       : "Promociones"     },
+  { href: `${pfx}/galeria`,     label: lang === "en" ? t.nav.gallery  : "Fotos y videos"  },
+  { href: `${pfx}/nosotros`,    label: lang === "en" ? t.nav.about    : "Nosotros"        },
+  { href: `${pfx}/faq`,         label: "FAQ"                                               },
+  { href: `${pfx}/contacto`,    label: lang === "en" ? t.nav.contact  : "Contacto"        },
 ];
+
 const desktopNavItems = [
-  { href: "/", label: "Inicio" },
-  { href: "/servicios", label: "Servicios" },
-  { href: "/especialistas", label: "Especialistas" },
-  { href: "/precios", label: "Precios" },
-  { href: "/ubicacion", label: "Ubicación" },
-  { href: "/promociones", label: "Promociones" },
-  { href: "/galeria", label: "Fotos y videos" },
-  { href: "/nosotros", label: "Nosotros" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/contacto", label: "Contacto" },
+  { href: `${pfx}/`,             label: lang === "en" ? t.nav.home     : "Inicio"         },
+  { href: `${pfx}/servicios`,    label: lang === "en" ? t.nav.services : "Servicios"      },
+  { href: `${pfx}/especialistas`,label: lang === "en" ? "Technicians"  : "Técnicos"       },
+  { href: `${pfx}/precios`,      label: lang === "en" ? t.nav.prices   : "Precios"        },
+  { href: `${pfx}/ubicacion`,    label: lang === "en" ? t.nav.location : "Ubicación"      },
+  { href: `${pfx}/galeria`,      label: lang === "en" ? t.nav.gallery  : "Fotos y videos" },
+  { href: `${pfx}/nosotros`,     label: lang === "en" ? t.nav.about    : "Nosotros"       },
+  { href: `${pfx}/faq`,          label: "FAQ"                                              },
+  { href: `${pfx}/contacto`,     label: lang === "en" ? t.nav.contact  : "Contacto"      },
   primaryCta,
 ];
 
 const currentPath = (Astro.url?.pathname || "/").replace(/\/+$/, "") || "/";
 const isActive = (href: string) => {
   const cleanHref = href.replace(/\/+$/, "") || "/";
-  if (cleanHref === "/") return currentPath === "/";
+  if (cleanHref === "/" || cleanHref === "/en") return currentPath === cleanHref;
   return currentPath === cleanHref || currentPath.startsWith(`${cleanHref}/`);
 };
 ---
@@ -86,17 +101,18 @@ const isActive = (href: string) => {
         data-saturday-hours={saturdayHours}
         data-sunday-open={sundayOpen ? "true" : "false"}
         data-sunday-hours={sundayHours}
+        data-lang={lang}
       >
         {scheduleLabel}
       </p>
       <p class="hidden min-w-[18rem] flex-[1.2] truncate text-center lg:block">{address}</p>
-      <p class="shrink-0 font-semibold text-sky-700 dark:text-[rgb(123,198,255)]">Tel: {phone}</p>
+      <p class="shrink-0 font-semibold text-sky-700 dark:text-[rgb(123,198,255)]">{lang === "en" ? "Tel:" : "Tel:"} {phone}</p>
     </div>
   </div>
 
   <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-4 py-3.5 sm:px-5 sm:py-4 lg:gap-6">
-    <a href="/" class="flex min-w-0 max-w-[calc(100%-7.5rem)] items-center gap-2.5 sm:max-w-[calc(100%-8.5rem)] sm:gap-3 md:max-w-none">
-      <img src={logoUrl} alt={businessName} class="h-10 w-10 shrink-0 rounded-md object-contain sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-14 lg:w-14" loading="eager" data-fallback-src="/default-logo-clinica.svg" />
+    <a href={lang === "en" ? "/en" : "/"} class="flex min-w-0 max-w-[calc(100%-9rem)] items-center gap-2.5 sm:max-w-[calc(100%-10rem)] sm:gap-3 md:max-w-none" aria-label={t.aria.logo}>
+      <img src={logoUrl} alt={businessName} class="h-10 w-10 shrink-0 rounded-md object-contain sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-14 lg:w-14" loading="eager" data-fallback-src="/default-logo.svg" />
       <div class="min-w-0">
         <p class="truncate text-[1rem] font-semibold tracking-tight text-slate-900 sm:text-[1.08rem] dark:text-[rgb(236,244,255)]">{businessName}</p>
         <p class="hidden max-w-[34ch] text-[0.92rem] font-medium leading-5 text-slate-600 sm:block dark:text-[rgb(186,205,227)]">{businessArea}</p>
@@ -110,7 +126,6 @@ const isActive = (href: string) => {
           const sharedClass = configured
             ? "rounded-full border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-[rgb(59,87,120)] dark:text-[rgb(196,216,240)] dark:hover:bg-[rgb(25,48,76)]"
             : "rounded-full border border-slate-200 p-1.5 text-slate-400 opacity-70 cursor-not-allowed dark:border-[rgb(59,87,120)] dark:text-[rgb(128,152,182)]";
-
           return (
             <a
               class={sharedClass}
@@ -118,21 +133,44 @@ const isActive = (href: string) => {
               target={configured ? "_blank" : undefined}
               rel={configured ? "noopener noreferrer" : undefined}
               aria-label={social.label}
-              title={configured ? social.label : `Configura ${social.label} en CMS > Información del negocio > Redes`}
+              title={social.label}
               aria-disabled={configured ? "false" : "true"}
               tabindex={configured ? "0" : "-1"}
             >
               {social.key === "facebook" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M13 9h3V6h-3c-2.8 0-5 2.2-5 5v2H6v3h2v5h3v-5h3l1-3h-4v-2c0-1.1.9-2 2-2z"/></svg>}
               {social.key === "instagram" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>}
-              {social.key === "tiktok" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M14 3c.4 1.7 1.8 3 3.5 3.2V9c-1.4-.1-2.6-.6-3.5-1.4V14a6 6 0 1 1-5.4-6v2.8a3.2 3.2 0 1 0 2.6 3.2V3H14z"/></svg>}
             </a>
           );
         })}
       </div>
+      <!-- Language switcher -->
+      <a
+        href={altPath}
+        class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-[12px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-sky-700 dark:border-[rgb(59,87,120)] dark:text-[rgb(196,216,240)] dark:hover:bg-[rgb(25,48,76)] dark:hover:text-[rgb(126,203,255)]"
+        aria-label={t.aria.langSwitch}
+        title={t.aria.langSwitch}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        {t.langSwitch}
+      </a>
       <ThemeToggle compact />
     </div>
 
     <div class="ml-auto flex shrink-0 items-center gap-2 md:hidden">
+      <a
+        href={altPath}
+        class="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 dark:border-[rgb(59,87,120)] dark:text-[rgb(196,216,240)]"
+        aria-label={t.aria.langSwitch}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        {lang === "es" ? "EN" : "ES"}
+      </a>
       <ThemeToggle compact />
       <button
         type="button"
@@ -140,6 +178,7 @@ const isActive = (href: string) => {
         data-mobile-menu-button
         aria-expanded="false"
         aria-controls="mobile-nav-panel"
+        aria-label={t.aria.menu}
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon-open h-5 w-5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"></path>
@@ -147,7 +186,7 @@ const isActive = (href: string) => {
         <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon-close h-5 w-5 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
-        <span data-menu-label>Menú</span>
+        <span data-menu-label>{lang === "en" ? "Menu" : "Menú"}</span>
       </button>
     </div>
   </div>
@@ -170,7 +209,9 @@ const isActive = (href: string) => {
     <a href={primaryCta.href} class={`btn-base w-full ${isActive(primaryCta.href) ? "btn-primary" : "btn-secondary"}`}>
       {primaryCta.label}
     </a>
-    <p class="mb-2 mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(166,190,218)]">Accesos principales</p>
+    <p class="mb-2 mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(166,190,218)]">
+      {lang === "en" ? "Main sections" : "Accesos principales"}
+    </p>
     <nav class="grid gap-1.5 text-sm font-medium">
       {primaryNavItems.map((item) => (
         <a
@@ -184,7 +225,9 @@ const isActive = (href: string) => {
     </nav>
 
     <div class="mt-4 border-t border-sky-100 pt-4 dark:border-[rgb(36,58,86)]">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(166,190,218)]">Más secciones</p>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(166,190,218)]">
+        {lang === "en" ? "More sections" : "Más secciones"}
+      </p>
       <nav class="grid gap-1.5 text-sm font-medium">
         {secondaryNavItems.map((item) => (
           <a
@@ -208,25 +251,30 @@ const isActive = (href: string) => {
     if (!button || !panel) return;
 
     if (todayHoursEl) {
-      const weekdayHours = todayHoursEl.dataset.weekdayHours || "10 a.m. – 6 p.m.";
-      const saturdayHours = todayHoursEl.dataset.saturdayHours || "10 a.m. – 4 p.m.";
+      const weekdayHours = todayHoursEl.dataset.weekdayHours || "8 a.m. – 5 p.m.";
+      const saturdayHours = todayHoursEl.dataset.saturdayHours || "8 a.m. – 12 p.m.";
       const sundayOpen = todayHoursEl.dataset.sundayOpen === "true";
       const sundayHours = todayHoursEl.dataset.sundayHours || "";
+      const lang = todayHoursEl.dataset.lang || "es";
 
       const day = new Date().getDay();
-      const dayNames = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-      const todayName = dayNames[day] || "hoy";
+      const dayNamesEs = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+      const dayNamesEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayNames = lang === "en" ? dayNamesEn : dayNamesEs;
+      const todayName = dayNames[day] || (lang === "en" ? "today" : "hoy");
+      const prefix = lang === "en" ? "Today" : "Hoy";
+      const closed = lang === "en" ? "closed" : "cerrado";
 
       const todayText =
         day >= 1 && day <= 5
-          ? `Horario de hoy: ${todayName} de ${weekdayHours}`
+          ? `${prefix}: ${todayName} ${weekdayHours}`
           : day === 6 && saturdayHours
-            ? `Horario de hoy: ${todayName} de ${saturdayHours}`
+            ? `${prefix}: ${todayName} ${saturdayHours}`
             : day === 6
-              ? `Horario de hoy: ${todayName} cerrado`
+              ? `${prefix}: ${todayName} – ${closed}`
               : sundayOpen && sundayHours
-                ? `Horario de hoy: ${todayName} de ${sundayHours}`
-                : "Horario de hoy: domingo cerrado";
+                ? `${prefix}: ${todayName} ${sundayHours}`
+                : `${prefix}: ${todayName} – ${closed}`;
 
       todayHoursEl.textContent = todayText;
     }
@@ -236,15 +284,17 @@ const isActive = (href: string) => {
       panel.classList.remove("menu-slide-in");
       button.setAttribute("aria-expanded", "false");
       const label = button.querySelector("[data-menu-label]");
-      if (label) label.textContent = "Menú";
+      const lang = document.documentElement.lang || "es";
+      if (label) label.textContent = lang === "en" ? "Menu" : "Menú";
     };
 
     button.addEventListener("click", () => {
       const willOpen = panel.classList.contains("hidden");
+      const lang = document.documentElement.lang || "es";
       panel.classList.toggle("hidden");
       button.setAttribute("aria-expanded", willOpen ? "true" : "false");
       const label = button.querySelector("[data-menu-label]");
-      if (label) label.textContent = willOpen ? "Cerrar" : "Menú";
+      if (label) label.textContent = willOpen ? (lang === "en" ? "Close" : "Cerrar") : (lang === "en" ? "Menu" : "Menú");
       if (willOpen) {
         panel.classList.remove("menu-slide-in");
         void panel.offsetWidth;

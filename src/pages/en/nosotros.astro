@@ -1,0 +1,77 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { getBusinessInfo, getAboutSection } from "../../lib/sanity.js";
+import { business } from "../../config/clinic";
+
+const cms = await getBusinessInfo();
+const about = await getAboutSection();
+const businessName = cms?.name || business.name;
+
+const title = "About Us";
+const intro = about?.intro || `${businessName} is a professional pest control company serving Charlotte, NC and surrounding areas.`;
+const secondary = about?.secondary || "Our team of licensed technicians uses proven, safe treatments to eliminate pests and keep them away for good.";
+const keyPoints: string[] = Array.isArray(about?.keyPoints) ? about.keyPoints.filter(Boolean) : [
+  "Licensed & insured technicians",
+  "EPA-registered products",
+  "Same-day service available",
+  "Serving Charlotte, NC area",
+];
+const mainImage = about?.mainImageUrl || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1600&q=80";
+---
+
+<Layout
+  title={`${title} – ${businessName}`}
+  description={`Learn about ${businessName}, a professional pest control company in Charlotte, NC.`}
+>
+  <Header />
+  <main id="contenido-principal">
+
+    <section class="bg-gradient-to-b from-sky-50 to-white py-16 dark:from-[rgb(6,16,30)] dark:to-[rgb(8,20,38)]">
+      <div class="mx-auto max-w-5xl px-4">
+        <p class="text-sm font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">Who we are</p>
+        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white sm:text-5xl">
+          About Us
+        </h1>
+      </div>
+    </section>
+
+    <section class="pb-20">
+      <div class="mx-auto max-w-5xl px-4">
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div data-reveal>
+            <p class="text-lg leading-relaxed text-slate-700 dark:text-[rgb(196,216,240)]">{intro}</p>
+            {secondary && (
+              <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-[rgb(170,195,225)]">{secondary}</p>
+            )}
+            {keyPoints.length > 0 && (
+              <ul class="mt-6 space-y-2">
+                {keyPoints.map((point) => (
+                  <li class="flex items-start gap-2 text-sm font-medium text-slate-700 dark:text-[rgb(196,216,240)]">
+                    <span class="mt-0.5 text-sky-500">✓</span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="/en/agendar" class="btn-base btn-primary">Request service</a>
+              <a href="/en/servicios" class="btn-base btn-secondary">Our services</a>
+            </div>
+          </div>
+          <div class="overflow-hidden rounded-2xl" data-reveal>
+            <img
+              src={mainImage}
+              alt={businessName}
+              class="h-80 w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</Layout>

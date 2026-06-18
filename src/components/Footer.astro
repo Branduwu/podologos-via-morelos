@@ -1,34 +1,67 @@
 ---
 import { getBusinessInfo } from "../lib/sanity.js";
 import { safeCmsUrl } from "../utils/url";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { business as biz } from "../config/clinic";
 
-const business = await getBusinessInfo();
-const businessName = business?.name || "Podologos Via Morelos Tulpetlac";
-const phone = business?.phone || "";
-const logoUrl = business?.logoImageUrl || "/default-logo-clinica.svg";
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const pfx = lang === "en" ? "/en" : "";
 
-const facebookUrl = safeCmsUrl(business?.facebookUrl, "");
-const instagramUrl = safeCmsUrl(business?.instagramUrl, "");
-const tiktokUrl = safeCmsUrl(business?.tiktokUrl, "");
+const cms = await getBusinessInfo();
+const businessName = cms?.name || biz.name;
+const phone = cms?.phone || biz.phoneDisplay;
+const logoUrl = cms?.logoImageUrl || "/default-logo.svg";
 
-const menuTitle = business?.footerMenuTitle || "Menu";
-const siteTitle = business?.footerSiteTitle || "Sobre el sitio";
-const privacyLabel = business?.footerPrivacyLabel || "Aviso de privacidad";
-const privacyUrl = safeCmsUrl(business?.footerPrivacyUrl, "/privacidad");
-const noticesLabel = business?.footerNoticesLabel || "Comunicados";
-const noticesUrl = safeCmsUrl(business?.footerNoticesUrl, "/comunicados");
-const copyrightText = business?.footerCopyrightText || "Todos los derechos reservados.";
-const footerTagline = business?.footerTagline || "Atención integral en podología, psicología, óptica, quiropráctica y dentista.";
-const weekdayHours = business?.weekdayHours || "10 a.m. – 6 p.m.";
-const saturdayHours = business?.saturdayHours || "";
-const sundayOpen = Boolean(business?.sundayOpen);
-const sundayHours = business?.sundayHours || "";
+const facebookUrl = safeCmsUrl(cms?.facebookUrl, "");
+const instagramUrl = safeCmsUrl(cms?.instagramUrl, "");
+
+const menuTitle = lang === "en" ? t.footer.menu : (cms?.footerMenuTitle || "Menú");
+const siteTitle = lang === "en" ? t.footer.site : (cms?.footerSiteTitle || "Sobre el sitio");
+const privacyLabel = lang === "en" ? t.footer.privacy : (cms?.footerPrivacyLabel || "Aviso de privacidad");
+const privacyUrl = safeCmsUrl(cms?.footerPrivacyUrl, `${pfx}/privacidad`);
+const noticesLabel = lang === "en" ? t.footer.notices : (cms?.footerNoticesLabel || "Comunicados");
+const noticesUrl = safeCmsUrl(cms?.footerNoticesUrl, `${pfx}/comunicados`);
+const copyrightText = lang === "en" ? t.footer.rights : (cms?.footerCopyrightText || "Todos los derechos reservados.");
+const footerTagline = lang === "en"
+  ? biz.taglineEn
+  : (cms?.footerTagline || biz.tagline);
+
+const weekdayHours = cms?.weekdayHours || "8 a.m. – 5 p.m.";
+const saturdayHours = cms?.saturdayHours || "8 a.m. – 12 p.m.";
+const sundayOpen = Boolean(cms?.sundayOpen);
+const sundayHours = cms?.sundayHours || "";
 
 const socialLinks = [
   { key: "facebook", label: "Facebook", url: facebookUrl },
   { key: "instagram", label: "Instagram", url: instagramUrl },
-  { key: "tiktok", label: "TikTok", url: tiktokUrl },
 ];
+
+const menuLinks = lang === "en"
+  ? [
+      { href: "/en",              label: "Home"          },
+      { href: "/en/servicios",    label: "Services"      },
+      { href: "/en/precios",      label: "Pricing"       },
+      { href: "/en/especialistas",label: "Technicians"   },
+      { href: "/en/galeria",      label: "Gallery"       },
+      { href: "/en/nosotros",     label: "About Us"      },
+      { href: "/en/ubicacion",    label: "Location"      },
+      { href: "/en/contacto",     label: "Contact"       },
+      { href: "/en/faq",          label: "FAQ"           },
+      { href: "/en/agendar",      label: "Request Service"},
+    ]
+  : [
+      { href: "/",            label: "Inicio"          },
+      { href: "/servicios",   label: "Servicios"       },
+      { href: "/precios",     label: "Precios"         },
+      { href: "/especialistas",label: "Técnicos"       },
+      { href: "/galeria",     label: "Fotos y videos"  },
+      { href: "/nosotros",    label: "Nosotros"        },
+      { href: "/ubicacion",   label: "Ubicación"       },
+      { href: "/contacto",    label: "Contacto"        },
+      { href: "/faq",         label: "FAQ"             },
+      { href: "/agendar",     label: "Solicitar servicio"},
+    ];
 ---
 
 <footer class="mt-16 overflow-hidden bg-[#0b1e35] text-[rgb(220,236,252)]">
@@ -37,11 +70,17 @@ const socialLinks = [
   <div class="border-b border-[rgb(25,50,80)]">
     <div class="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 py-10 text-center sm:flex-row sm:justify-between sm:text-left">
       <div>
-        <p class="font-['Manrope',sans-serif] text-2xl font-extrabold tracking-tight text-white sm:text-3xl">¿Listo para tu cita?</p>
-        <p class="mt-1.5 text-base font-medium text-[rgb(167,200,232)]">Agenda hoy con nuestros especialistas y cuida tu salud.</p>
+        <p class="font-['Manrope',sans-serif] text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+          {lang === "en" ? "Ready to protect your home?" : "¿Listo para proteger tu hogar?"}
+        </p>
+        <p class="mt-1.5 text-base font-medium text-[rgb(167,200,232)]">
+          {lang === "en"
+            ? "Request a service today and keep pests away."
+            : "Solicita un servicio hoy y mantén las plagas fuera."}
+        </p>
       </div>
-      <a href="/agendar" class="btn-base btn-primary shrink-0 shadow-[0_8px_28px_-8px_rgba(2,120,210,0.6)]">
-        Agenda tu cita
+      <a href={`${pfx}/agendar`} class="btn-base btn-primary shrink-0 shadow-[0_8px_28px_-8px_rgba(2,120,210,0.6)]">
+        {lang === "en" ? "Request service" : "Solicitar servicio"}
       </a>
     </div>
   </div>
@@ -49,8 +88,8 @@ const socialLinks = [
   <div class="mx-auto max-w-6xl px-4 py-10 sm:py-12">
     <div class="grid grid-cols-2 gap-8 lg:grid-cols-4 lg:gap-10">
       <div class="col-span-2 lg:col-span-1">
-        <a href="/" class="inline-flex items-center gap-3">
-          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1 sm:h-11 md:h-12" loading="lazy" data-fallback-src="/default-logo-clinica.svg" />
+        <a href={lang === "en" ? "/en" : "/"} class="inline-flex items-center gap-3">
+          <img src={logoUrl} alt={businessName} class="h-10 w-auto rounded-md bg-white/10 p-1 sm:h-11 md:h-12" loading="lazy" data-fallback-src="/default-logo.svg" />
           <span class="font-['Manrope',sans-serif] text-base font-bold leading-tight text-white">{businessName}</span>
         </a>
         <p class="type-footer-body mt-3 text-[rgb(167,200,232)]">{footerTagline}</p>
@@ -72,13 +111,12 @@ const socialLinks = [
                 target={configured ? "_blank" : undefined}
                 rel={configured ? "noopener noreferrer" : undefined}
                 aria-label={social.label}
-                title={configured ? social.label : `Configura ${social.label} en CMS > Ajustes generales > Redes`}
+                title={social.label}
                 aria-disabled={configured ? "false" : "true"}
                 tabindex={configured ? "0" : "-1"}
               >
                 {social.key === "facebook" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4.5 w-4.5" fill="currentColor"><path d="M13 9h3V6h-3c-2.8 0-5 2.2-5 5v2H6v3h2v5h3v-5h3l1-3h-4v-2c0-1.1.9-2 2-2z"/></svg>}
                 {social.key === "instagram" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4.5 w-4.5" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>}
-                {social.key === "tiktok" && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4.5 w-4.5" fill="currentColor"><path d="M14 3c.4 1.7 1.8 3 3.5 3.2V9c-1.4-.1-2.6-.6-3.5-1.4V14a6 6 0 1 1-5.4-6v2.8a3.2 3.2 0 1 0 2.6 3.2V3H14z"/></svg>}
               </a>
             );
           })}
@@ -88,17 +126,9 @@ const socialLinks = [
       <div>
         <h3 class="type-footer-title text-[rgb(148,186,222)]">{menuTitle}</h3>
         <ul class="type-footer-body mt-4 space-y-2 text-[rgb(167,200,232)]">
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/">Inicio</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/servicios">Nuestros servicios</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/precios">Precios</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/especialistas">Especialistas</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/promociones">Promociones</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/galeria">Fotos y videos</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/nosotros">Nosotros</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/ubicacion">Ubicación</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/contacto">Contacto</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/faq">FAQ</a></li>
-          <li><a class="footer-link hover:text-[rgb(122,200,255)]" href="/agendar">Agendar cita</a></li>
+          {menuLinks.map((link) => (
+            <li><a class="footer-link hover:text-[rgb(122,200,255)]" href={link.href}>{link.label}</a></li>
+          ))}
         </ul>
       </div>
 
@@ -111,27 +141,27 @@ const socialLinks = [
       </div>
 
       <div>
-        <h3 class="type-footer-title text-[rgb(148,186,222)]">Horario</h3>
+        <h3 class="type-footer-title text-[rgb(148,186,222)]">{lang === "en" ? "Hours" : "Horario"}</h3>
         <div class="mt-4 space-y-1.5 text-sm font-medium text-[rgb(167,200,232)]">
           <p class="flex items-center gap-2">
             <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-            Lun – Vie: {weekdayHours}
+            {lang === "en" ? "Mon – Fri:" : "Lun – Vie:"} {weekdayHours}
           </p>
           {saturdayHours && (
             <p class="flex items-center gap-2">
               <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-              Sábado: {saturdayHours}
+              {lang === "en" ? "Saturday:" : "Sábado:"} {saturdayHours}
             </p>
           )}
           {sundayOpen && sundayHours ? (
             <p class="flex items-center gap-2">
               <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-              Domingo: {sundayHours}
+              {lang === "en" ? "Sunday:" : "Domingo:"} {sundayHours}
             </p>
           ) : (
             <p class="flex items-center gap-2">
               <span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-              Domingo: Cerrado
+              {lang === "en" ? "Sunday: Closed" : "Domingo: Cerrado"}
             </p>
           )}
         </div>

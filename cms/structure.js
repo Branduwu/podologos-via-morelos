@@ -119,47 +119,85 @@ const AnnouncementIcon = makeIcon([
   path('M7 13l1 6h2'),
 ])
 
-const FootIcon = makeIcon([
-  path('M10 4c2 0 3 1.8 3 4 0 3-1.5 5-3.5 5S6 10.8 6 8c0-2.2 1.2-4 4-4Z'),
-  circle(15, 5, 0.9),
-  circle(17, 7, 0.8),
-  circle(17.5, 10, 0.7),
-  circle(16.5, 13, 0.7),
+const RodentIcon = makeIcon([
+  circle(9, 10, 4),
+  path('M13 9l6-4'),
+  path('M13 11l5 2'),
+  circle(9, 10, 1),
 ])
 
-const PsychologyIcon = makeIcon([
-  path('M12 4a6 6 0 0 0-6 6c0 2.8 1.6 4.8 4 5.6V20h5v-4h2a1 1 0 0 0 1-1v-2h1l-1.5-2A6 6 0 0 0 12 4Z'),
-  path('M10 9h4'),
+const RoachIcon = makeIcon([
+  ellipse = rect(8, 8, 8, 8, 4),
+  path('M12 8V5'),
+  path('M9 9l-3-3'),
+  path('M15 9l3-3'),
+  path('M9 15l-3 3'),
+  path('M15 15l3 3'),
 ])
 
-const OpticIcon = makeIcon([
-  path('M3 12s3.5-5 9-5 9 5 9 5-3.5 5-9 5-9-5-9-5Z'),
-  circle(12, 12, 2.2),
+const TermiteIcon = makeIcon([
+  circle(12, 8, 3),
+  path('M12 11v8'),
+  path('M9 13l-4 2'),
+  path('M15 13l4 2'),
 ])
 
-const ChiropracticIcon = makeIcon([
-  path('M12 3c-2 2-2 4 0 6s2 4 0 6-2 4 0 6'),
-  path('M9 7h6'),
-  path('M9 12h6'),
-  path('M9 17h6'),
+const BedBugIcon = makeIcon([
+  rect(4, 10, 16, 8, 3),
+  path('M8 10V7'),
+  path('M12 10V6'),
+  path('M16 10V7'),
+  circle(8, 13, 1),
+  circle(12, 13, 1),
+  circle(16, 13, 1),
 ])
 
-const ToothIcon = makeIcon([
-  path('M8 4c1.4 0 2.1.8 4 .8s2.6-.8 4-.8c2.1 0 3.5 1.7 3.5 4 0 1.5-.5 3-1.3 4.6L15.5 20c-.5 1.1-2 1-2.2-.2L12 14l-1.3 5.8c-.3 1.2-1.8 1.3-2.2.2L5.8 12.6A10 10 0 0 1 4.5 8c0-2.3 1.4-4 3.5-4Z'),
+const AntIcon = makeIcon([
+  circle(12, 6, 2),
+  circle(12, 12, 2.5),
+  circle(12, 18, 2),
+  path('M9.5 5l-3 4'),
+  path('M14.5 5l3 4'),
+  path('M9.5 19l-3-4'),
+  path('M14.5 19l3-4'),
+])
+
+const WaspIcon = makeIcon([
+  path('M12 3c-2.5 2-2.5 4 0 6s2.5 4 0 6'),
+  path('M8 6l-4 2'),
+  path('M16 6l4 2'),
+  path('M8 14l-4-2'),
+  path('M16 14l4-2'),
+])
+
+const InspectionIcon = makeIcon([
+  circle(11, 11, 7),
+  path('M21 21l-4-4'),
+  path('M11 8v6'),
+  path('M8 11h6'),
+])
+
+const GeneralFumigIcon = makeIcon([
+  path('M3 20c3-4 6-6 9-6s6 2 9 6'),
+  path('M12 14V4'),
+  path('M9 7l3-3 3 3'),
 ])
 
 const faqCategories = [
-  {title: 'General', value: 'general', icon: FaqIcon},
-  {title: 'Podologia', value: 'podologia', icon: FootIcon},
-  {title: 'Psicologia', value: 'psicologia', icon: PsychologyIcon},
-  {title: 'Optica', value: 'optica', icon: OpticIcon},
-  {title: 'Quiropractica', value: 'quiropractica', icon: ChiropracticIcon},
-  {title: 'Dentista', value: 'dentista', icon: ToothIcon},
+  {title: 'General',                         value: 'general',    icon: FaqIcon},
+  {title: 'Roedores / Rodents',              value: 'roedores',   icon: RodentIcon},
+  {title: 'Cucarachas / Cockroaches',        value: 'cucarachas', icon: RoachIcon},
+  {title: 'Termitas / Termites',             value: 'termitas',   icon: TermiteIcon},
+  {title: 'Chinches / Bed Bugs',             value: 'chinches',   icon: BedBugIcon},
+  {title: 'Hormigas / Ants',                 value: 'hormigas',   icon: AntIcon},
+  {title: 'Avispas y abejas / Wasps & Bees', value: 'avispas',    icon: WaspIcon},
+  {title: 'Inspeccion / Inspection',         value: 'inspeccion', icon: InspectionIcon},
+  {title: 'Fumigacion general',              value: 'fumigacion', icon: GeneralFumigIcon},
 ]
 
 export const structure = (S) =>
   S.list()
-    .title('Panel de contenido')
+    .title('Panel de contenido – FumiPro NC')
     .items([
       S.listItem()
         .title('Guia rapida para editor')
@@ -186,7 +224,7 @@ export const structure = (S) =>
                   S.documentTypeList('businessInfo').title('Informacion del negocio')
                 ),
               S.listItem()
-                .title('Seccion Nosotros (home y pagina Nosotros)')
+                .title('Seccion Nosotros / About Us')
                 .icon(AboutIcon)
                 .child(
                   S.documentTypeList('aboutSection').title('Seccion Nosotros')
@@ -201,23 +239,23 @@ export const structure = (S) =>
             .title('2) Contenido comercial')
             .items([
               S.listItem()
-                .title('Servicios')
+                .title('Servicios / Services')
                 .icon(ServiceIcon)
-                .child(S.documentTypeList('service').title('Servicios')),
+                .child(S.documentTypeList('service').title('Servicios / Services')),
               S.listItem()
-                .title('Especialistas')
+                .title('Tecnicos / Technicians')
                 .icon(SpecialistIcon)
                 .child(
-                  S.documentTypeList('specialistProfile').title('Especialistas')
+                  S.documentTypeList('specialistProfile').title('Tecnicos / Technicians')
                 ),
               S.listItem()
-                .title('Precios')
+                .title('Precios / Pricing')
                 .icon(PriceIcon)
-                .child(S.documentTypeList('priceItem').title('Precios')),
+                .child(S.documentTypeList('priceItem').title('Precios / Pricing')),
               S.listItem()
-                .title('Promociones')
+                .title('Promociones / Offers')
                 .icon(PromotionIcon)
-                .child(S.documentTypeList('promotion').title('Promociones')),
+                .child(S.documentTypeList('promotion').title('Promociones / Offers')),
             ])
         ),
       S.listItem()
@@ -225,17 +263,17 @@ export const structure = (S) =>
         .icon(GalleryIcon)
         .child(S.documentTypeList('galleryItem').title('Fotos y videos')),
       S.listItem()
-        .title('4) Preguntas frecuentes (FAQ)')
+        .title('4) Preguntas frecuentes / FAQ')
         .icon(FaqIcon)
         .child(
           S.list()
-            .title('4) Preguntas frecuentes (FAQ)')
+            .title('4) FAQ')
             .items([
               S.listItem()
-                .title('Todas')
+                .title('Todas / All')
                 .icon(FaqIcon)
                 .child(
-                  S.documentTypeList('faqItem').title('Preguntas frecuentes')
+                  S.documentTypeList('faqItem').title('Preguntas frecuentes / FAQ')
                 ),
               ...faqCategories.map((category) =>
                 S.listItem()
@@ -258,19 +296,19 @@ export const structure = (S) =>
             .title('5) Contenido legal y avisos')
             .items([
               S.listItem()
-                .title('Aviso de privacidad')
+                .title('Aviso de privacidad / Privacy Policy')
                 .icon(PrivacyIcon)
                 .child(
                   S.document()
                     .schemaType('privacyPage')
                     .documentId('privacyPageSingleton')
-                    .title('Aviso de privacidad')
+                    .title('Aviso de privacidad / Privacy Policy')
                 ),
               S.listItem()
-                .title('Comunicados')
+                .title('Comunicados / Announcements')
                 .icon(AnnouncementIcon)
                 .child(
-                  S.documentTypeList('siteAnnouncement').title('Comunicados')
+                  S.documentTypeList('siteAnnouncement').title('Comunicados / Announcements')
                 ),
             ])
         ),
