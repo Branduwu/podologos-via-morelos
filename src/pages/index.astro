@@ -104,7 +104,7 @@ const heroEyebrow = business?.homeHeroEyebrow || "Atención integral";
 const heroTitle = business?.homeHeroTitle || "Cuidado profesional para tus pies y bienestar integral";
 const heroSubtitle =
   business?.homeHeroSubtitle ||
-  "Más de 20 años cuidando la salud de tus pies en Tulpetlac, Ecatepec. Servicios de podología, psicología, óptica, quiropráctica y dentista.";
+  "Más de 10 años eliminando plagas en Charlotte, NC. Fumigación de roedores, cucarachas, termitas, chinches y más.";
 const heroImageUrl =
   business?.homeHeroImageUrl ||
   "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1800&q=80";
@@ -124,7 +124,7 @@ const heroSecondaryCtaText = business?.homeSecondaryCtaText || "Nuestros servici
 const heroSecondaryCtaUrl = business?.homeSecondaryCtaUrl || "/servicios";
 const heroServiceChips = clinic.serviceCategories.map((category) => ({
   key: category.key,
-  label: category.key === "optica" ? "Optica" : category.label,
+  label: category.label,
   href: `/agendar?service=${encodeURIComponent(category.key)}`,
 }));
 
@@ -145,7 +145,7 @@ const googleReviewsCtaUrl =
 const aboutTitle = about?.title || "Nosotros";
 const aboutIntro =
   about?.intro ||
-  "Somos un centro integral de salud en Tulpetlac enfocado en podología, psicología, óptica, quiropráctica y dentista con atención cercana y profesional.";
+  "Somos un empresa de control de plagas en Charlotte, NC con tratamientos profesionales para roedores, cucarachas, termitas, chinches, hormigas y más.";
 const aboutSecondary =
   about?.secondary ||
   "Nuestro objetivo es ayudarte a mejorar tu bienestar con tratamientos personalizados, explicaciones claras y seguimiento continuo.";
@@ -164,7 +164,7 @@ const aboutSecondaryCtaUrl = about?.secondaryCtaUrl || "/nosotros";
 function fmt(d: string | Date | null | undefined) {
   if (!d) return "";
   try {
-    return new Date(d).toLocaleDateString("es-MX", {
+    return new Date(d).toLocaleDateString("es-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -286,7 +286,7 @@ function getVideoAspectClass(it: HomeGalleryItem) {
 function formatGoogleReviewDate(unixTime?: number) {
   if (!Number.isFinite(unixTime) || Number(unixTime) <= 0) return "";
   try {
-    return new Date(Number(unixTime) * 1000).toLocaleDateString("es-MX", {
+    return new Date(Number(unixTime) * 1000).toLocaleDateString("es-US", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -308,7 +308,7 @@ function trimGoogleReviewText(text?: string) {
   <Header />
 
   <main class="pb-12">
-    <section class="relative overflow-hidden border-y border-sky-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
+    <section class="relative overflow-hidden border-y border-red-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
       <div class="absolute inset-0 overflow-hidden" data-hero-carousel data-hero-autoplay-ms={heroAutoplayMs}>
         {heroSlides.map((slide, index) => (
           <img
@@ -321,10 +321,10 @@ function trimGoogleReviewText(text?: string) {
           />
         ))}
       </div>
-      <div class="absolute inset-0 bg-gradient-to-r from-sky-950/82 via-sky-900/68 to-slate-900/48"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-red-950/82 via-red-900/68 to-slate-900/48"></div>
       <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div class="absolute -right-24 -top-24 h-[32rem] w-[32rem] rounded-full bg-sky-300/10 blur-[100px]"></div>
-        <div class="absolute bottom-0 right-1/4 h-[22rem] w-[22rem] rounded-full bg-cyan-400/8 blur-[80px]"></div>
+        <div class="absolute -right-24 -top-24 h-[32rem] w-[32rem] rounded-full bg-red-300/10 blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 h-[22rem] w-[22rem] rounded-full bg-red-400/8 blur-[80px]"></div>
       </div>
 
       <div class="relative mx-auto max-w-6xl px-4 py-20 text-white md:py-28">
@@ -335,11 +335,11 @@ function trimGoogleReviewText(text?: string) {
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
               </span>
-              Especialistas en tu salud · Tulpetlac, Ecatepec
+              Control de plagas profesional · Charlotte, NC
             </div>
-            <p class="hero-animate hero-delay-2 type-hero-eyebrow text-sky-100">{heroEyebrow}</p>
+            <p class="hero-animate hero-delay-2 type-hero-eyebrow text-red-100">{heroEyebrow}</p>
             <h1 class="hero-animate hero-delay-3 type-hero-title mt-3 max-w-4xl">{heroTitle}</h1>
-            <p class="hero-animate hero-delay-4 type-hero-subtitle mt-4 max-w-3xl text-sky-50/95">{heroSubtitle}</p>
+            <p class="hero-animate hero-delay-4 type-hero-subtitle mt-4 max-w-3xl text-red-50/95">{heroSubtitle}</p>
 
             <div class="hero-animate hero-delay-5 mt-8 flex flex-wrap gap-3">
               <a class="btn-base btn-primary shadow-[0_8px_24px_-8px_rgba(2,132,199,0.7)]" href={heroPrimaryCtaUrl}>
@@ -351,7 +351,7 @@ function trimGoogleReviewText(text?: string) {
             </div>
 
             <div class="hero-animate hero-delay-5 mt-8 max-w-4xl">
-              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100/75">Elige por servicio</p>
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-100/75">Elige por servicio</p>
               <div class="mt-3 flex flex-wrap gap-2">
                 {heroServiceChips.map((chip) => (
                   <a
@@ -380,17 +380,17 @@ function trimGoogleReviewText(text?: string) {
         </div>
       )}
 
-      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#eef5fb] to-transparent dark:from-[#071428]" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#fff8f8] to-transparent dark:from-[#1a0505]" aria-hidden="true"></div>
     </section>
 
     <div data-reveal class="relative z-10 mx-auto -mt-4 max-w-4xl px-4">
-      <div class="grid grid-cols-3 divide-x divide-sky-200/60 overflow-hidden rounded-2xl border border-sky-200/80 bg-white/96 shadow-[0_20px_48px_-18px_rgb(14_116_144/0.24)] backdrop-blur-md dark:divide-slate-700/60 dark:border-slate-800/80 dark:bg-slate-900/96 dark:shadow-[0_20px_48px_-18px_rgb(2_6_23/0.9)]">
+      <div class="grid grid-cols-3 divide-x divide-red-200/60 overflow-hidden rounded-2xl border border-red-200/80 bg-white/96 shadow-[0_20px_48px_-18px_rgb(14_116_144/0.24)] backdrop-blur-md dark:divide-slate-700/60 dark:border-slate-800/80 dark:bg-slate-900/96 dark:shadow-[0_20px_48px_-18px_rgb(2_6_23/0.9)]">
         <div class="flex flex-col items-center gap-1 py-4 text-center sm:py-5">
-          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-sky-700 dark:text-sky-300 sm:text-3xl">20+</span>
+          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-red-700 dark:text-red-300 sm:text-3xl">20+</span>
           <span class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:text-xs">años de exp.</span>
         </div>
         <div class="flex flex-col items-center gap-1 py-4 text-center sm:py-5">
-          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-sky-700 dark:text-sky-300 sm:text-3xl">5</span>
+          <span class="font-['Manrope',sans-serif] text-2xl font-extrabold leading-none tracking-tight text-red-700 dark:text-red-300 sm:text-3xl">5</span>
           <span class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 sm:text-xs">especialidades</span>
         </div>
         <div class="flex flex-col items-center gap-1 py-4 text-center sm:py-5">
@@ -405,14 +405,14 @@ function trimGoogleReviewText(text?: string) {
     <section class="mx-auto mt-10 max-w-6xl px-4">
       <div data-reveal class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">
-            <span class="h-px w-5 bg-sky-500" aria-hidden="true"></span>Ofertas especiales
+          <p class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-red-700 dark:text-red-300">
+            <span class="h-px w-5 bg-red-500" aria-hidden="true"></span>Ofertas especiales
           </p>
           <h2 class="type-section-title text-slate-900 dark:text-slate-100">{promotionsTitle}</h2>
           <p class="type-section-subtitle text-slate-800 dark:text-slate-200">{promotionsSubtitle}</p>
         </div>
         <div class="flex flex-col items-start gap-2 md:items-end">
-          <a class="text-sm font-semibold text-sky-700 hover:underline dark:text-sky-300" href="/promociones">
+          <a class="text-sm font-semibold text-red-700 hover:underline dark:text-red-300" href="/promociones">
             Ver todas las promociones
           </a>
         </div>
@@ -446,7 +446,7 @@ function trimGoogleReviewText(text?: string) {
           <div data-promo-carousel-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
             {homePromos.map((p, index) => (
               <article data-promo-carousel-item={index} data-promo-end={p.endDate || ""} class="group flex min-h-[29rem] min-w-[86%] snap-start flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_44px_-12px_rgb(14_116_144/0.18)] md:min-w-[48%] lg:min-w-[32%] dark:border-slate-800/80 dark:bg-slate-950 dark:hover:shadow-[0_20px_44px_-12px_rgb(2_6_23/0.6)]">
-                <div class="h-1 w-full bg-gradient-to-r from-sky-500 via-cyan-400 to-sky-600"></div>
+                <div class="h-1 w-full bg-gradient-to-r from-red-500 via-red-400 to-red-600"></div>
                 <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-slate-700/70">
                   <img data-promo-image class="h-full w-full object-contain object-center transition duration-500 group-hover:scale-[1.02]" src={p.imageUrl || promotionsFallbackImage} alt={p.title} loading="lazy" data-fallback-src={promotionsFallbackImage || "/placeholder.jpg"} />
                 </div>
@@ -455,7 +455,7 @@ function trimGoogleReviewText(text?: string) {
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="type-card-title">{p.title}</h3>
                     {p.label && (
-                      <span class="shrink-0 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-bold text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">
+                      <span class="shrink-0 rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700 dark:bg-red-900/40 dark:text-red-300">
                         {p.label}
                       </span>
                     )}
@@ -492,10 +492,10 @@ function trimGoogleReviewText(text?: string) {
     </section>
 
     <section class="mx-auto mt-12 max-w-6xl px-4">
-      <div data-reveal class="grid gap-6 overflow-hidden rounded-3xl border border-sky-200/80 bg-gradient-to-br from-white via-sky-50/20 to-white p-6 shadow-[0_14px_48px_-20px_rgb(14_116_144/0.14)] md:grid-cols-[1.08fr,0.92fr] md:items-center dark:border-slate-800/80 dark:from-slate-950 dark:via-sky-950/20 dark:to-slate-950 dark:shadow-[0_14px_48px_-20px_rgb(2_6_23/0.7)] md:p-10">
+      <div data-reveal class="grid gap-6 overflow-hidden rounded-3xl border border-red-200/80 bg-gradient-to-br from-white via-red-50/20 to-white p-6 shadow-[0_14px_48px_-20px_rgb(14_116_144/0.14)] md:grid-cols-[1.08fr,0.92fr] md:items-center dark:border-slate-800/80 dark:from-slate-950 dark:via-red-950/20 dark:to-slate-950 dark:shadow-[0_14px_48px_-20px_rgb(2_6_23/0.7)] md:p-10">
         <div>
-          <p class="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
-            <span class="h-px w-5 bg-sky-500"></span>
+          <p class="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">
+            <span class="h-px w-5 bg-red-500"></span>
             Conócenos
           </p>
           <h2 class="type-section-title mt-2">{aboutTitle}</h2>
@@ -506,8 +506,8 @@ function trimGoogleReviewText(text?: string) {
             <ul class="mt-6 grid gap-2.5 text-base text-slate-700 dark:text-slate-300 sm:grid-cols-2">
               {aboutKeyPoints.map((point) => (
                 <li class="flex items-start gap-2.5">
-                  <span class="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/50">
-                    <span class="h-1.5 w-1.5 rounded-full bg-sky-600 dark:bg-sky-400"></span>
+                  <span class="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+                    <span class="h-1.5 w-1.5 rounded-full bg-red-600 dark:bg-red-400"></span>
                   </span>
                   <span>{point}</span>
                 </li>
@@ -526,7 +526,7 @@ function trimGoogleReviewText(text?: string) {
         </div>
 
         <div class="group relative">
-          <div class="absolute -inset-1 rounded-3xl bg-gradient-to-br from-sky-400/20 to-cyan-300/10 opacity-0 blur-xl transition duration-500 group-hover:opacity-100 dark:from-sky-600/20 dark:to-cyan-500/10" aria-hidden="true"></div>
+          <div class="absolute -inset-1 rounded-3xl bg-gradient-to-br from-red-400/20 to-red-300/10 opacity-0 blur-xl transition duration-500 group-hover:opacity-100 dark:from-red-600/20 dark:to-red-500/10" aria-hidden="true"></div>
           <img class="relative h-72 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-500 group-hover:shadow-[0_24px_52px_-16px_rgb(14_116_144/0.28)] md:h-[30rem] dark:ring-slate-700" src={aboutMainImage} alt="Nosotros" loading="eager" data-fallback-src="/placeholder.jpg" />
         </div>
       </div>
@@ -583,12 +583,12 @@ function trimGoogleReviewText(text?: string) {
     <section class="mx-auto mt-12 max-w-6xl px-4">
       <div data-reveal class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
-          <p class="mb-1.5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">
-            <span class="h-px w-5 bg-sky-500" aria-hidden="true"></span>Galería
+          <p class="mb-1.5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-red-700 dark:text-red-300">
+            <span class="h-px w-5 bg-red-500" aria-hidden="true"></span>Galería
           </p>
           <h2 class="type-section-title">Fotos y videos destacados</h2>
         </div>
-        <a class="text-sm font-semibold text-sky-700 hover:underline dark:text-sky-300" href="/galeria">Ver fotos y videos</a>
+        <a class="text-sm font-semibold text-red-700 hover:underline dark:text-red-300" href="/galeria">Ver fotos y videos</a>
       </div>
 
       {homeGallery.length === 0 ? (
@@ -738,13 +738,13 @@ function trimGoogleReviewText(text?: string) {
       <section class="mx-auto mt-12 max-w-6xl px-4">
         <div data-reveal class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <p class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">
-              <span class="h-px w-5 bg-sky-500" aria-hidden="true"></span>Reseñas verificadas
+            <p class="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-red-700 dark:text-red-300">
+              <span class="h-px w-5 bg-red-500" aria-hidden="true"></span>Reseñas verificadas
             </p>
             <h2 class="type-section-title">{googleReviewsTitle}</h2>
             <p class="type-section-subtitle text-slate-700 dark:text-slate-300">{googleReviewsSubtitle}</p>
           </div>
-          <div class="flex shrink-0 flex-col items-end gap-1.5 rounded-2xl border border-sky-200/80 bg-white/90 px-5 py-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900">
+          <div class="flex shrink-0 flex-col items-end gap-1.5 rounded-2xl border border-red-200/80 bg-white/90 px-5 py-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900">
             <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{googleReviews.placeName || business?.name || "Google Maps"}</p>
             <div class="flex items-center gap-2.5">
               <span class="font-['Manrope',sans-serif] text-3xl font-extrabold leading-none text-slate-900 dark:text-slate-100">{Number(googleReviews.rating || 0).toFixed(1)}</span>
@@ -810,7 +810,7 @@ function trimGoogleReviewText(text?: string) {
                   href={review.authorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="mt-4 inline-flex w-fit text-sm font-semibold text-sky-700 hover:underline dark:text-sky-300"
+                  class="mt-4 inline-flex w-fit text-sm font-semibold text-red-700 hover:underline dark:text-red-300"
                 >
                   Ver perfil en Google
                 </a>

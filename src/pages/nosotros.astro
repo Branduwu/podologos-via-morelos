@@ -1,4 +1,4 @@
-﻿---
+---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -57,10 +57,10 @@ const specialistsWaNumber = resolveWhatsAppNumber(
 const title = about?.title || "Nosotros";
 const intro =
   about?.intro ||
-  "Somos un centro integral de salud en Tulpetlac con atencion cercana, profesional y enfocada en resultados reales para cada paciente.";
+  "Somos una empresa de control de plagas en Charlotte, NC con atención rápida, certificada y enfocada en resultados reales para tu hogar o negocio.";
 const secondary =
   about?.secondary ||
-  "Integramos podologia, psicologia, optica, quiropractica y dentista para ayudarte a cuidar tu bienestar en un solo lugar.";
+  "Eliminamos roedores, cucarachas, termitas, chinches, hormigas y avispas con técnicas certificadas y seguras para tu familia y mascotas.";
 const mainImage =
   about?.mainImageUrl ||
   "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1400&q=80";
@@ -122,15 +122,15 @@ function specialistProfileHref(specialist: Specialist) {
 ---
 
 <Layout
-  title={`Nosotros | ${business?.name || "Podologos Via Morelos"}`}
-  description={`Conoce al equipo de ${business?.name || "Podólogos Vía Morelos"}. Especialistas en podología, psicología, óptica, quiropráctica y dentista en ${business?.area || "Tulpetlac"}.`}
+  title={`Nosotros | ${business?.name || "FumiPro NC"}`}
+  description={`Conoce al equipo de ${business?.name || "FumiPro NC"}. Empresa de control de plagas certificada en ${business?.area || "Charlotte, NC"}.`}
 >
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">
     <section class="card-surface grid gap-8 rounded-3xl p-8 md:grid-cols-[1.1fr,0.9fr] md:items-center">
       <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">Conócenos</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">Conócenos</p>
         <h1 class="mt-2 text-4xl font-bold tracking-tight md:text-5xl">{title}</h1>
         <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{intro}</p>
         <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{secondary}</p>
@@ -151,7 +151,7 @@ function specialistProfileHref(specialist: Specialist) {
         <h2 class="text-2xl font-bold tracking-tight">Por qué elegirnos</h2>
         <ul class="mt-4 grid gap-3 text-base text-slate-700 sm:grid-cols-2 dark:text-slate-300">
           {points.map((point) => (
-            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{point}</span></li>
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>{point}</span></li>
           ))}
         </ul>
       </section>
@@ -177,13 +177,13 @@ function specialistProfileHref(specialist: Specialist) {
               />
               <div class="p-4">
                 <p class="text-lg font-bold">{specialist.name || "Especialista"}</p>
-                <p class="mt-1 text-sm font-semibold text-sky-700 dark:text-sky-300">{specialist.specialty || "Especialidad"}</p>
+                <p class="mt-1 text-sm font-semibold text-red-700 dark:text-red-300">{specialist.specialty || "Especialidad"}</p>
                 <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialist.shortBio || "Perfil disponible pronto."}</p>
 
                 {Array.isArray(specialist.focusAreas) && specialist.focusAreas.length > 0 && (
                   <div class="mt-3 flex flex-wrap gap-2">
                     {specialist.focusAreas.slice(0, 4).map((area) => (
-                      <span class="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">{area}</span>
+                      <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">{area}</span>
                     ))}
                   </div>
                 )}

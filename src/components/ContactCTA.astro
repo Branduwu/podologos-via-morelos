@@ -75,8 +75,8 @@ const socialItems = [
   <h2 class="text-xl font-semibold">Contacto</h2>
   <div class="mt-4 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
     <p><span class="font-semibold">Dirección:</span> {address}</p>
-    <p><span class="font-semibold">Teléfono:</span> <a class="text-sky-700 hover:underline dark:text-sky-300" href={`tel:${phoneTel}`}>{phoneDisplay}</a></p>
-    <p><span class="font-semibold">WhatsApp:</span> <a class="text-sky-700 hover:underline dark:text-sky-300" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">{waNumber}</a></p>
+    <p><span class="font-semibold">Teléfono:</span> <a class="text-red-700 hover:underline dark:text-red-300" href={`tel:${phoneTel}`}>{phoneDisplay}</a></p>
+    <p><span class="font-semibold">WhatsApp:</span> <a class="text-red-700 hover:underline dark:text-red-300" href={waPrimaryHref} target="_blank" rel="noopener noreferrer">{waNumber}</a></p>
   </div>
 
   <div class="mt-6 grid gap-3 sm:grid-cols-2">
@@ -128,7 +128,7 @@ const socialItems = [
       <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Redes</p>
       <div class="mt-2 flex flex-wrap gap-2 text-sm">
         {socialItems.map((item) => (
-          <a class="text-sky-700 hover:underline dark:text-sky-300" href={item.value} target="_blank" rel="noopener noreferrer">
+          <a class="text-red-700 hover:underline dark:text-red-300" href={item.value} target="_blank" rel="noopener noreferrer">
             {item.label}: {item.handle}
           </a>
         ))}

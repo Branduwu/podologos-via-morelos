@@ -25,11 +25,14 @@ const noneSpecialistValue = "__none__";
 
 const priceCategories = [
   { key: "all", label: "Todas" },
-  { key: "podologia", label: "Podologia" },
-  { key: "psicologia", label: "Psicologia" },
-  { key: "optica", label: "Optica" },
-  { key: "quiropractica", label: "Quiropractica" },
-  { key: "dentista", label: "Dentista" },
+  { key: "roedores", label: "Roedores" },
+  { key: "cucarachas", label: "Cucarachas" },
+  { key: "termitas", label: "Termitas" },
+  { key: "chinches", label: "Chinches" },
+  { key: "hormigas", label: "Hormigas" },
+  { key: "avispas", label: "Avispas" },
+  { key: "inspeccion", label: "Inspección" },
+  { key: "general", label: "General" },
 ];
 const priceCategoryLabelByKey = new Map(priceCategories.map((item) => [item.key, item.label]));
 
@@ -43,14 +46,16 @@ function applyTemplate(value: string | null | undefined, replacements: Record<st
 
 function priceCategoryKey(price: PriceRow) {
   const fromCms = normalizeCategory(price.category || "");
-  if (["podologia", "psicologia", "optica", "quiropractica", "dentista"].includes(fromCms)) return fromCms;
+  if (["roedores", "cucarachas", "termitas", "chinches", "hormigas", "avispas", "inspeccion", "general"].includes(fromCms)) return fromCms;
   const text = normalizeCategory(`${price.serviceTitle || ""} ${price.note || ""}`);
   if (!text) return "general";
-  if (text.includes("podolog")) return "podologia";
-  if (text.includes("psicolog")) return "psicologia";
-  if (text.includes("optomet") || text.includes("optic")) return "optica";
-  if (text.includes("quiropr") || text.includes("quiro")) return "quiropractica";
-  if (text.includes("dent") || text.includes("odont")) return "dentista";
+  if (text.includes("roed") || text.includes("rata") || text.includes("raton")) return "roedores";
+  if (text.includes("cucar")) return "cucarachas";
+  if (text.includes("termit")) return "termitas";
+  if (text.includes("chinch")) return "chinches";
+  if (text.includes("hormig")) return "hormigas";
+  if (text.includes("avispa") || text.includes("abeja")) return "avispas";
+  if (text.includes("inspec")) return "inspeccion";
   return "general";
 }
 
@@ -130,13 +135,13 @@ const pricesPageText = {
   ).trim(),
 };
 
-function moneyMXN(n: number | string | null | undefined) {
+function moneyUSD(n: number | string | null | undefined) {
   const num = Number(n);
   if (Number.isNaN(num) || num <= 0) return "-";
   try {
-    return new Intl.NumberFormat("es-MX", {
+    return new Intl.NumberFormat("es-US", {
       style: "currency",
-      currency: "MXN",
+      currency: "USD",
       maximumFractionDigits: 0,
     }).format(num);
   } catch {
@@ -165,8 +170,8 @@ function buildAgendarHref(price: PriceRow) {
 ---
 
 <Layout
-  title={`Precios | ${business?.name || "Podologos Via Morelos Tulpetlac"}`}
-  description={`Consulta los precios desde de todos nuestros servicios médicos en ${business?.area || "Tulpetlac"}. Cotiza varios servicios y agenda tu cita directamente.`}
+  title={`Precios | ${business?.name || "FumiPro NC Charlotte"}`}
+  description={`Consulta los precios de todos nuestros servicios de fumigación en ${business?.area || "Charlotte, NC"}. Cotiza tratamientos y agenda tu inspección en línea.`}
 >
   <Header />
 
@@ -224,7 +229,7 @@ function buildAgendarHref(price: PriceRow) {
       <>
         <div class="mt-6 space-y-4">
           <section class="rounded-3xl border border-slate-200 bg-white/92 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 md:p-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">{pricesPageText.filterLabel}</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">{pricesPageText.filterLabel}</p>
             <div class="mt-4 flex flex-wrap gap-2.5" id="price-filters">
               {priceCategories.map((cat, idx) => (
                 <button
@@ -254,12 +259,12 @@ function buildAgendarHref(price: PriceRow) {
                   {" "}
                   <strong>{pricesPageText.quoteAddActionLabel}</strong> {pricesPageText.quoteAddActionHelp}
                 </p>
-                <p class="mt-2 text-xs font-medium text-sky-700 md:hidden dark:text-sky-300">
+                <p class="mt-2 text-xs font-medium text-red-700 md:hidden dark:text-red-300">
                   {pricesPageText.quoteMobileHelp}
                 </p>
               </div>
               <div class="flex flex-wrap items-center gap-3">
-                <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:ring-sky-900/40">
+                <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-200 dark:bg-red-950/30 dark:text-red-300 dark:ring-red-900/40">
                   {pricesPageText.quoteLimitBadge}
                 </span>
                 <a
@@ -284,7 +289,7 @@ function buildAgendarHref(price: PriceRow) {
           <section class="space-y-6">
             <div class="hidden items-start justify-between gap-4 rounded-3xl border border-slate-200 bg-white/78 p-4 shadow-sm md:flex dark:border-slate-800 dark:bg-slate-950/90">
               <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">{pricesPageText.sectionEyebrow}</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">{pricesPageText.sectionEyebrow}</p>
                 <p class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">{pricesPageText.sectionTitle}</p>
               </div>
               <p class="max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
@@ -335,13 +340,13 @@ function buildAgendarHref(price: PriceRow) {
                   >
                     <div class="flex items-start justify-between gap-3">
                       <div>
-                        <p class="text-[0.72rem] font-extrabold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
+                        <p class="text-[0.72rem] font-extrabold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">
                           {categoryLabel}
                         </p>
                         <p class="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">{p.serviceTitle || "-"}</p>
                       </div>
-                      <span class="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-300">
-                        {moneyMXN(p.priceFrom)}
+                      <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                        {moneyUSD(p.priceFrom)}
                       </span>
                     </div>
 
@@ -407,7 +412,7 @@ function buildAgendarHref(price: PriceRow) {
                       ]}
                     >
                       <td class="px-4 py-5 font-semibold leading-7 text-slate-900 dark:text-slate-100">{p.serviceTitle || "-"}</td>
-                      <td class="px-4 py-5 font-medium">{moneyMXN(p.priceFrom)}</td>
+                      <td class="px-4 py-5 font-medium">{moneyUSD(p.priceFrom)}</td>
                       <td class="px-4 py-5 leading-7">{p.duration || "-"}</td>
                       <td class="px-4 py-5 leading-7 text-slate-600 dark:text-slate-300">{p.note || ""}</td>
                       <td class="px-4 py-5">
@@ -482,7 +487,7 @@ function buildAgendarHref(price: PriceRow) {
   };
 
   const moneyMX = (value) =>
-    new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(value || 0);
+    new Intl.NumberFormat("es-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value || 0);
 
   const updatePriceFilterUI = () => {
     priceFilterButtons.forEach((btn) => {
@@ -550,7 +555,7 @@ function buildAgendarHref(price: PriceRow) {
     }
 
     const params = new URLSearchParams();
-    params.set("service", selected[0].category || "podologia");
+    params.set("service", selected[0].category || "general");
     const uniqueSpecialists = Array.from(
       new Set(selected.map((item) => String(item.specialist || "").trim()).filter(Boolean))
     );
@@ -586,9 +591,9 @@ function buildAgendarHref(price: PriceRow) {
       const disableAdd = reachedLimit && !isSelected;
 
       button.textContent = isSelected ? pricesPageText.quoteRemoveLabel : pricesPageText.quoteAddActionLabel;
-      button.classList.toggle("bg-sky-100", isSelected);
-      button.classList.toggle("text-sky-800", isSelected);
-      button.classList.toggle("border-sky-300", isSelected);
+      button.classList.toggle("bg-red-100", isSelected);
+      button.classList.toggle("text-red-800", isSelected);
+      button.classList.toggle("border-red-300", isSelected);
 
       button.toggleAttribute("disabled", disableAdd);
       button.classList.toggle("opacity-50", disableAdd);

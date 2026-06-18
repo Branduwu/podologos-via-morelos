@@ -45,13 +45,13 @@ const grouped = Object.entries(categoryLabels).map(([key, label]) => ({
   <Header />
   <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-sky-50 to-white py-16 dark:from-[rgb(6,16,30)] dark:to-[rgb(8,20,38)]">
+    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
       <div class="mx-auto max-w-3xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">FAQ</p>
+        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">FAQ</p>
         <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">
           Frequently Asked Questions
         </h1>
-        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(186,205,227)]">
+        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
           Common questions about our pest control services in Charlotte, NC.
         </p>
       </div>
@@ -60,7 +60,7 @@ const grouped = Object.entries(categoryLabels).map(([key, label]) => ({
     <section class="pb-20">
       <div class="mx-auto max-w-3xl px-4 space-y-10">
         {grouped.length === 0 ? (
-          <p class="text-slate-500 dark:text-[rgb(150,175,205)]">No FAQ items available yet.</p>
+          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No FAQ items available yet.</p>
         ) : (
           grouped.map((group) => (
             <div data-reveal>
@@ -70,11 +70,11 @@ const grouped = Object.entries(categoryLabels).map(([key, label]) => ({
                   const q = faq.questionEn || faq.question || "";
                   const a = faq.answerEn || faq.answer || "";
                   return (
-                    <details class="rounded-xl border border-slate-100 bg-white dark:border-[rgb(36,58,86)] dark:bg-[rgb(12,28,50)]">
+                    <details class="rounded-xl border border-slate-100 bg-white dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
                       <summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">
                         {q}
                       </summary>
-                      <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:border-[rgb(36,58,86)] dark:text-[rgb(186,205,227)]">
+                      <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:border-[rgb(36,58,86)] dark:text-[rgb(245,210,210)]">
                         {a}
                       </div>
                     </details>

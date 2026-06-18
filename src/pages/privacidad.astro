@@ -17,7 +17,7 @@ const title = privacy?.title || "Aviso de privacidad";
 const subtitle =
   privacy?.subtitle || "Aviso de privacidad para atencion y contacto de pacientes.";
 const updatedAtLabel = privacy?.updatedAt
-  ? new Date(`${privacy.updatedAt}T12:00:00`).toLocaleDateString("es-MX", {
+  ? new Date(`${privacy.updatedAt}T12:00:00`).toLocaleDateString("es-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -40,7 +40,7 @@ const paragraphs = String(privacy?.body || "")
 const bodyParagraphs = paragraphs.length > 0 ? paragraphs : fallbackParagraphs;
 ---
 
-<Layout title={`${title} | Podologos Via Morelos Tulpetlac`} description={subtitle}>
+<Layout title={`${title} | FumiPro NC Charlotte`} description={subtitle}>
   <Header />
 
   <main class="mx-auto max-w-4xl px-4 py-10">

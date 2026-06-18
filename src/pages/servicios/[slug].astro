@@ -57,12 +57,12 @@ for (const specialist of specialists) {
   specialistBySlug.set(slug, specialist);
 }
 
-function moneyMXN(n: number | null | undefined) {
+function moneyUSD(n: number | null | undefined) {
   if (typeof n !== "number") return "";
   try {
-    return new Intl.NumberFormat("es-MX", {
+    return new Intl.NumberFormat("es-US", {
       style: "currency",
-      currency: "MXN",
+      currency: "USD",
       maximumFractionDigits: 0,
     }).format(n);
   } catch {
@@ -171,7 +171,7 @@ if (service?.title) {
 }
 ---
 
-<Layout title={`${service?.title || "Servicio"} | Podologos Via Morelos`}>
+<Layout title={`${service?.title || "Servicio"} | FumiPro NC`}>
   <Header />
 
   <main class="mx-auto max-w-4xl px-4 py-10">
@@ -221,7 +221,7 @@ if (service?.title) {
           )}
           {typeof service.priceFrom === "number" && (
             <span class="rounded-full border border-slate-200 px-3 py-1 dark:border-slate-800">
-              Desde {moneyMXN(service.priceFrom)}
+              Desde {moneyUSD(service.priceFrom)}
             </span>
           )}
         </div>

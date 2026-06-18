@@ -1,4 +1,4 @@
-﻿---
+---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -21,7 +21,7 @@ const normalizeComparableText = (value: string) =>
 const addressText = String(business?.address || "").trim();
 const rawZoneText = String(business?.locationZoneText || "").trim();
 const defaultZoneText =
-  String(business?.area || "").trim() || "Sta. María Tulpetlac, Ecatepec (sobre Vía Morelos).";
+  String(business?.area || "").trim() || "Charlotte, NC 28201.";
 const zoneText = (() => {
   if (!rawZoneText) return defaultZoneText;
   if (normalizeComparableText(rawZoneText) === normalizeComparableText(addressText)) return defaultZoneText;
@@ -36,43 +36,48 @@ const guideTips =
   Array.isArray(business?.locationGuideTips) && business.locationGuideTips.length > 0
     ? business.locationGuideTips
     : [
-        'Llegas más fácil si buscas "Podologo Plus Care" en Google Maps.',
+        'Llegas más fácil si buscas "FumiPro NC" en Google Maps.',
         "Atención con cita para evitar tiempos de espera.",
         "Si tienes estudios o recetas previas, tráelos (opcional).",
       ];
 
 const serviceGuides = {
-  podologia: [
-    "Trae calzado comodo y, si puedes, sandalias para revision rapida.",
-    "Evita cortar la una 24 a 48 horas antes si vienes por una encarnada.",
+  roedores: [
+    "Retira alimentos expuestos y sella bolsas antes del tratamiento.",
+    "Aleja mascotas y niños del área tratada por al menos 2 horas.",
   ],
-  dentista: [
-    "Trae estudios o radiografias dentales previas si cuentas con ellas.",
-    "Evita ingerir alimentos justo antes si tu cita incluye revision oral detallada.",
+  cucarachas: [
+    "Limpia debajo de electrodomésticos y esquinas antes del servicio.",
+    "No barras ni limpies la zona tratada por 48 horas para máxima efectividad.",
   ],
-  quiropractica: [
-    "Trae ropa comoda o facil de mover para la sesion.",
-    "Evita cargar cosas pesadas antes de tu cita.",
+  termitas: [
+    "Facilita acceso a paredes, marcos y estructuras de madera.",
+    "Si detectas montículos o daño estructural, documenta la zona antes de la visita.",
   ],
-  psicologia: [
-    "Llega 5 a 10 minutos antes para iniciar sin prisa.",
-    "Si quieres, anota 2 a 3 puntos de lo que te gustaria trabajar.",
+  chinches: [
+    "Lava ropa de cama en agua caliente antes del tratamiento.",
+    "Desenchufa colchones y retira cobijas para acceso completo al área.",
   ],
-  optica: [
-    "Si usas lentes, traelos junto con tu graduacion anterior (si la tienes).",
-    "Evita usar gotas o medicacion ocular sin indicacion ese dia.",
+  inspeccion: [
+    "Asegúrate de tener acceso a sótano, ático y espacios cerrados.",
+    "Anota áreas donde hayas visto indicios de plagas para informar al técnico.",
+  ],
+  general: [
+    "Guarda alimentos en recipientes sellados antes del servicio.",
+    "Ventila el área tratada siguiendo las instrucciones del técnico.",
   ],
 };
 
 const serviceGuideLabels = {
-  podologia: "Podologia",
-  dentista: "Dentista",
-  quiropractica: "Quiropractica",
-  psicologia: "Psicologia",
-  optica: "Optica",
+  roedores: "Roedores",
+  cucarachas: "Cucarachas",
+  termitas: "Termitas",
+  chinches: "Chinches",
+  inspeccion: "Inspección",
+  general: "General",
 };
 
-const defaultServiceGuideKey = "podologia";
+const defaultServiceGuideKey = "inspeccion";
 const defaultServiceGuideTips = serviceGuides[defaultServiceGuideKey];
 const facadeImage =
   business?.locationFacadeImageUrl ||
@@ -81,7 +86,7 @@ const scheduleText =
   business?.hoursText || "Lunes a viernes: 10:00 a 18:00 · Sábado: 10:00 a 16:00 · Domingo: cerrado";
 ---
 
-<Layout title={`Ubicación | ${business?.name || "Podologos Via Morelos"}`}>
+<Layout title={`Ubicación | ${business?.name || "FumiPro NC"}`}>
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">
@@ -122,7 +127,7 @@ const scheduleText =
           <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Guía rápida</h3>
           <ul class="mt-3 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
             {guideTips.map((tip: string) => (
-              <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{tip}</span></li>
+              <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>{tip}</span></li>
             ))}
           </ul>
 
@@ -137,7 +142,7 @@ const scheduleText =
                   data-service-guide-filter={key}
                   class={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
                     key === defaultServiceGuideKey
-                      ? "border-sky-700 bg-sky-700 text-white"
+                      ? "border-red-700 bg-red-700 text-white"
                       : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                   }`}
                 >
@@ -151,7 +156,7 @@ const scheduleText =
               </p>
               <ul class="mt-2 grid gap-2 text-sm text-slate-700 dark:text-slate-300" id="service-guide-list">
                 {defaultServiceGuideTips.map((tip) => (
-                  <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-sky-600"></span><span>{tip}</span></li>
+                  <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>{tip}</span></li>
                 ))}
               </ul>
             </div>
@@ -173,11 +178,11 @@ const scheduleText =
 
         <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
           <iframe
-            title={`Mapa de ubicación de ${business?.name || "Podólogos Vía Morelos"}`}
+            title={`Mapa de ubicación de ${business?.name || "FumiPro NC"}`}
             class="h-[28rem] w-full"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
-            src={`https://www.google.com/maps?q=${encodeURIComponent(business?.address || "Via Morelos 232, Ecatepec")}&output=embed`}
+            src={`https://www.google.com/maps?q=${encodeURIComponent(business?.address || "Charlotte, NC 28201")}&output=embed`}
           ></iframe>
         </div>
 
@@ -231,7 +236,7 @@ const scheduleText =
       const li = document.createElement("li");
       li.className = "flex items-start gap-2";
       const dot = document.createElement("span");
-      dot.className = "mt-1 h-2 w-2 rounded-full bg-sky-600";
+      dot.className = "mt-1 h-2 w-2 rounded-full bg-red-600";
       const text = document.createElement("span");
       text.textContent = String(tip || "");
       li.appendChild(dot);
@@ -243,8 +248,8 @@ const scheduleText =
   const updateGuideButtons = () => {
     guideButtons.forEach((btn) => {
       const isActive = btn.dataset.serviceGuideFilter === activeGuide;
-      btn.classList.toggle("border-sky-700", isActive);
-      btn.classList.toggle("bg-sky-700", isActive);
+      btn.classList.toggle("border-red-700", isActive);
+      btn.classList.toggle("bg-red-700", isActive);
       btn.classList.toggle("text-white", isActive);
     });
   };

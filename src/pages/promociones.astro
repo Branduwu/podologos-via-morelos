@@ -29,11 +29,14 @@ today.setHours(0, 0, 0, 0);
 
 const FILTER_OPTIONS = [
   { label: "Todas", value: "todas" },
-  { label: "Podología", value: "podologia" },
-  { label: "Psicología", value: "psicologia" },
-  { label: "Óptica", value: "optica" },
-  { label: "Quiropráctica", value: "quiropractica" },
-  { label: "Dentista", value: "dentista" },
+  { label: "Roedores", value: "roedores" },
+  { label: "Cucarachas", value: "cucarachas" },
+  { label: "Termitas", value: "termitas" },
+  { label: "Chinches", value: "chinches" },
+  { label: "Hormigas", value: "hormigas" },
+  { label: "Avispas", value: "avispas" },
+  { label: "Inspección", value: "inspeccion" },
+  { label: "General", value: "general" },
 ];
 
 const normalizeCategory = normalizeServiceSlug;
@@ -68,7 +71,7 @@ const ordered = [...normalized].sort((a, b) => Number(b.pinned) - Number(a.pinne
 function fmt(d: string | Date | null | undefined) {
   if (!d) return "";
   try {
-    return new Date(d).toLocaleDateString("es-MX", {
+    return new Date(d).toLocaleDateString("es-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -119,7 +122,7 @@ function agendarPromotionHref(p: Promotion) {
 }
 ---
 
-<Layout title="Promociones | Podologos Via Morelos Tulpetlac">
+<Layout title="Promociones | FumiPro NC Charlotte">
   <Header />
 
   <main class="mx-auto max-w-6xl px-4 py-10">

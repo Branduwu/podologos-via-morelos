@@ -91,9 +91,9 @@ const isActive = (href: string) => {
 };
 ---
 
-<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur dark:border-[rgb(36,58,86)] dark:bg-[rgb(8,20,38)]/95">
-  <div class="hidden border-b border-slate-100 bg-white md:block dark:border-[rgb(28,48,74)] dark:bg-[rgb(6,16,32)]">
-    <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-5 py-2.5 text-[13px] text-slate-600 dark:text-[rgb(186,205,227)]">
+<header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,5,5)]/95">
+  <div class="hidden border-b border-slate-100 bg-white md:block dark:border-[rgb(46,10,10)] dark:bg-[rgb(26,5,5)]">
+    <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-5 py-2.5 text-[13px] text-slate-600 dark:text-[rgb(245,210,210)]">
       <p
         id="today-hours"
         class="min-w-[14rem] flex-1 truncate"
@@ -106,7 +106,7 @@ const isActive = (href: string) => {
         {scheduleLabel}
       </p>
       <p class="hidden min-w-[18rem] flex-[1.2] truncate text-center lg:block">{address}</p>
-      <p class="shrink-0 font-semibold text-sky-700 dark:text-[rgb(123,198,255)]">{lang === "en" ? "Tel:" : "Tel:"} {phone}</p>
+      <p class="shrink-0 font-semibold text-red-700 dark:text-[rgb(255,148,148)]">{lang === "en" ? "Tel:" : "Tel:"} {phone}</p>
     </div>
   </div>
 
@@ -114,8 +114,8 @@ const isActive = (href: string) => {
     <a href={lang === "en" ? "/en" : "/"} class="flex min-w-0 max-w-[calc(100%-9rem)] items-center gap-2.5 sm:max-w-[calc(100%-10rem)] sm:gap-3 md:max-w-none" aria-label={t.aria.logo}>
       <img src={logoUrl} alt={businessName} class="h-10 w-10 shrink-0 rounded-md object-contain sm:h-11 sm:w-11 md:h-12 md:w-12 lg:h-14 lg:w-14" loading="eager" data-fallback-src="/default-logo.svg" />
       <div class="min-w-0">
-        <p class="truncate text-[1rem] font-semibold tracking-tight text-slate-900 sm:text-[1.08rem] dark:text-[rgb(236,244,255)]">{businessName}</p>
-        <p class="hidden max-w-[34ch] text-[0.92rem] font-medium leading-5 text-slate-600 sm:block dark:text-[rgb(186,205,227)]">{businessArea}</p>
+        <p class="truncate text-[1rem] font-semibold tracking-tight text-slate-900 sm:text-[1.08rem] dark:text-[rgb(255,240,240)]">{businessName}</p>
+        <p class="hidden max-w-[34ch] text-[0.92rem] font-medium leading-5 text-slate-600 sm:block dark:text-[rgb(245,210,210)]">{businessArea}</p>
       </div>
     </a>
 
@@ -124,8 +124,8 @@ const isActive = (href: string) => {
         {socialLinks.map((social) => {
           const configured = Boolean(social.url);
           const sharedClass = configured
-            ? "rounded-full border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-[rgb(59,87,120)] dark:text-[rgb(196,216,240)] dark:hover:bg-[rgb(25,48,76)]"
-            : "rounded-full border border-slate-200 p-1.5 text-slate-400 opacity-70 cursor-not-allowed dark:border-[rgb(59,87,120)] dark:text-[rgb(128,152,182)]";
+            ? "rounded-full border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 dark:border-[rgb(80,18,18)] dark:text-[rgb(248,220,220)] dark:hover:bg-[rgb(48,10,10)]"
+            : "rounded-full border border-slate-200 p-1.5 text-slate-400 opacity-70 cursor-not-allowed dark:border-[rgb(80,18,18)] dark:text-[rgb(210,130,130)]";
           return (
             <a
               class={sharedClass}
@@ -146,7 +146,7 @@ const isActive = (href: string) => {
       <!-- Language switcher -->
       <a
         href={altPath}
-        class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-[12px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-sky-700 dark:border-[rgb(59,87,120)] dark:text-[rgb(196,216,240)] dark:hover:bg-[rgb(25,48,76)] dark:hover:text-[rgb(126,203,255)]"
+        class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-[12px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-red-700 dark:border-[rgb(80,18,18)] dark:text-[rgb(248,220,220)] dark:hover:bg-[rgb(48,10,10)] dark:hover:text-[rgb(255,152,152)]"
         aria-label={t.aria.langSwitch}
         title={t.aria.langSwitch}
       >
@@ -162,7 +162,7 @@ const isActive = (href: string) => {
     <div class="ml-auto flex shrink-0 items-center gap-2 md:hidden">
       <a
         href={altPath}
-        class="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 dark:border-[rgb(59,87,120)] dark:text-[rgb(196,216,240)]"
+        class="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 dark:border-[rgb(80,18,18)] dark:text-[rgb(248,220,220)]"
         aria-label={t.aria.langSwitch}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -174,7 +174,7 @@ const isActive = (href: string) => {
       <ThemeToggle compact />
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-[rgb(59,87,120)] dark:text-[rgb(214,228,245)] dark:hover:bg-[rgb(25,48,76)]"
+        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-[rgb(80,18,18)] dark:text-[rgb(252,225,225)] dark:hover:bg-[rgb(48,10,10)]"
         data-mobile-menu-button
         aria-expanded="false"
         aria-controls="mobile-nav-panel"
@@ -197,7 +197,7 @@ const isActive = (href: string) => {
         <a
           href={item.href}
           aria-current={isActive(item.href) ? "page" : undefined}
-          class={`nav-link whitespace-nowrap ${isActive(item.href) ? "text-sky-700 dark:text-[rgb(126,203,255)] after:scale-x-100 font-semibold" : "hover:text-sky-700 dark:hover:text-[rgb(126,203,255)]"}`}
+          class={`nav-link whitespace-nowrap ${isActive(item.href) ? "text-red-700 dark:text-[rgb(255,152,152)] after:scale-x-100 font-semibold" : "hover:text-red-700 dark:hover:text-[rgb(255,152,152)]"}`}
         >
           {item.label}
         </a>
@@ -205,11 +205,11 @@ const isActive = (href: string) => {
     </nav>
   </div>
 
-  <div id="mobile-nav-panel" class="hidden border-t border-slate-100 bg-white px-4 pb-5 pt-4 md:hidden dark:border-[rgb(36,58,86)] dark:bg-[rgb(8,20,38)]">
+  <div id="mobile-nav-panel" class="hidden border-t border-slate-100 bg-white px-4 pb-5 pt-4 md:hidden dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,5,5)]">
     <a href={primaryCta.href} class={`btn-base w-full ${isActive(primaryCta.href) ? "btn-primary" : "btn-secondary"}`}>
       {primaryCta.label}
     </a>
-    <p class="mb-2 mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(166,190,218)]">
+    <p class="mb-2 mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(240,190,190)]">
       {lang === "en" ? "Main sections" : "Accesos principales"}
     </p>
     <nav class="grid gap-1.5 text-sm font-medium">
@@ -217,15 +217,15 @@ const isActive = (href: string) => {
         <a
           href={item.href}
           aria-current={isActive(item.href) ? "page" : undefined}
-          class={`rounded-lg px-3 py-2 ${isActive(item.href) ? "bg-sky-100 text-sky-800 dark:bg-[rgb(25,48,76)] dark:text-[rgb(126,203,255)]" : "hover:bg-sky-50 dark:hover:bg-[rgb(18,39,65)]"}`}
+          class={`rounded-lg px-3 py-2 ${isActive(item.href) ? "bg-red-100 text-red-800 dark:bg-[rgb(48,10,10)] dark:text-[rgb(255,152,152)]" : "hover:bg-red-50 dark:hover:bg-[rgb(36,8,8)]"}`}
         >
           {item.label}
         </a>
       ))}
     </nav>
 
-    <div class="mt-4 border-t border-sky-100 pt-4 dark:border-[rgb(36,58,86)]">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(166,190,218)]">
+    <div class="mt-4 border-t border-red-100 pt-4 dark:border-[rgb(36,58,86)]">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-[rgb(240,190,190)]">
         {lang === "en" ? "More sections" : "Más secciones"}
       </p>
       <nav class="grid gap-1.5 text-sm font-medium">
@@ -233,7 +233,7 @@ const isActive = (href: string) => {
           <a
             href={item.href}
             aria-current={isActive(item.href) ? "page" : undefined}
-            class={`rounded-lg px-3 py-2 ${isActive(item.href) ? "bg-sky-100 text-sky-800 dark:bg-[rgb(25,48,76)] dark:text-[rgb(126,203,255)]" : "hover:bg-sky-50 dark:hover:bg-[rgb(18,39,65)]"}`}
+            class={`rounded-lg px-3 py-2 ${isActive(item.href) ? "bg-red-100 text-red-800 dark:bg-[rgb(48,10,10)] dark:text-[rgb(255,152,152)]" : "hover:bg-red-50 dark:hover:bg-[rgb(36,8,8)]"}`}
           >
             {item.label}
           </a>

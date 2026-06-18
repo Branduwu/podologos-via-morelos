@@ -20,7 +20,7 @@ const items =
         id: item._id || `${item.title || "item"}-${item.publishDate || ""}`,
         title: item.title || "Comunicado",
         date: item.publishDate
-          ? new Date(`${item.publishDate}T12:00:00`).toLocaleDateString("es-MX")
+          ? new Date(`${item.publishDate}T12:00:00`).toLocaleDateString("es-US")
           : "-",
         body: item.body || "",
         featured: Boolean(item.featured),
@@ -28,7 +28,7 @@ const items =
     : [];
 ---
 
-<Layout title="Comunicados | Podologos Via Morelos Tulpetlac" description="Noticias y avisos del consultorio.">
+<Layout title="Comunicados | FumiPro NC Charlotte" description="Noticias y avisos del consultorio.">
   <Header />
 
   <main class="mx-auto max-w-4xl px-4 py-10">
@@ -44,13 +44,13 @@ const items =
       <div class="mt-6 space-y-4">
         {items.map((item) => (
           <article
-            class={`rounded-2xl border p-6 ${item.featured ? "border-sky-300 bg-sky-50 dark:border-sky-700 dark:bg-sky-950/40" : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"}`}
+            class={`rounded-2xl border p-6 ${item.featured ? "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950/40" : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"}`}
             data-announcement-id={item.id}
           >
             <div class="flex flex-wrap items-center gap-3">
               <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">{item.date}</p>
               {item.featured && (
-                <span class="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-bold text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">
+                <span class="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700 dark:bg-red-900/50 dark:text-red-300">
                   Destacado
                 </span>
               )}

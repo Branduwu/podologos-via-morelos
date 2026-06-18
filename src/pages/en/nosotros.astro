@@ -28,9 +28,9 @@ const mainImage = about?.mainImageUrl || "https://images.unsplash.com/photo-1558
   <Header />
   <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-sky-50 to-white py-16 dark:from-[rgb(6,16,30)] dark:to-[rgb(8,20,38)]">
+    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
       <div class="mx-auto max-w-5xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">Who we are</p>
+        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Who we are</p>
         <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white sm:text-5xl">
           About Us
         </h1>
@@ -41,15 +41,15 @@ const mainImage = about?.mainImageUrl || "https://images.unsplash.com/photo-1558
       <div class="mx-auto max-w-5xl px-4">
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
           <div data-reveal>
-            <p class="text-lg leading-relaxed text-slate-700 dark:text-[rgb(196,216,240)]">{intro}</p>
+            <p class="text-lg leading-relaxed text-slate-700 dark:text-[rgb(248,220,220)]">{intro}</p>
             {secondary && (
-              <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-[rgb(170,195,225)]">{secondary}</p>
+              <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-[rgb(245,200,200)]">{secondary}</p>
             )}
             {keyPoints.length > 0 && (
               <ul class="mt-6 space-y-2">
                 {keyPoints.map((point) => (
-                  <li class="flex items-start gap-2 text-sm font-medium text-slate-700 dark:text-[rgb(196,216,240)]">
-                    <span class="mt-0.5 text-sky-500">✓</span>
+                  <li class="flex items-start gap-2 text-sm font-medium text-slate-700 dark:text-[rgb(248,220,220)]">
+                    <span class="mt-0.5 text-red-500">✓</span>
                     {point}
                   </li>
                 ))}
