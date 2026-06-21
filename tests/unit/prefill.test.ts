@@ -3,37 +3,40 @@ import { getPrefillFromUrl, normalizeServiceSlug } from "../../src/utils/prefill
 
 describe("prefill utils", () => {
   it("normalizes service slug aliases", () => {
-    expect(normalizeServiceSlug("Optometria")).toBe("optica");
-    expect(normalizeServiceSlug("Podologia clinica")).toBe("podologia");
-    expect(normalizeServiceSlug("Psicologia")).toBe("psicologia");
-    expect(normalizeServiceSlug("Quiropractica")).toBe("quiropractica");
+    expect(normalizeServiceSlug("Roedores")).toBe("roedores");
+    expect(normalizeServiceSlug("Control de cucarachas")).toBe("cucarachas");
+    expect(normalizeServiceSlug("Tratamiento de termitas")).toBe("termitas");
+    expect(normalizeServiceSlug("Chinches de cama")).toBe("chinches");
+    expect(normalizeServiceSlug("Hormigas")).toBe("hormigas");
+    expect(normalizeServiceSlug("Avispas y abejas")).toBe("avispas");
+    expect(normalizeServiceSlug("Inspeccion preventiva")).toBe("inspeccion");
   });
 
   it("parses single service and specialist from URL", () => {
-    const prefill = getPrefillFromUrl("https://demo.local/agendar?service=podologia&specialist=abc-123");
-    expect(prefill.service).toBe("podologia");
+    const prefill = getPrefillFromUrl("https://demo.local/agendar?service=roedores&specialist=abc-123");
+    expect(prefill.service).toBe("roedores");
     expect(prefill.specialist).toBe("abc-123");
   });
 
   it("parses multiple services and approx total", () => {
     const prefill = getPrefillFromUrl(
-      "https://demo.local/agendar?service=psicologia&services=Primera%20sesion&services=Terapia&priceIds=abc123&priceId=def456&approxTotal=950"
+      "https://demo.local/agendar?service=termitas&services=Inspeccion&services=Tratamiento&priceIds=abc123&priceId=def456&approxTotal=950"
     );
-    expect(prefill.service).toBe("psicologia");
-    expect(prefill.services).toEqual(["Primera sesion", "Terapia"]);
+    expect(prefill.service).toBe("termitas");
+    expect(prefill.services).toEqual(["Inspeccion", "Tratamiento"]);
     expect(prefill.priceIds).toEqual(["abc123", "def456"]);
     expect(prefill.approxTotal).toBe(950);
   });
 
   it("parses manual whatsapp routing fields from URL", () => {
     const prefill = getPrefillFromUrl(
-      "https://demo.local/agendar?service=dentista&routing=general&waNumber=5215512345678&waMessage=Mensaje%20manual&waNumbers=5215512345678&waNumbers=__none__&waMessages=Uno&waMessages=__none__"
+      "https://demo.local/agendar?service=general&routing=general&waNumber=17045550192&waMessage=Mensaje%20manual&waNumbers=17045550192&waNumbers=__none__&waMessages=Uno&waMessages=__none__"
     );
-    expect(prefill.service).toBe("dentista");
+    expect(prefill.service).toBe("general");
     expect(prefill.routing).toBe("general");
-    expect(prefill.waNumber).toBe("5215512345678");
+    expect(prefill.waNumber).toBe("17045550192");
     expect(prefill.waMessage).toBe("Mensaje manual");
-    expect(prefill.waNumbers).toEqual(["5215512345678", ""]);
+    expect(prefill.waNumbers).toEqual(["17045550192", ""]);
     expect(prefill.waMessages).toEqual(["Uno", ""]);
   });
 });

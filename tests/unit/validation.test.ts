@@ -28,10 +28,11 @@ describe("validation utils", () => {
     expect(isSunday("2026-02-22")).toBe(true);
     expect(isSunday("2026-02-23")).toBe(false);
 
-    expect(isWithinSchedule("2026-02-23", "10:00")).toBe(true); // Monday open
-    expect(isWithinSchedule("2026-02-23", "17:30")).toBe(true);
-    expect(isWithinSchedule("2026-02-23", "18:00")).toBe(false); // Closing time is not a start time
-    expect(isWithinSchedule("2026-02-23", "09:30")).toBe(false);
+    // FumiPro NC schedule: Mon–Fri 08:00–17:00
+    expect(isWithinSchedule("2026-02-23", "10:00")).toBe(true);  // Monday, within hours
+    expect(isWithinSchedule("2026-02-23", "16:30")).toBe(true);  // Just before closing (17:00)
+    expect(isWithinSchedule("2026-02-23", "17:00")).toBe(false); // Exact close time is not a valid start
+    expect(isWithinSchedule("2026-02-23", "07:30")).toBe(false); // Before opening (08:00)
     expect(isWithinSchedule("2026-02-22", "12:00")).toBe(false); // Sunday closed
   });
 });
