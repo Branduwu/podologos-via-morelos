@@ -122,18 +122,21 @@ export default {
       name: "targetCategories",
       title: "Categorias (filtro web)",
       type: "array",
-      description: "Selecciona categorias oficiales para filtros: Podologia, Psicologia, Optica, Quiropractica, Dentista.",
+      description: "Selecciona categorias para filtros: Roedores, Cucarachas, Termitas, Chinches, Hormigas, Avispas, Inspeccion, General.",
       fieldset: "relations",
       of: [
         {
           type: "string",
           options: {
             list: [
-              { title: "Podologia", value: "podologia" },
-              { title: "Psicologia", value: "psicologia" },
-              { title: "Optica / Optometria", value: "optica" },
-              { title: "Quiropractica", value: "quiropractica" },
-              { title: "Dentista", value: "dentista" },
+              { title: "Roedores / Rodents",             value: "roedores"   },
+              { title: "Cucarachas / Cockroaches",        value: "cucarachas" },
+              { title: "Termitas / Termites",             value: "termitas"   },
+              { title: "Chinches de cama / Bed Bugs",     value: "chinches"   },
+              { title: "Hormigas / Ants",                 value: "hormigas"   },
+              { title: "Avispas y abejas / Wasps & Bees", value: "avispas"    },
+              { title: "Inspeccion / Inspection",         value: "inspeccion" },
+              { title: "General / General",               value: "general"    },
             ],
             layout: "dropdown",
           },

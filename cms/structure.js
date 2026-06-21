@@ -127,7 +127,7 @@ const RodentIcon = makeIcon([
 ])
 
 const RoachIcon = makeIcon([
-  ellipse = rect(8, 8, 8, 8, 4),
+  rect(8, 8, 8, 8, 4),
   path('M12 8V5'),
   path('M9 9l-3-3'),
   path('M15 9l3-3'),
@@ -259,9 +259,9 @@ export const structure = (S) =>
             ])
         ),
       S.listItem()
-        .title('3) Fotos y videos')
+        .title('3) Galeria / Gallery')
         .icon(GalleryIcon)
-        .child(S.documentTypeList('galleryItem').title('Fotos y videos')),
+        .child(S.documentTypeList('galleryItem').title('Galeria / Gallery')),
       S.listItem()
         .title('4) Preguntas frecuentes / FAQ')
         .icon(FaqIcon)

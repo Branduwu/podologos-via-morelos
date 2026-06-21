@@ -33,7 +33,7 @@ export default {
       name: "priceFrom",
       title: "Precio desde",
       type: "number",
-      description: "Monto en MXN, sin simbolo $.",
+      description: "Monto en USD, sin simbolo $.",
       fieldset: "basic",
       validation: (R) =>
         R.required().min(0).error("El precio es obligatorio y no puede ser negativo."),
@@ -51,11 +51,11 @@ export default {
     },
     {
       name: "leadSpecialist",
-      title: "Especialista destino (manual)",
+      title: "Técnico destino (manual)",
       type: "reference",
       to: [{ type: "specialistProfile" }],
       description:
-        "Opcional. Si lo eliges, este precio enviara al especialista seleccionado en Agendar/WhatsApp. Si lo dejas vacio, usa el especialista del servicio (si esta configurado). En cotizacion con destinos distintos, se usa WhatsApp general.",
+        "Opcional. Si lo eliges, este precio enviara al tecnico seleccionado en Agendar/WhatsApp. Si lo dejas vacio, usa el tecnico del servicio (si esta configurado). En cotizacion con destinos distintos, se usa WhatsApp general.",
       fieldset: "routing",
       options: {
         disableNew: true,
@@ -67,7 +67,7 @@ export default {
       title: "WhatsApp destino (manual)",
       type: "string",
       description:
-        "Opcional. Si lo llenas, este precio enviara mensajes a este numero en Agendar/WhatsApp. Formato sugerido: 5215512345678. En cotizacion con destinos distintos, se usa WhatsApp general.",
+        "Opcional. Si lo llenas, este precio enviara mensajes a este numero en Agendar/WhatsApp. Formato sugerido: 17041234567. En cotizacion con destinos distintos, se usa WhatsApp general.",
       fieldset: "routing",
       validation: (R) =>
         R.custom((value) => {
@@ -85,7 +85,7 @@ export default {
       type: "text",
       rows: 3,
       description:
-        "Opcional. Mensaje base para este precio. Puedes usar {servicio}, {especialista}, {negocio} y {problema}.",
+        "Opcional. Mensaje base para este precio. Puedes usar {servicio}, {tecnico}, {negocio} y {problema}.",
       fieldset: "routing",
     },
     {

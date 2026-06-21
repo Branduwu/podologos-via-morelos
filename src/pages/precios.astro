@@ -88,11 +88,11 @@ const pricesPageText = {
   emptyStateText: String(pricesPageContent.emptyStateText || "Aun no tenemos precios publicados.").trim(),
   filterLabel: String(pricesPageContent.filterLabel || "Elige un area").trim(),
   quoteTitle: String(pricesPageContent.quoteTitle || "Tu cotizacion").trim(),
-  quoteSingleActionLabel: String(pricesPageContent.quoteSingleActionLabel || "Agendar solo este").trim(),
-  quoteSingleActionHelp: String(pricesPageContent.quoteSingleActionHelp || "envia un solo servicio.").trim(),
-  quoteAddActionLabel: String(pricesPageContent.quoteAddActionLabel || "Agregar a cotizacion").trim(),
+  quoteSingleActionLabel: String(pricesPageContent.quoteSingleActionLabel || "Solicitar solo este").trim(),
+  quoteSingleActionHelp: String(pricesPageContent.quoteSingleActionHelp || "envía un solo servicio.").trim(),
+  quoteAddActionLabel: String(pricesPageContent.quoteAddActionLabel || "Agregar a cotización").trim(),
   quoteAddActionHelp: String(
-    pricesPageContent.quoteAddActionHelp || "guarda varios para mandarlos en un solo mensaje."
+    pricesPageContent.quoteAddActionHelp || "guarda varios para enviarlos en un solo mensaje."
   ).trim(),
   quoteMobileHelp: String(
     pricesPageContent.quoteMobileHelp || "Mientras recorres la lista, tu resumen se queda abajo para no perderlo."
@@ -102,19 +102,19 @@ const pricesPageText = {
     { limite: quoteSelectionLimit }
   ).trim(),
   quoteDisabledCtaLabel: String(pricesPageContent.quoteDisabledCtaLabel || "Selecciona servicios").trim(),
-  quoteContinueCtaLabel: String(pricesPageContent.quoteContinueCtaLabel || "Continuar con seleccion").trim(),
-  quoteMobileCtaLabel: String(pricesPageContent.quoteMobileCtaLabel || "Ir a la agenda").trim(),
+  quoteContinueCtaLabel: String(pricesPageContent.quoteContinueCtaLabel || "Continuar con selección").trim(),
+  quoteMobileCtaLabel: String(pricesPageContent.quoteMobileCtaLabel || "Solicitar servicios").trim(),
   quoteSelectedLabel: String(pricesPageContent.quoteSelectedLabel || "Seleccionados:").trim(),
   quoteSelectedCountSuffix: String(
     pricesPageContent.quoteSelectedCountSuffix || "servicios seleccionados"
   ).trim(),
   quoteTotalLabel: String(pricesPageContent.quoteTotalLabel || "Total aprox.:").trim(),
   quoteEmptyStateText: String(
-    pricesPageContent.quoteEmptyStateText || "Todavia no has elegido servicios."
+    pricesPageContent.quoteEmptyStateText || "Todavía no has elegido servicios."
   ).trim(),
   quoteLimitReachedText: applyTemplate(
     pricesPageContent.quoteLimitReachedTemplate ||
-      "Llegaste al limite de {limite} servicios. Quita uno para agregar otro.",
+      "Llegaste al límite de {limite} servicios. Quita uno para agregar otro.",
     { limite: quoteSelectionLimit }
   ).trim(),
   quoteRemoveLabel: String(pricesPageContent.quoteRemoveLabel || "Quitar").trim(),

@@ -1,481 +1,353 @@
-# Guia para Editores de Contenido
+# Guia para Editores — FumiPro NC
+# Editor Guide — FumiPro NC
 
 Esta guia explica como editar el sitio desde el CMS de Sanity de forma clara, segura y consistente.
+This guide explains how to edit the site from the Sanity CMS clearly, safely and consistently.
 
-La idea principal es simple: cada cambio debe ayudar al paciente a entender que se ofrece, cuanto cuesta aproximadamente, donde esta el negocio y como agendar sin confusion.
+La idea principal: cada cambio debe ayudar al cliente a entender que se ofrece, cuanto cuesta aproximadamente, donde esta el negocio y como solicitar el servicio.
+Main idea: every edit should help the customer understand what is offered, the approximate price, where the business is, and how to request service.
 
-## Reglas rapidas antes de editar
+---
 
-1. Edita primero el contenido, despues revisa como se ve en la web.
-2. Usa textos cortos, claros y profesionales.
-3. No borres documentos que ya se usaron; mejor apaga `Activo`.
-4. Usa siempre las categorias oficiales.
-5. Revisa enlaces, telefonos, fechas y WhatsApp antes de publicar.
-6. Si algo afecta agenda, precios o WhatsApp, prueba un clic real en la web.
+## Reglas rapidas antes de editar / Quick rules before editing
 
-## Categorias oficiales
+1. Edita primero el contenido, despues revisa como se ve en la web. / Edit content first, then check how it looks on the website.
+2. Usa textos cortos, claros y profesionales en ES y EN. / Use short, clear, professional text in both ES and EN.
+3. No borres documentos que ya se usaron; mejor apaga `Activo`. / Don't delete used documents; disable `Active` instead.
+4. Usa siempre las categorias del desplegable. / Always use categories from the dropdown.
+5. Revisa telefonos, WhatsApp y links antes de publicar. / Check phones, WhatsApp and links before publishing.
+6. Si algo afecta solicitudes, precios o WhatsApp, prueba un clic real en la web. / If it affects requests, prices or WhatsApp, test a real click on the website.
 
-Usa estas categorias exactamente como aparecen en el CMS:
+---
 
-- `Podologia`
-- `Psicologia`
-- `Optica`
-- `Quiropractica`
-- `Dentista`
+## Categorias oficiales / Official categories
 
-Por que importa: las categorias conectan servicios, especialistas, precios, promociones, filtros y la pagina `Agenda tu cita`. Si una categoria queda mal, la web puede mostrar contenido en el lugar incorrecto o no precargar datos.
+Usa estas categorias exactamente como aparecen en el desplegable del CMS:
+Use these categories exactly as they appear in the CMS dropdown:
 
-## Orden recomendado de edicion
+- `roedores` — Roedores / Rodents
+- `cucarachas` — Cucarachas / Cockroaches
+- `termitas` — Termitas / Termites
+- `chinches` — Chinches de cama / Bed Bugs
+- `hormigas` — Hormigas / Ants
+- `avispas` — Avispas y abejas / Wasps & Bees
+- `inspeccion` — Inspeccion / Inspection
+- `general` — Fumigacion general / General Fumigation
 
-1. `Configuracion del sitio`
-2. `Contenido comercial`
-3. `Fotos y videos`
-4. `Preguntas frecuentes`
-5. `Contenido legal y avisos`
+Por que importa: las categorias conectan servicios, tecnicos, precios, promociones y filtros. Si una categoria queda mal, la web puede mostrar contenido en el lugar incorrecto.
+Why it matters: categories connect services, technicians, prices, promotions and filters. A wrong category means content shown in the wrong place.
 
-Este orden evita errores porque primero se configuran los datos base del negocio y despues el contenido que depende de esos datos.
+---
 
-## 1) Configuracion del sitio
+## Orden recomendado de edicion / Recommended editing order
 
-Aqui se edita lo que aparece en varias partes del sitio: header, inicio, contacto, ubicacion, redes y pie de pagina.
+1. Configuracion del sitio / Site configuration
+2. Contenido comercial / Commercial content
+3. Galeria / Gallery
+4. Preguntas frecuentes / FAQ
+5. Contenido legal y avisos / Legal content and announcements
 
-### Informacion del negocio
+---
 
-Edita aqui:
+## 1) Configuracion del sitio / Site configuration
 
-- Nombre del negocio.
-- Subtexto del header.
-- Logo del negocio.
-- Horarios visibles.
-- Direccion.
-- Telefono.
-- WhatsApp general.
-- WhatsApp para especialistas.
-- Redes sociales.
-- Mapa de Google.
-- Textos y botones del inicio.
-- Configuracion de resenas de Google.
-- Enlaces del pie de pagina.
+### Informacion del negocio / Business info
 
-Consejos:
+Edita aqui / Edit here:
 
-- En telefonos, usa solo numeros o un formato facil de leer.
-- En WhatsApp, usa formato con lada, por ejemplo `5215512345678`.
-- En enlaces, pega la URL completa cuando sea externa, por ejemplo `https://...`.
-- Para enlaces internos usa rutas como `/privacidad`, `/contacto` o `/agendar`.
-- No uses enlaces raros que empiecen con `//sitio.com`.
+- Nombre del negocio. / Business name.
+- Subtexto del header. / Header subtext.
+- Logo. / Logo.
+- Horarios visibles. / Visible hours.
+- Direccion en Charlotte, NC. / Charlotte, NC address.
+- Telefono. / Phone.
+- WhatsApp general (formato: 17041234567). / General WhatsApp (format: 17041234567).
+- WhatsApp para tecnicos (fallback). / Technician WhatsApp (fallback).
+- Redes sociales. / Social media.
+- Mapa de Google. / Google Maps link.
+- Textos y botones del inicio. / Homepage text and buttons.
+- Configuracion de resenas de Google. / Google reviews configuration.
+- Pie de pagina. / Footer.
 
-### Inicio
+Consejos / Tips:
 
-La pagina de inicio toma datos de `Informacion del negocio` y `Seccion Nosotros`.
+- WhatsApp USA: empieza con 1 + area code, ejemplo `17041234567`. / US WhatsApp: start with 1 + area code, e.g. `17041234567`.
+- Para enlaces internos usa rutas como `/servicios`, `/agendar`, `/privacidad`. / For internal links use paths like `/servicios`, `/agendar`, `/privacidad`.
 
-Edita con esta idea:
+### Seccion Nosotros / About section
 
-- Titulo principal: debe decir rapidamente que hace el negocio.
-- Subtitulo: debe explicar el beneficio para el paciente.
-- Botones: deben llevar a acciones claras como agendar, llamar o ver servicios.
-- Imagen principal: debe ser limpia, confiable y relacionada con atencion real.
-- Promociones en inicio: se muestran solo si estan activas y vigentes.
-- Resenas de Google: se muestran si hay Place ID y API configurados.
+Edita aqui / Edit here:
 
-Buen ejemplo de titulo:
+- Titulo y texto de presentacion (ES). / Title and intro text (ES).
+- Title and intro text (EN).
+- Puntos clave. / Key points.
+- Imagen principal. / Main image.
+- Imagenes de apoyo. / Supporting images.
+- Botones. / Buttons.
 
-`Atencion profesional para el cuidado de tus pies`
+Ejemplo de titulo bueno / Good title example:
 
-Evita:
+`Más de 10 años protegiendo hogares y negocios en Charlotte, NC`
+`Over 10 years protecting homes and businesses in Charlotte, NC`
 
-`Bienvenidos a nuestra pagina oficial`
+Evita / Avoid:
 
-### Seccion Nosotros
+`Bienvenidos a nuestra pagina`
+`Welcome to our page`
 
-Edita aqui:
+---
 
-- Texto del bloque Nosotros en inicio.
-- Texto de la pagina Nosotros.
-- Puntos clave.
-- Imagen principal.
-- Imagenes de apoyo.
-- Botones.
+## 2) Contenido comercial / Commercial content
 
-Consejos:
+### Servicios / Services
 
-- Escribe como si explicaras el negocio a un paciente nuevo.
-- Usa puntos clave concretos: experiencia, higiene, ubicacion, atencion por cita.
-- Evita promesas absolutas como "curamos todo" o "resultados garantizados".
+Edita / Edit:
 
-## 2) Contenido comercial
+- Nombre del servicio (ES + EN). / Service name (ES + EN).
+- Categoria. / Category.
+- Descripcion corta (ES + EN). / Short description (ES + EN).
+- Descripcion larga (ES + EN). / Long description (ES + EN).
+- Que incluye (ES + EN). / What's included (ES + EN).
+- Duracion. / Duration.
+- Precio desde (USD, sin simbolo $). / Price from (USD, no $ sign).
+- Tecnico destino (si aplica). / Technician destination (if applicable).
+- WhatsApp destino (si aplica). / WhatsApp destination (if applicable).
+- Estado `Activo`. / `Active` status.
+- Orden. / Order.
 
-Aqui se edita lo que el paciente compara antes de agendar: servicios, especialistas, precios y promociones.
+Como escribir bien / How to write well:
 
-### Servicios
+- Descripcion corta: una linea clara en ambos idiomas. / Short description: one clear line in both languages.
+- Descripcion larga: explica para quien sirve y que puede esperar el cliente. / Long description: explain who it's for and what the customer can expect.
+- Incluye: puntos concretos, no parrafos largos. / Includes: specific bullet points, not long paragraphs.
+- Duracion: ejemplo `2-3 hrs`. / Duration example: `2-3 hrs`.
+- Precio desde: numero en USD sin simbolo. / Price from: USD number without symbol.
 
-Edita:
+Enrutamiento / Routing:
 
-- Nombre del servicio.
-- Categoria.
-- Descripcion corta.
-- Descripcion larga.
-- Que incluye.
-- Duracion.
-- Precio desde.
-- Especialista destino, si aplica.
-- WhatsApp destino, si aplica.
-- Mensaje de WhatsApp, si aplica.
-- Estado `Activo`.
-- Orden.
+- Si el servicio debe ir a un tecnico especifico, usa `Tecnico destino`. / If the service goes to a specific technician, use `Technician destination`.
+- Si debe ir a un numero sin tecnico, usa `WhatsApp destino`. / If it goes to a number without a technician, use `WhatsApp destination`.
+- Si no llenas destino, va al WhatsApp general. / If no destination is filled, it goes to the general WhatsApp.
 
-Como escribir bien:
+No hagas esto / Don't do this:
 
-- Descripcion corta: una linea clara.
-- Descripcion larga: explica para quien sirve y que puede esperar el paciente.
-- Incluye: usa puntos concretos, no parrafos largos.
-- Duracion: ejemplo `45 min aprox.`.
-- Precio desde: numero en MXN, sin simbolo `$`.
+- No cambies el slug de un servicio ya publicado sin necesidad. / Don't change the slug of a published service unnecessarily.
+- No borres un servicio; apaga `Activo`. / Don't delete a service; turn off `Active`.
+- No pongas categorias inventadas. / Don't use made-up categories.
 
-Agenda y WhatsApp:
+### Tecnicos / Technicians
 
-- Si un servicio debe llegar a un especialista, usa `Especialista destino`.
-- Si debe llegar a un numero especifico sin especialista, usa `WhatsApp destino`.
-- Evita llenar especialista y WhatsApp manual a la vez si no es necesario; para editores es mas claro elegir un solo destino principal.
-- Si no llenas destino, agenda usara el WhatsApp general.
-- Si el paciente agenda varios servicios con destinos distintos, se enviara al WhatsApp general para evitar confusiones.
+Edita / Edit:
 
-No hagas esto:
+- Nombre. / Name.
+- Especialidad (ES + EN). / Specialty (ES + EN).
+- Categoria de especialidad. / Specialty category.
+- Descripcion breve (ES + EN). / Short bio (ES + EN).
+- Areas de atencion (ES + EN). / Focus areas (ES + EN).
+- Foto. / Photo.
+- WhatsApp del tecnico. / Technician's WhatsApp.
+- Mensaje de WhatsApp (ES + EN). / WhatsApp message (ES + EN).
+- Texto de boton. / Button text.
+- Estado `Activo`. / `Active` status.
+- Orden. / Order.
 
-- No cambies el slug de un servicio ya publicado si no es necesario.
-- No borres un servicio con historial; apaga `Activo`.
-- No pongas categorias inventadas.
+Consejos / Tips:
 
-### Especialistas
+- La categoria del tecnico debe coincidir con los servicios que atiende. / Technician's category must match the services they handle.
+- Usa una foto clara, profesional y bien encuadrada. / Use a clear, professional, well-framed photo.
+- Si el tecnico no recibe WhatsApp directo, deja su numero vacio y se usa el fallback configurado. / If the tech doesn't receive direct WhatsApp, leave their number empty and the fallback is used.
 
-Edita:
+Ejemplo de mensaje / Message example:
 
-- Nombre.
-- Especialidad.
-- Categoria de especialidad.
-- Descripcion breve.
-- Areas de atencion.
-- Foto.
-- WhatsApp del especialista.
-- Mensaje de WhatsApp.
-- Texto de boton.
-- Estado `Activo`.
-- Orden.
+`Hola, quiero solicitar {servicio} en {negocio} con {tecnico}. Detalle: {problema}`
+`Hi, I'd like to request {servicio} at {negocio} with {tecnico}. Details: {problema}`
 
-Consejos:
+### Precios / Prices
 
-- La categoria del especialista debe coincidir con los servicios que atiende.
-- Usa una foto clara, profesional y bien encuadrada.
-- Si el especialista no recibe WhatsApp directo, deja su numero vacio y se usara el fallback configurado.
-- El mensaje personalizado puede usar placeholders.
+Edita / Edit:
 
-Ejemplo de mensaje:
+- Servicio relacionado. / Related service.
+- Nombre del precio. / Price name.
+- Precio desde (USD). / Price from (USD).
+- Duracion. / Duration.
+- Nota. / Note.
+- Tecnico destino (si aplica). / Technician destination (if applicable).
+- WhatsApp destino (si aplica). / WhatsApp destination (if applicable).
+- Estado `Activo`. / `Active` status.
+- Orden. / Order.
 
-`Hola, quiero agendar con {especialista} en {negocio}. Mi motivo es: {problema}`
+Consejos / Tips:
 
-### Precios
+- Cada precio debe estar conectado a un servicio. / Every price must be linked to a service.
+- La nota sirve para aclarar condiciones: `Incluye 2 visitas`. / The note clarifies conditions: `Includes 2 visits`.
+- Precio en USD sin simbolo $. / Price in USD without $ symbol.
 
-Edita:
+### Promociones / Promotions
 
-- Servicio relacionado.
-- Nombre del precio.
-- Precio desde.
-- Duracion.
-- Nota.
-- Especialista destino, si aplica.
-- WhatsApp destino, si aplica.
-- Mensaje de WhatsApp, si aplica.
-- Estado `Activo`.
-- Orden.
+Edita / Edit:
 
-Por que es importante relacionar el precio con un servicio:
-
-- La web usa esa relacion para filtrar por categoria.
-- Agenda usa esa relacion para calcular el total aproximado.
-- WhatsApp usa esa relacion para enviar la solicitud al destino correcto.
-
-Consejos:
-
-- Cada precio debe estar conectado a un servicio.
-- Usa nombres faciles de entender, por ejemplo `Corte y limpieza podologica`.
-- La nota sirve para aclarar condiciones: `Puede variar segun valoracion`.
-- Si un precio tiene un destino especial, configuralo aqui.
-- Si seleccionan varios precios en la web, agenda suma el total desde el catalogo del CMS, no desde la URL.
-
-### Promociones
-
-Edita:
-
-- Titulo.
-- Etiqueta corta.
-- Descripcion corta.
-- Descripcion completa.
-- Imagen.
-- Activa.
-- Destacada.
-- Fijada.
-- Fecha de inicio.
-- Fecha de fin.
-- Categorias.
-- Servicios relacionados.
+- Titulo. / Title.
+- Etiqueta corta. / Short label.
+- Descripcion corta. / Short description.
+- Descripcion completa. / Full description.
+- Imagen. / Image.
+- Activa. / Active.
+- Destacada. / Featured.
+- Fijada. / Pinned.
+- Fechas de vigencia. / Validity dates.
+- Categorias de plaga. / Pest categories.
 - Slug.
 
-Reglas de vigencia:
+Reglas de vigencia / Validity rules:
 
-- Usa formato `AAAA-MM-DD`, por ejemplo `2026-03-01`.
-- Si la promocion ya termino, la web no debe mostrar CTA para agendar.
-- Si quieres pausar una promocion antes de que termine, apaga `Activa`.
-- Si quieres que aparezca primero, usa `Fijada`.
-- Si quieres que se vea en bloque principal, usa `Destacada`.
+- Formato `AAAA-MM-DD`, ejemplo `2026-06-30`. / Format `YYYY-MM-DD`, e.g. `2026-06-30`.
+- Si la promo no tiene fecha fija, deja las fechas vacias. / If the promo has no fixed date, leave dates empty.
+- Si quieres pausarla antes de que termine, apaga `Activa`. / To pause it before it ends, turn off `Active`.
+- Si quieres que aparezca primero, usa `Fijada`. / To show it first, use `Pinned`.
 
-Buen ejemplo:
+Buen ejemplo / Good example:
 
-- Titulo: `Consulta podologica de valoracion`
-- Etiqueta: `Nuevo`
-- Descripcion corta: `Agenda una revision inicial y recibe orientacion personalizada.`
+- Titulo: `Inspección gratuita para nuevos clientes` / `Free inspection for new customers`
+- Etiqueta: `Sin costo` / `Free`
+- Descripcion corta: `Primera inspección sin cargo, sin compromiso.` / `First inspection free of charge, no commitment.`
 
-Evita:
+---
 
-- Titulos muy largos.
-- Promociones sin fecha de fin.
-- Imagenes con texto pequeno que no se lee en celular.
+## 3) Galeria / Gallery
 
-## 3) Fotos y videos
+Edita / Edit:
 
-Edita:
+- Titulo (ES o EN). / Title (ES or EN).
+- Categoria de plaga. / Pest category.
+- Tipo de contenido (imagen o video). / Content type (image or video).
+- Imagen o URL de video. / Image or video URL.
+- Destacar en Home. / Feature on Homepage.
+- Estado `Activo`. / `Active` status.
+- Orden. / Order.
 
-- Titulo.
-- Categoria.
-- Tipo de contenido.
-- Imagen o URL de video.
-- Plataforma.
-- Mostrar solo enlace.
-- Imagen previa.
-- Texto del boton.
-- Destacar en Home.
-- Estado `Activo`.
-- Orden.
+Consejos para imagenes / Image tips:
 
-Consejos para imagenes:
+- Fotos de trabajos realizados: antes/despues, equipo aplicando tratamiento, resultado. / Photos of completed work: before/after, equipment in use, results.
+- Evita imagenes borrosas o con demasiado texto superpuesto. / Avoid blurry images or ones with too much overlaid text.
 
-- Usa fotos claras y bien iluminadas.
-- Evita imagenes borrosas o con demasiado texto.
-- Si la foto muestra instalaciones, que se vea limpio y profesional.
+Consejos para videos / Video tips:
 
-Consejos para videos:
+- Pega solo el enlace, no el iframe. / Paste only the URL, not the iframe.
+- Si el video no se puede incrustar, activa `Mostrar solo enlace`. / If the video can't embed, enable `Show link only`.
 
-- Pega solo el enlace, no pegues iframe.
-- Si el video no se puede insertar, activa `Mostrar solo enlace`.
-- Usa imagen previa si el enlace no genera miniatura.
+---
 
-Ejemplos validos:
+## 4) Preguntas frecuentes / FAQ
 
-- `https://www.youtube.com/watch?v=VIDEO_ID`
-- `https://youtu.be/VIDEO_ID`
-- `https://www.tiktok.com/@usuario/video/1234567890`
-- `https://www.facebook.com/pagina/videos/1234567890/`
-- `https://fb.watch/xxxxxx/`
+Edita / Edit:
 
-## 4) Preguntas frecuentes
+- Pregunta (ES + EN). / Question (ES + EN).
+- Respuesta (ES + EN). / Answer (ES + EN).
+- Categoria de plaga. / Pest category.
+- Destacada. / Featured.
+- Estado `Activo`. / `Active` status.
 
-Edita:
+Consejos / Tips:
 
-- Pregunta.
-- Respuesta.
-- Categoria.
-- Destacar pregunta.
-- Estado `Activo`.
-- Orden.
+- Usa preguntas reales que los clientes hacen en llamadas y WhatsApp. / Use real questions customers ask by phone and WhatsApp.
+- Responde corto, claro y sin tecnicismos. / Answer short, clear, without jargon.
+- Destaca las 3-4 preguntas mas frecuentes. / Feature the 3-4 most common questions.
 
-Consejos:
+Buen ejemplo / Good example:
 
-- Usa preguntas reales de pacientes.
-- Responde corto, claro y sin tecnicismos.
-- Si la respuesta depende de valoracion, dilo claramente.
-- No prometas diagnosticos por internet.
+Pregunta ES: `¿Los productos son seguros para mis mascotas?`
+Question EN: `Are the products safe for my pets?`
 
-Buen ejemplo:
+Respuesta ES: `Sí. Usamos productos registrados por la EPA. Pedimos que las mascotas salgan del área 2-4 horas durante el servicio.`
+Answer EN: `Yes. We use EPA-registered products. We ask that pets leave the treated area for 2-4 hours during service.`
 
-Pregunta: `Puedo agendar si tengo dolor en el pie?`
+---
 
-Respuesta: `Si. Agenda una valoracion para revisar el caso y definir el tratamiento adecuado.`
+## 5) Contenido legal y avisos / Legal content and announcements
 
-## 5) Contenido legal y avisos
+### Aviso de privacidad / Privacy notice
 
-### Aviso de privacidad
+- El aviso debe ser texto final, no borrador. / The notice must be final text, not a draft.
+- Si hay duda legal, pide revision antes de publicar. / If there's a legal question, request review before publishing.
 
-Edita:
+### Comunicados / Announcements
 
-- Titulo.
-- Subtitulo.
-- Fecha de actualizacion.
-- Contenido completo.
+- Usa comunicados para avisos temporales: cierre por festivo, nueva zona de cobertura, etc. / Use announcements for temporary notices: holiday closure, new coverage area, etc.
+- Si el comunicado ya no aplica, apaga `Activo`. / If the announcement no longer applies, turn off `Active`.
 
-Importante:
+---
 
-- El aviso debe ser final, no un borrador.
-- No publiques texto tipo "pendiente de revisar".
-- Si hay duda legal, pide revision antes de publicar.
+## Plantillas de WhatsApp / WhatsApp templates
 
-### Comunicados
+Placeholders disponibles / Available placeholders:
 
-Edita:
+- `{servicio}` — nombre del servicio / service name
+- `{tecnico}` — nombre del tecnico / technician name
+- `{negocio}` — nombre del negocio / business name
+- `{problema}` — detalle del cliente / customer detail
 
-- Titulo.
-- Fecha del comunicado.
-- Contenido.
-- Estado `Activo`.
-- Orden.
+Ejemplo correcto / Correct example:
 
-Consejos:
+`Hola, quiero solicitar {servicio} en {negocio}. Detalle: {problema}`
+`Hi, I'd like to request {servicio} at {negocio}. Details: {problema}`
 
-- Usa comunicados para avisos temporales o informativos.
-- Si el comunicado ya no aplica, apaga `Activo`.
+Como se llena `{problema}` / How `{problema}` is filled:
 
-## Plantillas de WhatsApp
+- En la pagina Agendar: toma el texto del campo `Problema o notas`. / On the booking page: takes text from the `Problem or notes` field.
+- En botones rapidos: toma el texto de `Problema por defecto`. / On quick buttons: takes text from `Default problem`.
 
-Puedes usar estos placeholders en mensajes:
+---
 
-- `{servicio}`
-- `{especialista}`
-- `{negocio}`
-- `{problema}`
-
-Tambien se acepta `_____` como alias de `{problema}`.
-
-Ejemplo correcto:
-
-`Hola, quiero agendar {servicio} en {negocio}. Mi motivo es: {problema}`
-
-Ejemplo incorrecto:
-
-`Hola, quiero agendar {servicio} en {negocio}. Mi motivo es: {problema} dolor en el pie`
-
-Por que esta mal: el editor ya escribio el motivo manualmente y el sistema tambien lo va a llenar.
-
-Como se llena `{problema}`:
-
-- En `Agenda tu cita`, toma el texto del campo `Problema o notas`.
-- En botones rapidos, toma el texto de `Problema por defecto para botones rapidos`.
-
-Consejo:
-
-- Si quieres control total, escribe un mensaje completo que empiece con `Hola`.
-- Si solo quieres una frase corta, el sistema arma el formato guiado.
-
-## Como funciona Agenda tu cita
-
-Agenda toma informacion de:
-
-- `Informacion del negocio`: telefonos, mensajes y datos generales.
-- `Servicios`: categorias y destinos.
-- `Especialistas`: filtros y WhatsApp por especialista.
-- `Precios`: servicios, total aproximado y rutas confiables.
-- `Promociones`: categoria o servicio precargado.
-
-Reglas importantes:
-
-- El total aproximado se calcula desde el catalogo del CMS.
-- El WhatsApp destino se resuelve desde datos confiables del CMS.
-- Los parametros publicos de la URL no deben usarse como fuente de verdad para numero de WhatsApp.
-- Si hay varios servicios con destinos distintos, se usa el WhatsApp general.
-- La hora de cierre significa fin de atencion; no debe ofrecerse como hora de inicio.
-
-## Enlaces recomendados
-
-Usa asi:
-
-- Interno: `/agendar`
-- Interno: `/servicios`
-- Interno: `/privacidad`
-- Externo: `https://www.facebook.com/...`
-- Externo: `https://www.google.com/maps/...`
-
-Evita:
-
-- `www.sitio.com` sin `https://`
-- `//sitio.com`
-- Enlaces copiados con espacios al inicio o al final.
-
-## Slugs y URLs
-
-El slug es la parte final de una URL.
-
-Ejemplo:
-
-- Titulo: `Podologia preventiva`
-- Slug: `podologia-preventiva`
-- URL resultante: `/servicios/podologia-preventiva`
-
-Consejos:
-
-- Usa minusculas.
-- Usa guiones.
-- No uses espacios.
-- No cambies slugs publicados sin necesidad.
-
-## Checklist antes de publicar
-
-1. El titulo se entiende rapido.
-2. La categoria es correcta.
-3. El estado `Activo` esta como corresponde.
-4. La imagen se ve bien en celular.
-5. La fecha esta en formato `AAAA-MM-DD`.
-6. El precio no tiene simbolo `$`.
-7. El servicio relacionado esta configurado.
-8. El WhatsApp tiene lada y solo numeros.
-9. Los enlaces abren correctamente.
-10. Probaste en la web el boton relacionado.
-
-## Errores comunes y solucion
-
-### No aparece en la web
-
-- Revisa si `Activo` esta encendido.
-- Revisa si la categoria es correcta.
-- Revisa si el documento fue publicado.
-- Espera a que el sitio se reconstruya si aplica.
-
-### Agenda no precarga bien
-
-- Revisa la categoria del servicio.
-- Revisa que el precio este relacionado con un servicio.
-- Revisa que el especialista tenga categoria compatible.
-
-### El WhatsApp no va al destino esperado
-
-- Revisa primero `Especialista destino`.
-- Revisa despues `WhatsApp destino`.
-- Si hay varios servicios con destinos distintos, es normal que vaya al WhatsApp general.
-- Evita configurar muchos destinos manuales si no son necesarios.
-
-### Una promocion no aparece
-
-- Revisa que `Activa` este encendida.
-- Revisa la fecha de inicio y fin.
-- Si ya vencio, la web la oculta o desactiva su boton.
-
-### Error al borrar
-
-- Puede estar referenciado por otro documento.
-- Mejor apaga `Activo`.
-- Si de verdad debe borrarse, quita primero las referencias.
-
-### Error de calendario
-
-- Recarga el Studio.
-- Verifica formato `AAAA-MM-DD`.
-
-## Tono recomendado
-
-El tono del sitio debe ser:
-
-- Claro.
-- Cercano.
-- Profesional.
-- Tranquilizador.
-- Sin exagerar promesas.
-
-Frase guia:
-
-`Escribe para una persona que quiere resolver una duda y agendar sin batallar.`
+## Checklist antes de publicar / Pre-publish checklist
+
+1. El titulo se entiende rapido en ES y EN. / Title is clear in both ES and EN.
+2. La categoria es correcta (del desplegable). / Category is correct (from dropdown).
+3. El estado `Activo` esta como corresponde. / `Active` status is set correctly.
+4. La imagen se ve bien en celular. / Image looks good on mobile.
+5. Precio en USD sin simbolo $. / Price in USD without $ symbol.
+6. WhatsApp con codigo de pais USA: 1704XXXXXXX. / WhatsApp with US country code: 1704XXXXXXX.
+7. El servicio relacionado esta configurado (en precios). / Related service is set (for prices).
+8. Los enlaces abren correctamente. / Links open correctly.
+9. Probaste en la web el boton relacionado. / You tested the related button on the website.
+
+---
+
+## Errores comunes / Common errors
+
+### No aparece en la web / Not showing on website
+- Revisa si `Activo` esta encendido. / Check if `Active` is ON.
+- Revisa si la categoria es correcta. / Check if category is correct.
+- Espera a que el sitio se reconstruya si aplica. / Wait for the site to rebuild if applicable.
+
+### La solicitud no precarga bien / Request doesn't preload correctly
+- Revisa la categoria del servicio. / Check the service category.
+- Revisa que el precio este relacionado con un servicio. / Check that the price is linked to a service.
+- Revisa que el tecnico tenga categoria compatible. / Check that the technician has a compatible category.
+
+### El WhatsApp no va al destino esperado / Wrong WhatsApp destination
+- Revisa primero `Tecnico destino`. / Check `Technician destination` first.
+- Revisa despues `WhatsApp destino`. / Then check `WhatsApp destination`.
+- Con varios servicios y destinos distintos, va al WhatsApp general. / With multiple services and different destinations, it goes to the general WhatsApp.
+
+### Una promocion no aparece / Promotion not showing
+- Revisa que `Activa` este encendida. / Check that `Active` is ON.
+- Revisa la fecha de inicio y fin. / Check start and end dates.
+
+### Error al borrar / Error when deleting
+- El documento esta referenciado por otro. / The document is referenced by another.
+- Mejor apaga `Activo`. / Better to turn off `Active`.
+
+---
+
+## Tono recomendado / Recommended tone
+
+- Claro. / Clear.
+- Directo. / Direct.
+- Profesional pero cercano. / Professional but approachable.
+- Sin exagerar promesas. / No exaggerated promises.
+- Orientado a resolver el problema del cliente. / Focused on solving the customer's problem.
+
+Frase guia / Guiding phrase:
+
+`Escribe para una persona que quiere resolver una plaga y solicitar servicio sin complicaciones.`
+`Write for someone who wants to solve a pest problem and request service without hassle.`

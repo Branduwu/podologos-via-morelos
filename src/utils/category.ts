@@ -18,9 +18,9 @@ export const CATEGORY_LABELS: Record<string, string> = {
   chinches:   "Chinches de cama",
   hormigas:   "Hormigas",
   avispas:    "Avispas y abejas",
-  inspeccion: "Inspeccion",
-  general:    "Fumigacion general",
-  fumigacion: "Fumigacion general",
+  inspeccion: "Inspección",
+  general:    "Fumigación general",
+  fumigacion: "Fumigación general",
   otros:      "Otros",
 };
 

@@ -12,8 +12,7 @@ import { SafeDeletePromotionAction } from "./actions/safeDeletePromotionAction.j
 import { SafeDeleteSpecialistAction } from "./actions/safeDeleteSpecialistAction.jsx";
 import { SafeDeletePriceItemAction } from "./actions/safeDeletePriceItemAction.jsx";
 
-// IMPORTANTE: Este proyecto usa su propio Sanity project ID separado del de podologos.
-// Crea un nuevo proyecto en https://www.sanity.io/manage y pon el ID en las variables de entorno.
+// Proyecto: FumiPro NC (4nyua0ve) — separado del proyecto Plus Care.
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID || process.env.SANITY_PROJECT_ID || "REEMPLAZA_CON_NUEVO_PROJECT_ID";
 const dataset = process.env.SANITY_STUDIO_DATASET || process.env.SANITY_DATASET || "production";
 

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-label="FumiPro NC logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+  </defs>
+  <rect width="80" height="80" rx="14" fill="url(#bg)"/>
+  <!-- Shield shape -->
+  <path d="M40 12 L62 22 L62 42 C62 55 52 65 40 70 C28 65 18 55 18 42 L18 22 Z" fill="#fff" opacity="0.15"/>
+  <!-- Spray nozzle / fumigation icon -->
+  <rect x="22" y="38" width="20" height="6" rx="3" fill="#fff"/>
+  <rect x="38" y="34" width="6" height="14" rx="3" fill="#fff"/>
+  <rect x="40" y="28" width="14" height="4" rx="2" fill="#fff"/>
+  <!-- Spray dots -->
+  <circle cx="57" cy="24" r="2.5" fill="#fca5a5"/>
+  <circle cx="62" cy="30" r="2" fill="#fca5a5"/>
+  <circle cx="56" cy="32" r="1.5" fill="#fca5a5"/>
+  <!-- Bug legs left -->
+  <line x1="24" y1="38" x2="16" y2="30" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="24" y1="41" x2="15" y2="41" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="24" y1="44" x2="16" y2="52" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- "F" letter subtle -->
+  <text x="40" y="62" font-size="9" font-family="Arial, sans-serif" font-weight="900" fill="#fff" text-anchor="middle" opacity="0.9">FUMI</text>
+</svg>

@@ -1,6 +1,7 @@
-# CMS Podologos Via Morelos
+# CMS FumiPro NC
 
-Studio de Sanity para administrar contenido del sitio.
+Studio de Sanity para administrar contenido del sitio de control de plagas en Charlotte, NC.
+Sanity Studio to manage content for the pest control website in Charlotte, NC.
 
 ## Requisitos
 

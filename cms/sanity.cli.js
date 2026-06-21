@@ -1,6 +1,6 @@
 import {defineCliConfig} from 'sanity/cli'
 
-const projectId = process.env.SANITY_STUDIO_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'yb71w9t5'
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID || process.env.SANITY_PROJECT_ID || '4nyua0ve'
 const dataset = process.env.SANITY_STUDIO_DATASET || process.env.SANITY_DATASET || 'production'
 
 // hostname sin https:// y sin .sanity.studio

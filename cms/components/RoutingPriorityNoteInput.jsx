@@ -21,17 +21,17 @@ export default function RoutingPriorityNoteInput(props) {
           1) <strong>WhatsApp destino (manual)</strong> del {sourceLabel}
         </Text>
         <Text size={1}>
-          2) <strong>Especialista destino (manual)</strong> (si tiene numero)
+          2) <strong>Técnico destino (manual)</strong> (si tiene numero / if it has a number)
         </Text>
         <Text size={1}>
-          3) <strong>WhatsApp general del negocio</strong>
+          3) <strong>WhatsApp general del negocio / Business general WhatsApp</strong>
         </Text>
 
         <Text size={1} muted>
-          Si llenas numero/mensaje manual, ese valor tiene prioridad.
+          Si llenas numero/mensaje manual, ese valor tiene prioridad. / If you fill in a manual number/message, that value takes priority.
         </Text>
         <Text size={1} muted>
-          En cotizacion con varios servicios y destinos distintos (especialista/numero), el envio se unifica al WhatsApp general.
+          En cotizacion con varios servicios y destinos distintos (tecnico/numero), el envio se unifica al WhatsApp general. / In quotes with multiple services and different destinations, the message is sent to the general WhatsApp.
         </Text>
         <Text size={1} muted>
           En esos casos, en Agenda el campo Servicio se muestra como <strong>Variados</strong>.

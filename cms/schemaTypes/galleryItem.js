@@ -53,12 +53,15 @@ export default {
       fieldset: "basic",
       options: {
         list: [
-          { title: "Podologia", value: "podologia" },
-          { title: "Psicologia", value: "psicologia" },
-          { title: "Optica / Optometria", value: "optica" },
-          { title: "Quiropractica", value: "quiropractica" },
-          { title: "Dentista", value: "dentista" },
-          { title: "Instalaciones", value: "instalaciones" },
+          { title: "Roedores / Rodents",             value: "roedores"   },
+          { title: "Cucarachas / Cockroaches",        value: "cucarachas" },
+          { title: "Termitas / Termites",             value: "termitas"   },
+          { title: "Chinches de cama / Bed Bugs",     value: "chinches"   },
+          { title: "Hormigas / Ants",                 value: "hormigas"   },
+          { title: "Avispas y abejas / Wasps & Bees", value: "avispas"    },
+          { title: "Inspeccion / Inspection",         value: "inspeccion" },
+          { title: "General / General",               value: "general"    },
+          { title: "Equipo / Equipment",              value: "equipo"     },
         ],
         layout: "dropdown",
       },
@@ -235,12 +238,15 @@ export default {
     },
     prepare({ title, type, category, media, platform, url, linkOnly, linkPreviewImage }) {
       const categoryMap = {
-        podologia: "Podologia",
-        psicologia: "Psicologia",
-        optica: "Optica/Optometria",
-        quiropractica: "Quiropractica",
-        dentista: "Dentista",
-        instalaciones: "Instalaciones",
+        roedores:   "Roedores",
+        cucarachas: "Cucarachas",
+        termitas:   "Termitas",
+        chinches:   "Chinches de cama",
+        hormigas:   "Hormigas",
+        avispas:    "Avispas y abejas",
+        inspeccion: "Inspección",
+        general:    "General",
+        equipo:     "Equipo",
       };
       const status =
         type !== "video"

@@ -133,7 +133,7 @@
       title: "Texto de apoyo en Inicio",
       type: "text",
       rows: 3,
-      description: "Ejemplo: Mas de 20 anos cuidando la salud de tus pies.",
+      description: "Ejemplo: Mas de 10 anos eliminando plagas en Charlotte, NC.",
       fieldset: "home",
     },
     {
@@ -180,7 +180,7 @@
       type: "string",
       description: "Aqui editas el texto del boton principal.",
       fieldset: "home",
-      initialValue: "Agenda tu cita",
+      initialValue: "Solicitar servicio",
     },
     {
       name: "homePrimaryCtaUrl",
@@ -281,7 +281,7 @@
       name: "locationZoneText",
       title: "Zona para como llegar",
       type: "string",
-      description: "Ejemplo: Sta. Maria Tulpetlac, Ecatepec (sobre Via Morelos).",
+      description: "Ejemplo: South Charlotte, cerca de SouthPark Mall.",
       fieldset: "location",
     },
     {
@@ -332,17 +332,17 @@
     },
     {
       name: "whatsappCitasNumber",
-      title: "WhatsApp general (citas y botones generales)",
+      title: "WhatsApp general (solicitudes y botones generales)",
       type: "string",
       description: "Pega solo numeros, ejemplo 525512345678.",
       fieldset: "contact",
     },
     {
       name: "whatsappSpecialistsNumber",
-      title: "WhatsApp para especialistas (fallback)",
+      title: "WhatsApp para técnicos (fallback)",
       type: "string",
       description:
-        "Numero por defecto para botones de especialistas. Si un especialista tiene su propio numero, ese se usa primero.",
+        "Numero por defecto para botones de tecnicos. Si un tecnico tiene su propio numero, ese se usa primero.",
       fieldset: "contact",
     },
     {
@@ -357,11 +357,11 @@
     },
     {
       name: "whatsappSpecialistsMessage",
-      title: "Mensaje WhatsApp para especialistas (editable)",
+      title: "Mensaje WhatsApp para técnicos (editable)",
       type: "text",
       rows: 3,
       description:
-        "Mensaje base para especialistas. Puedes usar {especialista}, {servicio}, {negocio} y {problema}.",
+        "Mensaje base para tecnicos. Puedes usar {tecnico}, {servicio}, {negocio} y {problema}.",
       fieldset: "contact",
       validation: (R) => R.max(220).warning("Recomendado: maximo 220 caracteres."),
     },
@@ -406,7 +406,7 @@
       type: "string",
       description: "Texto debajo del logo en el pie de pagina.",
       fieldset: "footer",
-      initialValue: "Atencion integral en podologia, psicologia, optica, quiropractica y dentista.",
+      initialValue: "Control de plagas profesional en Charlotte, NC.",
       validation: (R) => R.max(160).warning("Recomendado: maximo 160 caracteres."),
     },
     {
@@ -471,7 +471,7 @@
       type: "string",
       description: "Campo informativo no editable.",
       fieldset: "footer",
-      initialValue: "Proyecto de DANA HR",
+      initialValue: "FumiPro NC · Charlotte, NC",
       readOnly: true,
     },
     {

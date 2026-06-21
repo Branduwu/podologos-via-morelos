@@ -3,11 +3,15 @@
 import { createClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { reportError } from "./reportError.js";
+import * as mock from "./mockData.js";
 
 const sanityProjectId =
   import.meta.env.SANITY_PROJECT_ID ||
   import.meta.env.PUBLIC_SANITY_PROJECT_ID ||
-  "yb71w9t5";
+  "demo";
+
+// When project ID is "demo" or not set, use local mock data
+const DEMO_MODE = !sanityProjectId || sanityProjectId === "demo" || import.meta.env.DEMO_MODE === "true";
 const sanityDataset =
   import.meta.env.SANITY_DATASET ||
   import.meta.env.PUBLIC_SANITY_DATASET ||
@@ -18,6 +22,7 @@ export const sanityClient = createClient({
   dataset: sanityDataset,
   apiVersion: "2025-01-01",
   useCdn: import.meta.env.PROD,
+  token: import.meta.env.SANITY_TOKEN,
 });
 
 const builder = createImageUrlBuilder(sanityClient);
@@ -33,6 +38,7 @@ async function fetchSafe(query, params = {}, fallback = null) {
 }
 
 export async function getServices() {
+  if (DEMO_MODE) return mock.services.map((s) => ({ ...s, slug: { current: s.slug } }));
   return fetchSafe(`*[_type == "service" && (!defined(active) || active == true)]{
     title,
     slug,
@@ -47,6 +53,10 @@ export async function getServices() {
 }
 
 export async function getServiceBySlug(slug) {
+  if (DEMO_MODE) {
+    const s = mock.services.find((item) => item.slug === slug);
+    return s ? { ...s, slug: { current: s.slug } } : null;
+  }
   return fetchSafe(
     `
     *[_type=="service" && slug.current==$slug && (!defined(active) || active == true)][0]{
@@ -68,6 +78,7 @@ export async function getServiceBySlug(slug) {
 }
 
 export async function getPromotions() {
+  if (DEMO_MODE) return mock.promotions;
   return fetchSafe(`*[_type=="promotion" && active==true]|order(pinned desc, startDate desc){
     _id,
     title,
@@ -87,10 +98,12 @@ export async function getPromotions() {
 }
 
 export async function getGallery() {
+  if (DEMO_MODE) return mock.gallery;
   return fetchSafe(`*[_type=="galleryItem" && active==true]|order(order asc, _createdAt desc){ _id, title, category, type, featured, "imageUrl": image.asset->url, platform, url, linkOnly, linkText, "linkPreviewImageUrl": linkPreviewImage.asset->url, order }`, {}, []);
 }
 
 export async function getPrices() {
+  if (DEMO_MODE) return mock.prices;
   return fetchSafe(`*[_type=="priceItem" && active==true]|order(order asc, _createdAt desc){
     _id,
     order,
@@ -110,6 +123,7 @@ export async function getPrices() {
 }
 
 export async function getSpecialists() {
+  if (DEMO_MODE) return mock.specialists;
   return fetchSafe(`*[_type=="specialistProfile" && active==true]|order(order asc, _createdAt desc){
     _id,
     name,
@@ -128,6 +142,7 @@ export async function getSpecialists() {
 }
 
 export async function getFaqs() {
+  if (DEMO_MODE) return mock.faqs;
   return fetchSafe(`*[_type=="faqItem" && active==true]|order(featured desc, category asc, order asc, _createdAt asc){ _id, question, answer, category, featured }`, {}, []);
 }
 
@@ -150,6 +165,7 @@ export async function getSiteAnnouncements() {
 }
 
 export async function getBusinessInfo() {
+  if (DEMO_MODE) return mock.business;
   return fetchSafe(`*[_type=="businessInfo"][0]{
     name, area, address, phone, hoursText, mapsUrl, whatsappCitasNumber,
     whatsappSpecialistsNumber, whatsappGeneralMessage, whatsappSpecialistsMessage, whatsappQuickProblemDefault,
@@ -177,7 +193,8 @@ export async function getBusinessInfo() {
 }
 
 export async function getAboutSection() {
-  return fetchSafe(`*[_type=="aboutSection"]|order(_updatedAt desc)[0]{ title, intro, secondary, keyPoints, specialistsTitle, specialistsSubtitle, servicesTitle, servicesSubtitle, ctaText, ctaUrl, secondaryCtaText, secondaryCtaUrl, "mainImageUrl": mainImage.asset->url, "galleryImageUrls": galleryImages[].asset->url, galleryCarouselIntervalMs }`, {}, null);
+  if (DEMO_MODE) return mock.about;
+  return fetchSafe(`*[_type=="aboutSection"]|order(_updatedAt desc)[0]{ title, titleEn, intro, introEn, secondary, secondaryEn, keyPoints, keyPointsEn, specialistsTitle, specialistsSubtitle, servicesTitle, servicesSubtitle, ctaText, ctaTextEn, ctaUrl, secondaryCtaText, secondaryCtaTextEn, secondaryCtaUrl, "mainImageUrl": mainImage.asset->url, "galleryImageUrls": galleryImages[].asset->url, galleryCarouselIntervalMs }`, {}, null);
 }
 
 export async function getPromotionByPath(pathValue) {
@@ -193,6 +210,9 @@ export async function getPromotionByPath(pathValue) {
 }
 
 export async function getSpecialistByPath(pathValue) {
+  if (DEMO_MODE) {
+    return mock.specialists.find((s) => s.slug === pathValue || s._id === pathValue) || null;
+  }
   return fetchSafe(
     `*[_type=="specialistProfile" && active==true && (slug.current == $value || _id == $value)][0]{
       _id, name, specialty, specialtyCategory, shortBio, focusAreas, ctaText, ctaUrl, useWhatsAppButton, whatsAppNumber, whatsAppMessage,
