@@ -19,9 +19,9 @@ const instagramUrl = safeCmsUrl(cms?.instagramUrl, "");
 const menuTitle = lang === "en" ? t.footer.menu : (cms?.footerMenuTitle || "Menú");
 const siteTitle = lang === "en" ? t.footer.site : (cms?.footerSiteTitle || "Sobre el sitio");
 const privacyLabel = lang === "en" ? t.footer.privacy : (cms?.footerPrivacyLabel || "Aviso de privacidad");
-const privacyUrl = safeCmsUrl(cms?.footerPrivacyUrl, `${pfx}/privacidad`);
+const privacyUrl = safeCmsUrl(cms?.footerPrivacyUrl, `/privacidad`);
 const noticesLabel = lang === "en" ? t.footer.notices : (cms?.footerNoticesLabel || "Comunicados");
-const noticesUrl = safeCmsUrl(cms?.footerNoticesUrl, `${pfx}/comunicados`);
+const noticesUrl = safeCmsUrl(cms?.footerNoticesUrl, `/comunicados`);
 const copyrightText = lang === "en" ? t.footer.rights : (cms?.footerCopyrightText || "Todos los derechos reservados.");
 const footerTagline = lang === "en"
   ? biz.taglineEn

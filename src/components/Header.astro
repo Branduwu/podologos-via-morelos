@@ -2,13 +2,11 @@
 import { getBusinessInfo } from "../lib/sanity.js";
 import ThemeToggle from "./ThemeToggle.astro";
 import { safeCmsUrl } from "../utils/url";
-import { getLangFromUrl, getAlternatePath, useTranslations } from "../i18n/utils";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
 import { business } from "../config/clinic";
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
-const altLang = lang === "es" ? "en" : "es";
-const altPath = getAlternatePath(Astro.url?.pathname || "/", altLang);
 
 const cms = await getBusinessInfo();
 
@@ -143,34 +141,10 @@ const isActive = (href: string) => {
           );
         })}
       </div>
-      <!-- Language switcher -->
-      <a
-        href={altPath}
-        class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-2.5 py-1 text-[12px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-red-700 dark:border-[rgb(80,18,18)] dark:text-[rgb(248,220,220)] dark:hover:bg-[rgb(48,10,10)] dark:hover:text-[rgb(255,152,152)]"
-        aria-label={t.aria.langSwitch}
-        title={t.aria.langSwitch}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        {t.langSwitch}
-      </a>
       <ThemeToggle compact />
     </div>
 
     <div class="ml-auto flex shrink-0 items-center gap-2 md:hidden">
-      <a
-        href={altPath}
-        class="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 dark:border-[rgb(80,18,18)] dark:text-[rgb(248,220,220)]"
-        aria-label={t.aria.langSwitch}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
-        {lang === "es" ? "EN" : "ES"}
-      </a>
       <ThemeToggle compact />
       <button
         type="button"

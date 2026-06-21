@@ -56,10 +56,10 @@ export const business: BusinessConfig = {
   schedule: {
     monday:    { closed: false, open: "08:00", close: "17:00", label: "Lunes",     labelEn: "Monday"    },
     tuesday:   { closed: false, open: "08:00", close: "17:00", label: "Martes",    labelEn: "Tuesday"   },
-    wednesday: { closed: false, open: "08:00", close: "17:00", label: "Miercoles", labelEn: "Wednesday" },
+    wednesday: { closed: false, open: "08:00", close: "17:00", label: "Miércoles", labelEn: "Wednesday" },
     thursday:  { closed: false, open: "08:00", close: "17:00", label: "Jueves",    labelEn: "Thursday"  },
     friday:    { closed: false, open: "08:00", close: "17:00", label: "Viernes",   labelEn: "Friday"    },
-    saturday:  { closed: false, open: "08:00", close: "12:00", label: "Sabado",    labelEn: "Saturday"  },
+    saturday:  { closed: false, open: "08:00", close: "12:00", label: "Sábado",    labelEn: "Saturday"  },
     sunday:    { closed: true,                                  label: "Domingo",   labelEn: "Sunday"    },
   },
   serviceCategories: [
@@ -69,7 +69,7 @@ export const business: BusinessConfig = {
     { key: "chinches",          label: "Chinches de cama",     labelEn: "Bed Bugs"          },
     { key: "hormigas",          label: "Hormigas",             labelEn: "Ants"              },
     { key: "avispas",           label: "Avispas y abejas",     labelEn: "Wasps & Bees"      },
-    { key: "inspeccion",        label: "Inspeccion",           labelEn: "Inspection"        },
+    { key: "inspeccion",        label: "Inspección",           labelEn: "Inspection"        },
     { key: "general",           label: "Fumigacion general",   labelEn: "General Fumigation"},
   ],
   quoteSelectionLimit: 4,
