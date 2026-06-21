@@ -1,9 +1,9 @@
----
+﻿---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getAboutSection, getBusinessInfo, getGallery, getPromotions } from "../lib/sanity.js";
-import { clinic } from "../config/clinic";
+import { business } from "../config/clinic";
 import { getGooglePlaceReviews } from "../lib/googleReviews.js";
 import { normalizeServiceSlug } from "../utils/prefill";
 
@@ -122,7 +122,7 @@ const heroPrimaryCtaText = business?.homePrimaryCtaText || "Solicitar inspecció
 const heroPrimaryCtaUrl = business?.homePrimaryCtaUrl || "/agendar";
 const heroSecondaryCtaText = business?.homeSecondaryCtaText || "Nuestros servicios";
 const heroSecondaryCtaUrl = business?.homeSecondaryCtaUrl || "/servicios";
-const heroServiceChips = clinic.serviceCategories.map((category) => ({
+const heroServiceChips = business.serviceCategories.map((category) => ({
   key: category.key,
   label: category.label,
   href: `/agendar?service=${encodeURIComponent(category.key)}`,
@@ -140,7 +140,7 @@ const googleReviewsSubtitle =
   "Opiniones de clientes reales en Charlotte, NC publicadas en Google Maps.";
 const googleReviewsCtaText = business?.homeGoogleReviewsCtaText || "Ver reseñas en Google";
 const googleReviewsCtaUrl =
-  googleReviews?.googleMapsUrl || business?.mapsUrl || clinic.googleMapsUrl;
+  googleReviews?.googleMapsUrl || business?.mapsUrl || business.googleMapsUrl;
 
 const aboutTitle = about?.title || "Sobre FumiPro NC";
 const aboutIntro =

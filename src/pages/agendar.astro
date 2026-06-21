@@ -1,8 +1,8 @@
----
+﻿---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { clinic } from "../config/clinic";
+import { business } from "../config/clinic";
 import { getBusinessInfo, getPrices, getServices, getSpecialists } from "../lib/sanity.js";
 import { getPrefillFromUrl, normalizeServiceSlug } from "../utils/prefill";
 import { safeCmsUrl } from "../utils/url";
@@ -46,7 +46,7 @@ const prices: PriceRow[] = (await getPrices()) || [];
 
 const generalWhatsappNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
-  clinic.whatsappNumber
+  business.whatsappNumber
 );
 const specialistsWhatsappNumber = resolveWhatsAppNumber(
   business?.whatsappSpecialistsNumber,
@@ -55,18 +55,18 @@ const specialistsWhatsappNumber = resolveWhatsAppNumber(
 const generalWhatsAppMessage = String(business?.whatsappGeneralMessage || "").trim();
 const specialistsWhatsAppMessage = String(business?.whatsappSpecialistsMessage || "").trim();
 const quickProblemDefault = String(business?.whatsappQuickProblemDefault || "").trim();
-const address = business?.address || clinic.address;
-const phoneDisplay = business?.phone || clinic.phoneDisplay;
-const phoneHref = `tel:${String(phoneDisplay).replace(/\D/g, "") || clinic.phoneTel}`;
+const address = business?.address || business.address;
+const phoneDisplay = business?.phone || business.phoneDisplay;
+const phoneHref = `tel:${String(phoneDisplay).replace(/\D/g, "") || business.phoneTel}`;
 const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sábado 10:00 a 16:00 · Domingo cerrado";
-const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
+const mapsUrl = safeCmsUrl(business?.mapsUrl, business.googleMapsUrl);
 const hasQuickWhatsApp = Boolean(generalWhatsappNumber);
 const quickWhatsAppHref = hasQuickWhatsApp
   ? `https://wa.me/${generalWhatsappNumber}?text=${encodeURIComponent("Hola, quiero informacion para solicitar un servicio de fumigacion.")}`
   : "/contacto";
 
 const categoryMap = new Map<string, string>();
-for (const c of clinic.serviceCategories) categoryMap.set(c.key, c.label);
+for (const c of business.serviceCategories) categoryMap.set(c.key, c.label);
 for (const s of services) {
   const key = normalizeServiceSlug(s?.category || "");
   if (key && !categoryMap.has(key)) categoryMap.set(key, s?.category || key);
@@ -90,7 +90,7 @@ const specialistOptions = specialists
   }));
 
 const prefill = getPrefillFromUrl(Astro.url);
-const quoteSelectionLimit = Math.max(1, Number(clinic.quoteSelectionLimit || 6));
+const quoteSelectionLimit = Math.max(1, Number(business.quoteSelectionLimit || 6));
 const rawPrefillServices = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteSelectionLimit) : [];
 
 const priceCatalog = prices.map((item) => ({
@@ -450,7 +450,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
     generalWhatsAppMessage,
     specialistsWhatsAppMessage,
     quickProblemDefault,
-    businessName: business?.name || clinic.name,
+    businessName: business?.name || business.name,
     pageText: bookingPageText,
     serviceOptions,
     specialistOptions,

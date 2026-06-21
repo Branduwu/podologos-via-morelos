@@ -1,5 +1,5 @@
----
-import { clinic } from "../config/clinic";
+﻿---
+import { business } from "../config/clinic";
 import {
   buildContactMessage,
   buildWhatsAppUrl,
@@ -24,16 +24,16 @@ type Props = {
 };
 
 const { business } = Astro.props as Props;
-const address = business?.address || clinic.address;
-const phoneDisplay = business?.phone || clinic.phoneDisplay;
-const phoneTel = String(phoneDisplay).replace(/\D/g, "") || clinic.phoneTel;
+const address = business?.address || business.address;
+const phoneDisplay = business?.phone || business.phoneDisplay;
+const phoneTel = String(phoneDisplay).replace(/\D/g, "") || business.phoneTel;
 const waNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
-  clinic.whatsappNumber
+  business.whatsappNumber
 );
-const mapsUrl = safeCmsUrl(business?.mapsUrl, clinic.googleMapsUrl);
+const mapsUrl = safeCmsUrl(business?.mapsUrl, business.googleMapsUrl);
 
-const serviceChips = clinic.serviceCategories.map((item) => ({
+const serviceChips = business.serviceCategories.map((item) => ({
   key: item.key,
   label: item.label,
 }));
@@ -55,7 +55,7 @@ const primaryWaMessage = buildContactMessage({
     business?.whatsappGeneralMessage,
     "Hola, me gustaría agendar en {negocio} y conocer sus servicios. ¿Me pueden orientar?",
     {
-      business: business?.name || clinic.name,
+      business: business?.name || business.name,
       problem: business?.whatsappQuickProblemDefault || "",
     }
   ),
@@ -102,7 +102,7 @@ const socialItems = [
               "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
               {
                 service: chip.label,
-                business: business?.name || clinic.name,
+                business: business?.name || business.name,
                 problem: business?.whatsappQuickProblemDefault || "",
               }
             ),

@@ -1,4 +1,4 @@
-import { clinic, type DayKey } from "../config/clinic";
+﻿import { business, type DayKey } from "../config/clinic";
 
 const DAY_KEYS: DayKey[] = [
   "sunday",
@@ -53,7 +53,7 @@ export function isWithinSchedule(dateValue: string, timeValue: string): boolean 
   if (Number.isNaN(date.getTime())) return false;
 
   const dayKey = DAY_KEYS[date.getDay()];
-  const daySchedule = clinic.schedule[dayKey];
+  const daySchedule = business.schedule[dayKey];
   if (!daySchedule || daySchedule.closed || !daySchedule.open || !daySchedule.close) return false;
 
   const [h, m] = timeValue.split(":").map((p) => Number(p));

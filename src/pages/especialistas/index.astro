@@ -1,8 +1,8 @@
----
+﻿---
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { clinic } from "../../config/clinic";
+import { business } from "../../config/clinic";
 import { getBusinessInfo, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
 import { normalizeCategory } from "../../utils/category";
@@ -69,7 +69,7 @@ function specialistCategoryFromData(specialist: Specialist) {
 
 const generalWaNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
-  clinic.whatsappNumber
+  business.whatsappNumber
 );
 const specialistsWaNumber = resolveWhatsAppNumber(
   business?.whatsappSpecialistsNumber,
@@ -100,7 +100,7 @@ function specialistWhatsAppHref(specialist: Specialist) {
     {
       specialist: specialist.name || "este especialista",
       service: specialist.specialty || "Especialista",
-      business: business?.name || clinic.name,
+      business: business?.name || business.name,
       problem: business?.whatsappQuickProblemDefault || "",
     }
   );

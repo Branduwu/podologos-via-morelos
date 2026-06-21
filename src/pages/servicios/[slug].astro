@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { clinic } from "../../config/clinic";
+import { business as businessConfig } from "../../config/clinic";
 import { getBusinessInfo, getServiceBySlug, getSpecialists, sanityClient } from "../../lib/sanity.js";
 import { reportError } from "../../lib/reportError.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
@@ -100,14 +100,14 @@ let waHref = service?.title
           "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
           {
             service: service.title,
-            business: business?.name || clinic.name,
+            business: business?.name || businessConfig.name,
             problem: business?.whatsappQuickProblemDefault || "",
           }
         ),
       }),
       resolveWhatsAppNumber(
         business?.whatsappCitasNumber,
-        clinic.whatsappNumber
+        businessConfig.whatsappNumber
       )
     )
   : "";
@@ -135,12 +135,12 @@ const waTargetNumber = useSpecialistWa
       routingSpecialist?.whatsAppNumber,
       business?.whatsappSpecialistsNumber,
       business?.whatsappCitasNumber,
-      clinic.whatsappNumber
+      businessConfig.whatsappNumber
     )
   : resolveWhatsAppNumber(
       manualServiceWaNumber,
       business?.whatsappCitasNumber,
-      clinic.whatsappNumber
+      businessConfig.whatsappNumber
     );
 const waReasonTemplate = manualServiceWaMessage
   ? manualServiceWaMessage
@@ -161,7 +161,7 @@ if (service?.title) {
         {
           specialist: routingSpecialist?.name || "técnico disponible",
           service: service.title,
-          business: business?.name || clinic.name,
+          business: business?.name || businessConfig.name,
           problem: business?.whatsappQuickProblemDefault || "",
         }
       ),

@@ -1,4 +1,4 @@
-import { clinic } from "../config/clinic";
+﻿import { business } from "../config/clinic";
 import { formatDateMX, sanitizePhone } from "./validation";
 
 export type AppointmentMessageInput = {
@@ -67,7 +67,7 @@ function applyTemplate(
   values: WhatsAppTemplateValues = {}
 ): string {
   let output = String(template || "");
-  const fallbackBusiness = String(values.business || clinic.name || "nuestro negocio").trim();
+  const fallbackBusiness = String(values.business || business.name || "nuestro negocio").trim();
   const replacements: Record<string, string> = {
     especialista: String(values.specialist || "este técnico").trim(),
     servicio: String(values.service || "General").trim(),
@@ -127,7 +127,7 @@ export function buildAppointmentMessage(data: AppointmentMessageInput): string {
   const intro =
     data.introMessage && String(data.introMessage).trim()
       ? sanitizeDirectReason(data.introMessage)
-      : `Hola, quiero solicitar un servicio de fumigacion en ${clinic.name}.`;
+      : `Hola, quiero solicitar un servicio de fumigacion en ${business.name}.`;
   const specialist = data.specialist?.trim() || "Sin preferencia";
   const dateText = data.date ? formatDateMX(data.date) : "Por definir";
   const timeText = data.time || data.shift || "Por definir";
@@ -187,7 +187,7 @@ export function buildContactMessage(data: ContactMessageInput): string {
   const intro =
     data.introMessage && String(data.introMessage).trim()
       ? sanitizeDirectReason(data.introMessage)
-      : `Hola, me gustaria solicitar un servicio de fumigacion en ${clinic.name}.`;
+      : `Hola, me gustaria solicitar un servicio de fumigacion en ${business.name}.`;
 
   const lines = [intro];
   if (service && service.toLowerCase() !== "general") {
@@ -202,7 +202,7 @@ export function buildContactMessage(data: ContactMessageInput): string {
 
 export function buildWhatsAppUrl(
   message: string,
-  whatsappNumber: string = clinic.whatsappNumber
+  whatsappNumber: string = business.whatsappNumber
 ): string {
   const clean = sanitizePhone(whatsappNumber);
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`;
