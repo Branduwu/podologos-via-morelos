@@ -1,5 +1,5 @@
 ﻿---
-import { business } from "../config/clinic";
+import { business as businessConfig } from "../config/clinic";
 import {
   buildContactMessage,
   buildWhatsAppUrl,
@@ -24,16 +24,16 @@ type Props = {
 };
 
 const { business } = Astro.props as Props;
-const address = business?.address || business.address;
-const phoneDisplay = business?.phone || business.phoneDisplay;
-const phoneTel = String(phoneDisplay).replace(/\D/g, "") || business.phoneTel;
+const address = business?.address || businessConfig.address;
+const phoneDisplay = business?.phone || businessConfig.phoneDisplay;
+const phoneTel = String(phoneDisplay).replace(/\D/g, "") || businessConfig.phoneTel;
 const waNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
-  business.whatsappNumber
+  businessConfig.whatsappNumber
 );
-const mapsUrl = safeCmsUrl(business?.mapsUrl, business.googleMapsUrl);
+const mapsUrl = safeCmsUrl(business?.mapsUrl, businessConfig.googleMapsUrl);
 
-const serviceChips = business.serviceCategories.map((item) => ({
+const serviceChips = businessConfig.serviceCategories.map((item: { key: string; label: string }) => ({
   key: item.key,
   label: item.label,
 }));
@@ -55,7 +55,7 @@ const primaryWaMessage = buildContactMessage({
     business?.whatsappGeneralMessage,
     "Hola, me gustaría agendar en {negocio} y conocer sus servicios. ¿Me pueden orientar?",
     {
-      business: business?.name || business.name,
+      business: business?.name || businessConfig.name,
       problem: business?.whatsappQuickProblemDefault || "",
     }
   ),
@@ -93,7 +93,7 @@ const socialItems = [
   <div class="mt-5 rounded-2xl border border-slate-200/90 bg-slate-50/90 p-4 dark:border-slate-800 dark:bg-slate-900/60">
     <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Selecciona servicio</p>
     <div class="mt-2 flex flex-wrap gap-2">
-      {serviceChips.map((chip) => {
+      {serviceChips.map((chip: { key: string; label: string }) => {
         const href = buildWhatsAppUrl(
           buildContactMessage({
             service: chip.label,
@@ -102,7 +102,7 @@ const socialItems = [
               "Hola, me interesa el servicio de {servicio} en {negocio}. ¿Tienen disponibilidad?",
               {
                 service: chip.label,
-                business: business?.name || business.name,
+                business: business?.name || businessConfig.name,
                 problem: business?.whatsappQuickProblemDefault || "",
               }
             ),

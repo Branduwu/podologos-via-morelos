@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getBusinessInfo, getPrices } from "../lib/sanity.js";
-import { business } from "../config/clinic";
+import { business as businessConfig } from "../config/clinic";
 import { normalizeCategory } from "../utils/category";
 
 type PriceRow = {
@@ -20,7 +20,7 @@ type PriceRow = {
 
 const business = await getBusinessInfo();
 const prices: PriceRow[] = (await getPrices()) || [];
-const quoteSelectionLimit = Math.max(1, Number(business.quoteSelectionLimit || 6));
+const quoteSelectionLimit = Math.max(1, Number(businessConfig.quoteSelectionLimit || 6));
 const noneSpecialistValue = "__none__";
 
 const priceCategories = [

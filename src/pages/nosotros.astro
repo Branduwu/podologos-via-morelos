@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { business } from "../config/clinic";
+import { business as businessConfig } from "../config/clinic";
 import { getAboutSection, getBusinessInfo, getServices, getSpecialists } from "../lib/sanity.js";
 import {
   buildContactMessage,
@@ -47,7 +47,7 @@ const specialists: Specialist[] = (await getSpecialists()) || [];
 
 const generalWaNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
-  business.whatsappNumber
+  businessConfig.whatsappNumber
 );
 const specialistsWaNumber = resolveWhatsAppNumber(
   business?.whatsappSpecialistsNumber,

@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { business } from "../../config/clinic";
+import { business as businessConfig } from "../../config/clinic";
 import { getBusinessInfo, getServices, getSpecialists } from "../../lib/sanity.js";
 import { normalizeServiceSlug } from "../../utils/prefill";
 import {
@@ -42,7 +42,7 @@ const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const generalWaNumber = resolveWhatsAppNumber(
   business?.whatsappCitasNumber,
-  business.whatsappNumber
+  businessConfig.whatsappNumber
 );
 const specialistsWaNumber = resolveWhatsAppNumber(
   business?.whatsappSpecialistsNumber,

@@ -3,7 +3,7 @@ import "../styles/global.css";
 import { business } from "../config/clinic";
 import { getBusinessInfo } from "../lib/sanity.js";
 import { resolveWhatsAppNumber } from "../utils/whatsapp";
-import { getLangFromUrl, getAlternateLinks, useTranslations } from "../i18n/utils";
+import { getLangFromUrl, getAlternateLinks } from "../i18n/utils";
 
 const {
   title: titleProp,
@@ -12,7 +12,6 @@ const {
 } = Astro.props;
 
 const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
 
 const cms = await getBusinessInfo();
 const waNumber = resolveWhatsAppNumber(

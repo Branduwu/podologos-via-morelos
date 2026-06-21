@@ -10,7 +10,6 @@ const galleryItems = (await getGallery()) || [];
 const businessName = cms?.name || business.name;
 
 const photos = galleryItems.filter((it: any) => it.type !== "video");
-const videos = galleryItems.filter((it: any) => it.type === "video");
 ---
 
 <Layout
