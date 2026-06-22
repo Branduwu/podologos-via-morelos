@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import { getBusinessInfo, getPrices } from "../lib/sanity.js";
 import { business as businessConfig } from "../config/clinic";
 import { normalizeCategory } from "../utils/category";
+import { moneyUSD } from "../utils/format";
 
 type PriceRow = {
   _id?: string;
@@ -135,20 +136,6 @@ const pricesPageText = {
   ).trim(),
 };
 
-function moneyUSD(n: number | string | null | undefined) {
-  const num = Number(n);
-  if (Number.isNaN(num) || num <= 0) return "-";
-  try {
-    return new Intl.NumberFormat("es-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(num);
-  } catch {
-    return `$${num}`;
-  }
-}
-
 function resolvePreferredSpecialistSlug(price: PriceRow) {
   return String(price.leadSpecialistSlug || "").trim();
 }
@@ -170,8 +157,8 @@ function buildAgendarHref(price: PriceRow) {
 ---
 
 <Layout
-  title={`Precios | ${business?.name || "FumiPro NC Charlotte"}`}
-  description={`Consulta los precios de todos nuestros servicios de fumigación en ${business?.area || "Charlotte, NC"}. Cotiza tratamientos y agenda tu inspección en línea.`}
+  title={`Precios | ${business?.name || businessConfig.name}`}
+  description={`Consulta los precios de nuestros servicios en ${business?.area || "Tulpetlac, Ecatepec"}. Cotiza y agenda tu cita en línea.`}
 >
   <Header />
 

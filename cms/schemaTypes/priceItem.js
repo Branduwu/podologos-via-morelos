@@ -19,7 +19,17 @@ export default {
       to: [{ type: "service" }],
       description: "Relaciona este precio con un servicio existente. Si desactivas un servicio, revisa este campo.",
       fieldset: "basic",
-      validation: (R) => R.required().error("Debes seleccionar un servicio."),
+      validation: (R) =>
+        R.required()
+          .error("Debes seleccionar un servicio.")
+          .custom(async (ref, context) => {
+            if (!ref?._ref) return true;
+            const doc = await context.getClient({ apiVersion: "2025-01-01" }).getDocument(ref._ref);
+            if (doc && doc.active === false) {
+              return "El servicio vinculado está desactivado. Este precio no se mostrará correctamente en la web.";
+            }
+            return true;
+          }),
     },
     {
       name: "title",

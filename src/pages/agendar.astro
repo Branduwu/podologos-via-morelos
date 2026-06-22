@@ -62,7 +62,7 @@ const hoursText = business?.hoursText || "L-V 10:00 a 18:00 · Sábado 10:00 a 1
 const mapsUrl = safeCmsUrl(business?.mapsUrl, businessConfig.googleMapsUrl);
 const hasQuickWhatsApp = Boolean(generalWhatsappNumber);
 const quickWhatsAppHref = hasQuickWhatsApp
-  ? `https://wa.me/${generalWhatsappNumber}?text=${encodeURIComponent("Hola, quiero informacion para solicitar un servicio de fumigacion.")}`
+  ? `https://wa.me/${generalWhatsappNumber}?text=${encodeURIComponent(`Hola, me gustaría agendar una cita en ${business?.name || businessConfig.name}. ¿Me pueden orientar?`)}`
   : "/contacto";
 
 const categoryMap = new Map<string, string>();
@@ -305,7 +305,7 @@ if (!validServiceKeys.has(resolvedPrefillService)) {
 
               <div class="grid gap-2">
                 <label class="text-[0.95rem] font-semibold" for="phone">Teléfono</label>
-                <input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="numeric" class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950" placeholder="Ej. 55 2538 8683" />
+                <input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="numeric" aria-describedby="phone-error" class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950" placeholder="Ej. 55 2538 8683" />
                 <p class="text-xs text-slate-500 dark:text-slate-400">Acepta espacios o guiones. Se valida entre 10 y 15 dígitos y evita números inválidos.</p>
                 <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Ingresa un teléfono válido de 10 a 15 dígitos.</p>
               </div>

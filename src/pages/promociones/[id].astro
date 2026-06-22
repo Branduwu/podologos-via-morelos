@@ -97,11 +97,7 @@ const promoCurrentStatus = promotionStatus(promo.startDate, promo.endDate);
         <div class="flex w-full items-center justify-center bg-slate-50 p-4 dark:bg-slate-900 md:p-6">
           <img src={promo.imageUrl} alt={promo.title} class="max-h-[42rem] w-auto max-w-full object-contain" loading="eager" data-fallback-src="/placeholder.jpg" />
         </div>
-      ) : (
-        <div class="flex h-72 items-center justify-center bg-slate-100 text-sm text-slate-500 dark:bg-slate-900 dark:text-slate-400">
-          Sin imagen de promocion
-        </div>
-      )}
+      ) : null}
 
       <div class="p-6 md:p-8">
         <div class="flex flex-wrap items-center gap-2">
