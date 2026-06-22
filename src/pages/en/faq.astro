@@ -31,48 +31,88 @@ const categoryLabels: Record<string, string> = {
   fumigacion: "General Fumigation",
 };
 
-const grouped = Object.entries(categoryLabels).map(([key, label]) => ({
-  key,
-  label,
-  items: faqs.filter((f) => f.category === key),
-})).filter((g) => g.items.length > 0);
+const grouped = Object.entries(categoryLabels)
+  .map(([key, label]) => ({
+    key,
+    label,
+    items: faqs.filter((f) => f.category === key),
+  }))
+  .filter((g) => g.items.length > 0);
+
+const allFaqs = faqs.map((f) => ({
+  ...f,
+  q: (f.questionEn || f.question || "").trim(),
+  a: (f.answerEn || f.answer || "").trim(),
+  catLabel: categoryLabels[f.category || ""] || "General",
+}));
 ---
 
 <Layout
   title={`FAQ – ${businessName}`}
-  description="Frequently asked questions about pest control services in Charlotte, NC."
+  description={`Frequently asked questions about pest control services in Charlotte, NC from ${businessName}.`}
 >
   <Header />
   <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
+    <section class="bg-gradient-to-b from-red-50 to-white py-14 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
       <div class="mx-auto max-w-3xl px-4">
         <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">FAQ</p>
-        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">
+        <h1 class="mt-2 font-['Manrope',sans-serif] text-4xl font-extrabold text-slate-900 dark:text-white">
           Frequently Asked Questions
         </h1>
         <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
           Common questions about our pest control services in Charlotte, NC.
         </p>
+
+        <!-- Search -->
+        <div class="relative mt-6">
+          <input
+            id="faq-search-en"
+            type="search"
+            placeholder="Search questions..."
+            class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(60,18,18)] dark:bg-[rgb(28,5,5)] dark:text-white dark:placeholder-[rgb(200,130,130)]"
+          />
+          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+          </svg>
+        </div>
+
+        <!-- Category filters -->
+        <div class="mt-4 flex flex-wrap gap-2" id="faq-filters-en">
+          <button type="button" data-faq-filter="all" class="category-chip category-chip--active">All</button>
+          {grouped.map((g) => (
+            <button type="button" data-faq-filter={g.key} class="category-chip">{g.label}</button>
+          ))}
+        </div>
       </div>
     </section>
 
     <section class="pb-20">
       <div class="mx-auto max-w-3xl px-4 space-y-10">
+
         {grouped.length === 0 ? (
           <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No FAQ items available yet.</p>
         ) : (
           grouped.map((group) => (
-            <div data-reveal>
-              <h2 class="font-['Manrope',sans-serif] mb-4 text-xl font-bold text-slate-900 dark:text-white">{group.label}</h2>
+            <div data-faq-group={group.key} data-reveal>
+              <h2 class="mb-4 font-['Manrope',sans-serif] text-xl font-bold text-slate-900 dark:text-white">{group.label}</h2>
               <div class="space-y-3">
                 {group.items.map((faq) => {
-                  const q = faq.questionEn || faq.question || "";
-                  const a = faq.answerEn || faq.answer || "";
+                  const q = (faq.questionEn || faq.question || "").trim();
+                  const a = (faq.answerEn || faq.answer || "").trim();
                   return (
-                    <details class="rounded-xl border border-slate-100 bg-white dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                      <summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">
-                        {q}
+                    <details
+                      data-faq-item
+                      data-faq-category={group.key}
+                      data-faq-q={q.toLowerCase()}
+                      class="rounded-xl border border-slate-100 bg-white open:shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]"
+                      open={faq.featured}
+                    >
+                      <summary class="flex cursor-pointer items-start justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900 marker:content-[''] dark:text-white">
+                        <span>{q}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron mt-0.5 h-4 w-4 shrink-0 text-red-500 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
                       </summary>
                       <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:border-[rgb(36,58,86)] dark:text-[rgb(245,210,210)]">
                         {a}
@@ -84,9 +124,69 @@ const grouped = Object.entries(categoryLabels).map(([key, label]) => ({
             </div>
           ))
         )}
+
+        <div id="faq-no-results-en" class="hidden rounded-2xl border border-slate-100 bg-white p-8 text-center dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
+          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No matching questions found.</p>
+          <a href="/en/contacto" class="mt-4 inline-block text-sm font-semibold text-red-700 hover:underline dark:text-red-400">Contact us directly →</a>
+        </div>
+
       </div>
     </section>
 
   </main>
   <Footer />
 </Layout>
+
+<style>
+  details[open] .faq-chevron { transform: rotate(180deg); }
+</style>
+
+<script is:inline>
+  (() => {
+    const searchInput = document.getElementById("faq-search-en");
+    const filterBtns = Array.from(document.querySelectorAll("[data-faq-filter]"));
+    const items = Array.from(document.querySelectorAll("[data-faq-item]"));
+    const groups = Array.from(document.querySelectorAll("[data-faq-group]"));
+    const noResults = document.getElementById("faq-no-results-en");
+
+    let activeCategory = "all";
+    let searchQuery = "";
+
+    const applyFilters = () => {
+      let visible = 0;
+      items.forEach((item) => {
+        const cat = item.getAttribute("data-faq-category") || "";
+        const q = item.getAttribute("data-faq-q") || "";
+        const catOk = activeCategory === "all" || cat === activeCategory;
+        const searchOk = !searchQuery || q.includes(searchQuery);
+        const show = catOk && searchOk;
+        item.classList.toggle("hidden", !show);
+        if (show) visible++;
+      });
+
+      groups.forEach((group) => {
+        const key = group.getAttribute("data-faq-group") || "";
+        const groupItems = items.filter((i) => i.getAttribute("data-faq-category") === key);
+        const anyVisible = groupItems.some((i) => !i.classList.contains("hidden"));
+        group.classList.toggle("hidden", !anyVisible);
+      });
+
+      if (noResults) noResults.classList.toggle("hidden", visible > 0);
+    };
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCategory = btn.getAttribute("data-faq-filter") || "all";
+        filterBtns.forEach((b) => b.classList.toggle("category-chip--active", b === btn));
+        applyFilters();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        searchQuery = searchInput.value.toLowerCase().trim();
+        applyFilters();
+      });
+    }
+  })();
+</script>

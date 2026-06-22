@@ -16,7 +16,7 @@ type Technician = {
   shortBioEn?: string;
   focusAreas?: string[];
   focusAreasEn?: string[];
-  photo?: string;
+  photoUrl?: string;
   ctaText?: string;
   ctaTextEn?: string;
   ctaUrl?: string;
@@ -75,12 +75,13 @@ const getSlug = (t: Technician) =>
               const isExternal = ctaHref.startsWith("https://wa.me");
               return (
                 <div class="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                  {tech.photo ? (
+                  {tech.photoUrl ? (
                     <img
-                      src={tech.photo}
+                      src={tech.photoUrl}
                       alt={tech.name || "Technician"}
                       class="h-48 w-full rounded-t-2xl object-cover"
                       loading="lazy"
+                      data-fallback-src="/placeholder.jpg"
                     />
                   ) : (
                     <div class="flex h-48 w-full items-center justify-center rounded-t-2xl bg-red-100 dark:bg-[rgb(24,6,6)]">
