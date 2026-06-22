@@ -41,8 +41,10 @@ export async function getServices() {
   if (DEMO_MODE) return mock.services.map((s) => ({ ...s, slug: { current: s.slug } }));
   return fetchSafe(`*[_type == "service" && (!defined(active) || active == true)]{
     title,
+    titleEn,
     slug,
     short,
+    shortEn,
     priceFrom,
     duration,
     category,

@@ -2,62 +2,208 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
+import VideoEmbed from "../../components/VideoEmbed.astro";
 import { getBusinessInfo, getGallery } from "../../lib/sanity.js";
 import { business } from "../../config/clinic";
 
-const cms = await getBusinessInfo();
-const galleryItems = (await getGallery()) || [];
-const businessName = cms?.name || business.name;
+type GalleryItem = {
+  _id?: string;
+  title: string;
+  category: string;
+  type: "image" | "video";
+  imageUrl?: string;
+  platform?: "youtube" | "tiktok" | "facebook";
+  url?: string;
+  linkOnly?: boolean;
+  linkText?: string;
+  linkPreviewImageUrl?: string;
+};
 
-const photos = galleryItems.filter((it: any) => it.type !== "video");
+const cms = await getBusinessInfo();
+const businessName = cms?.name || business.name;
+const itemsRaw = (await getGallery()) || [];
+
+const items: GalleryItem[] = itemsRaw.map((it: Partial<GalleryItem>, idx: number) => ({
+  ...it,
+  _id: it._id || `item-${idx}`,
+  category: (it.category || "otros").toLowerCase(),
+  type: (it.type || (it.imageUrl ? "image" : "video")) as "image" | "video",
+  title: it.title || "Gallery item",
+}));
+
+const images = items.filter((it) => it.type === "image");
+const videos = items.filter((it) => it.type === "video");
+const youtubeVideos = videos.filter((it) => it.platform === "youtube");
+const tiktokVideos  = videos.filter((it) => it.platform === "tiktok");
+const facebookVideos= videos.filter((it) => it.platform === "facebook");
+
+const mediaFilters = [
+  { key: "all",      label: "All"      },
+  { key: "image",    label: "Photos"   },
+  { key: "youtube",  label: "YouTube"  },
+  { key: "tiktok",   label: "TikTok"   },
+  { key: "facebook", label: "Facebook" },
+];
 ---
 
 <Layout
   title={`Gallery – ${businessName}`}
-  description={`See our pest control work in Charlotte, NC. Before and after photos from ${businessName}.`}
+  description={`Photos and videos of our pest control work in Charlotte, NC. See results from ${businessName}.`}
 >
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-6xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Our work</p>
-        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">Gallery</h1>
-        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          Before and after photos from our pest control treatments in Charlotte, NC.
-        </p>
+  <main id="contenido-principal" class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Gallery</h1>
+    <p class="mt-2 text-slate-800 dark:text-slate-200">
+      Photos and videos of our pest control services and results.
+    </p>
+
+    <div class="mt-6">
+      <div class="flex flex-wrap gap-2" data-media-filters>
+        {mediaFilters.map((filter) => (
+          <button
+            type="button"
+            data-media-filter={filter.key}
+            aria-pressed={filter.key === "all" ? "true" : "false"}
+            class={`category-chip text-sm ${filter.key === "all" ? "category-chip--active" : ""}`}
+          >
+            {filter.label}
+          </button>
+        ))}
       </div>
-    </section>
+    </div>
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-6xl px-4">
-        {galleryItems.length === 0 ? (
-          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">Gallery coming soon.</p>
-        ) : (
-          <>
-            {photos.length > 0 && (
-              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-reveal>
-                {photos.map((item: any) => (
-                  <div class="overflow-hidden rounded-xl border border-slate-100 bg-white dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                    <img
-                      src={item.imageUrl || "/placeholder.jpg"}
-                      alt={item.title || "Gallery image"}
-                      class="h-52 w-full object-cover"
-                      loading="lazy"
-                      data-fallback-src="/placeholder.jpg"
-                    />
-                    {item.title && (
-                      <p class="px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-[rgb(248,220,220)]">{item.title}</p>
-                    )}
-                  </div>
-                ))}
+    {items.length === 0 && (
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        Photos of our work coming soon. Contact us for more information.
+      </div>
+    )}
+
+    <section id="imagenes" class="mt-10" data-media-section="image">
+      <h2 class="text-xl font-semibold">Photos</h2>
+      {images.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Photos coming soon.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
+          {images.map((it) => (
+            <article data-gallery-item data-media-type="image" class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
               </div>
-            )}
-          </>
-        )}
-      </div>
+              {it.imageUrl ? (
+                <img class="aspect-[4/3] w-full object-cover" src={it.imageUrl} alt={it.title} loading="lazy" data-fallback-src="/placeholder.jpg" />
+              ) : null}
+            </article>
+          ))}
+        </div>
+      )}
     </section>
 
+    <section id="youtube" class="mt-12" data-media-section="youtube">
+      <h2 class="text-xl font-semibold">YouTube Videos</h2>
+      {youtubeVideos.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">YouTube videos coming soon.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
+          {youtubeVideos.map((it) => (
+            <article data-gallery-item data-media-type="youtube" class="self-start overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+              </div>
+              <div class="px-4 pb-4">
+                <VideoEmbed platform={it.platform} url={it.url} title={it.title} linkOnly={it.linkOnly} linkText={it.linkText} previewImage={it.linkPreviewImageUrl} />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section id="tiktok" class="mt-12" data-media-section="tiktok">
+      <h2 class="text-xl font-semibold">TikTok Videos</h2>
+      {tiktokVideos.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">TikTok videos coming soon.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
+          {tiktokVideos.map((it) => (
+            <article data-gallery-item data-media-type="tiktok" class="self-start overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+              </div>
+              <div class="px-4 pb-4">
+                <VideoEmbed platform={it.platform} url={it.url} title={it.title} linkOnly={it.linkOnly} linkText={it.linkText} previewImage={it.linkPreviewImageUrl} />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section id="facebook" class="mt-12" data-media-section="facebook">
+      <h2 class="text-xl font-semibold">Facebook Videos</h2>
+      {facebookVideos.length === 0 ? (
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Facebook videos coming soon.</p>
+      ) : (
+        <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-section-grid>
+          {facebookVideos.map((it) => (
+            <article data-gallery-item data-media-type="facebook" class="self-start overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
+              <div class="p-4">
+                <p class="text-sm font-semibold">{it.title}</p>
+              </div>
+              <div class="px-4 pb-4">
+                <VideoEmbed platform={it.platform} url={it.url} title={it.title} linkOnly={it.linkOnly} linkText={it.linkText} previewImage={it.linkPreviewImageUrl} />
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
   </main>
+
   <Footer />
 </Layout>
+
+<script is:inline>
+  (() => {
+    const mediaButtons = Array.from(document.querySelectorAll("[data-media-filter]"));
+    const items = Array.from(document.querySelectorAll("[data-gallery-item]"));
+    const sections = Array.from(document.querySelectorAll("[data-media-section]"));
+    if (!mediaButtons.length || !sections.length) return;
+
+    let activeMedia = "all";
+
+    const setActiveStyle = (buttons, activeValue, attrName) => {
+      buttons.forEach((button) => {
+        const isActive = button.getAttribute(attrName) === activeValue;
+        button.classList.toggle("category-chip--active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    };
+
+    const applyFilters = () => {
+      items.forEach((item) => {
+        const mediaType = item.getAttribute("data-media-type") || "";
+        item.classList.toggle("hidden", !(activeMedia === "all" || mediaType === activeMedia));
+      });
+      sections.forEach((section) => {
+        const sectionMedia = section.getAttribute("data-media-section") || "";
+        section.classList.toggle("hidden", !(activeMedia === "all" || sectionMedia === activeMedia));
+      });
+    };
+
+    mediaButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.getAttribute("data-media-filter") || "all";
+        activeMedia = value;
+        setActiveStyle(mediaButtons, activeMedia, "data-media-filter");
+        applyFilters();
+        const targetId = value === "all" ? "imagenes" : value;
+        const target = document.getElementById(targetId);
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    setActiveStyle(mediaButtons, activeMedia, "data-media-filter");
+    applyFilters();
+  })();
+</script>
