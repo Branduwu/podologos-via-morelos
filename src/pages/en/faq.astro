@@ -3,24 +3,24 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { getBusinessInfo, getFaqs } from "../../lib/sanity.js";
-import { business } from "../../config/clinic";
+import { normalizeCategory } from "../../utils/category";
 
-type FaqItem = {
-  _id?: string;
-  question?: string;
-  questionEn?: string;
-  answer?: string;
-  answerEn?: string;
-  category?: string;
-  featured?: boolean;
-};
+const business = await getBusinessInfo();
+const faqs = (await getFaqs()) || [];
 
-const cms = await getBusinessInfo();
-const faqs: FaqItem[] = (await getFaqs()) || [];
-const businessName = cms?.name || business.name;
+const categories = [
+  { key: "all",       label: "All" },
+  { key: "roedores",  label: "Rodents" },
+  { key: "cucarachas",label: "Cockroaches" },
+  { key: "termitas",  label: "Termites" },
+  { key: "chinches",  label: "Bed Bugs" },
+  { key: "hormigas",  label: "Ants" },
+  { key: "avispas",   label: "Wasps & Bees" },
+  { key: "inspeccion",label: "Inspection" },
+  { key: "general",   label: "General" },
+];
 
-const categoryLabels: Record<string, string> = {
-  general:    "General",
+const categoryLabelEn: Record<string, string> = {
   roedores:   "Rodents",
   cucarachas: "Cockroaches",
   termitas:   "Termites",
@@ -28,165 +28,130 @@ const categoryLabels: Record<string, string> = {
   hormigas:   "Ants",
   avispas:    "Wasps & Bees",
   inspeccion: "Inspection",
-  fumigacion: "General Fumigation",
+  general:    "General",
 };
-
-const grouped = Object.entries(categoryLabels)
-  .map(([key, label]) => ({
-    key,
-    label,
-    items: faqs.filter((f) => f.category === key),
-  }))
-  .filter((g) => g.items.length > 0);
-
-const allFaqs = faqs.map((f) => ({
-  ...f,
-  q: (f.questionEn || f.question || "").trim(),
-  a: (f.answerEn || f.answer || "").trim(),
-  catLabel: categoryLabels[f.category || ""] || "General",
-}));
 ---
 
-<Layout
-  title={`FAQ – ${businessName}`}
-  description={`Frequently asked questions about pest control services in Charlotte, NC from ${businessName}.`}
->
+<Layout title={`FAQ | ${business?.name || "FumiPro NC"}`}>
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-14 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-3xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">FAQ</p>
-        <h1 class="mt-2 font-['Manrope',sans-serif] text-4xl font-extrabold text-slate-900 dark:text-white">
-          Frequently Asked Questions
-        </h1>
-        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          Common questions about our pest control services in Charlotte, NC.
-        </p>
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <header class="rounded-3xl border border-red-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
+      <h1 class="type-section-title">Frequently asked questions</h1>
+      <p class="type-section-subtitle mt-2 text-slate-600 dark:text-slate-300">We answer the most common questions about our pest control services in Charlotte, NC.</p>
 
-        <!-- Search -->
-        <div class="relative mt-6">
+      <div class="mt-5 grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
+        <label class="relative block">
+          <span class="sr-only">Search question</span>
           <input
-            id="faq-search-en"
+            id="faq-search"
             type="search"
-            placeholder="Search questions..."
-            class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(60,18,18)] dark:bg-[rgb(28,5,5)] dark:text-white dark:placeholder-[rgb(200,130,130)]"
+            placeholder="Search by keyword..."
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none ring-red-300 focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
-          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
-          </svg>
-        </div>
+        </label>
 
-        <!-- Category filters -->
-        <div class="mt-4 flex flex-wrap gap-2" id="faq-filters-en">
-          <button type="button" data-faq-filter="all" class="category-chip category-chip--active">All</button>
-          {grouped.map((g) => (
-            <button type="button" data-faq-filter={g.key} class="category-chip">{g.label}</button>
+        <div class="flex flex-wrap gap-2" id="faq-filters">
+          {categories.map((cat) => (
+            <button
+              type="button"
+              data-filter={cat.key}
+              aria-pressed={cat.key === "all" ? "true" : "false"}
+              class={`category-chip text-xs ${cat.key === "all" ? "category-chip--active" : ""}`}
+            >
+              {cat.label}
+            </button>
           ))}
         </div>
       </div>
-    </section>
+    </header>
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-3xl px-4 space-y-10">
-
-        {grouped.length === 0 ? (
-          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No FAQ items available yet.</p>
-        ) : (
-          grouped.map((group) => (
-            <div data-faq-group={group.key} data-reveal>
-              <h2 class="mb-4 font-['Manrope',sans-serif] text-xl font-bold text-slate-900 dark:text-white">{group.label}</h2>
-              <div class="space-y-3">
-                {group.items.map((faq) => {
-                  const q = (faq.questionEn || faq.question || "").trim();
-                  const a = (faq.answerEn || faq.answer || "").trim();
-                  return (
-                    <details
-                      data-faq-item
-                      data-faq-category={group.key}
-                      data-faq-q={q.toLowerCase()}
-                      class="rounded-xl border border-slate-100 bg-white open:shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]"
-                      open={faq.featured}
-                    >
-                      <summary class="flex cursor-pointer items-start justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900 marker:content-[''] dark:text-white">
-                        <span>{q}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="faq-chevron mt-0.5 h-4 w-4 shrink-0 text-red-500 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                      </summary>
-                      <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:border-[rgb(36,58,86)] dark:text-[rgb(245,210,210)]">
-                        {a}
-                      </div>
-                    </details>
-                  );
-                })}
-              </div>
-            </div>
-          ))
-        )}
-
-        <div id="faq-no-results-en" class="hidden rounded-2xl border border-slate-100 bg-white p-8 text-center dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No matching questions found.</p>
-          <a href="/en/contacto" class="mt-4 inline-block text-sm font-semibold text-red-700 hover:underline dark:text-red-400">Contact us directly →</a>
-        </div>
-
+    {faqs.length === 0 ? (
+      <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        No questions published yet. You can add them in CMS &gt; FAQ.
       </div>
-    </section>
+    ) : (
+      <section class="mt-6 space-y-3" id="faq-list">
+        {faqs.map((item: { _id?: string; question?: string; questionEn?: string; answer?: string; answerEn?: string; category?: string; featured?: boolean }) => {
+          const q = item.questionEn || item.question || "";
+          const a = item.answerEn || item.answer || "";
+          const cat = normalizeCategory(item.category) || "general";
+          const catLabel = categoryLabelEn[cat] || "General";
+          return (
+            <article
+              class="faq-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition dark:border-slate-800 dark:bg-slate-950"
+              data-faq-card
+              data-category={cat}
+              data-search={`${q} ${a}`.toLowerCase()}
+            >
+              <div class="px-4 py-4 text-left">
+                <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-semibold text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                  {catLabel}
+                </span>
+                {item.featured && (
+                  <span class="ml-2 inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                    Featured
+                  </span>
+                )}
+                <h2 class="type-faq-question mt-2 text-slate-900 dark:text-slate-100">{q || "Question"}</h2>
+                <p class="type-faq-answer mt-3 text-slate-700 dark:text-slate-300">{a || "Answer pending."}</p>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+    )}
 
+    <p id="faq-empty" class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+      No questions found with that filter. Try a different keyword or category.
+    </p>
   </main>
+
   <Footer />
 </Layout>
 
-<style>
-  details[open] .faq-chevron { transform: rotate(180deg); }
-</style>
-
 <script is:inline>
-  (() => {
-    const searchInput = document.getElementById("faq-search-en");
-    const filterBtns = Array.from(document.querySelectorAll("[data-faq-filter]"));
-    const items = Array.from(document.querySelectorAll("[data-faq-item]"));
-    const groups = Array.from(document.querySelectorAll("[data-faq-group]"));
-    const noResults = document.getElementById("faq-no-results-en");
+  const searchInput = document.getElementById("faq-search");
+  const filterButtons = Array.from(document.querySelectorAll("[data-filter]"));
+  const cards = Array.from(document.querySelectorAll("[data-faq-card]"));
+  const emptyState = document.getElementById("faq-empty");
+  let activeFilter = "all";
 
-    let activeCategory = "all";
-    let searchQuery = "";
+  const updateFiltersUI = () => {
+    filterButtons.forEach((btn) => {
+      const isActive = btn.dataset.filter === activeFilter;
+      btn.classList.toggle("category-chip--active", isActive);
+      btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+  };
 
-    const applyFilters = () => {
-      let visible = 0;
-      items.forEach((item) => {
-        const cat = item.getAttribute("data-faq-category") || "";
-        const q = item.getAttribute("data-faq-q") || "";
-        const catOk = activeCategory === "all" || cat === activeCategory;
-        const searchOk = !searchQuery || q.includes(searchQuery);
-        const show = catOk && searchOk;
-        item.classList.toggle("hidden", !show);
-        if (show) visible++;
-      });
+  const applyFilters = () => {
+    const term = (searchInput?.value || "").trim().toLowerCase();
+    let visibleCount = 0;
 
-      groups.forEach((group) => {
-        const key = group.getAttribute("data-faq-group") || "";
-        const groupItems = items.filter((i) => i.getAttribute("data-faq-category") === key);
-        const anyVisible = groupItems.some((i) => !i.classList.contains("hidden"));
-        group.classList.toggle("hidden", !anyVisible);
-      });
-
-      if (noResults) noResults.classList.toggle("hidden", visible > 0);
-    };
-
-    filterBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        activeCategory = btn.getAttribute("data-faq-filter") || "all";
-        filterBtns.forEach((b) => b.classList.toggle("category-chip--active", b === btn));
-        applyFilters();
-      });
+    cards.forEach((card) => {
+      const category = card.dataset.category || "general";
+      const haystack = card.dataset.search || "";
+      const matchCategory = activeFilter === "all" || category === activeFilter;
+      const matchSearch = !term || haystack.includes(term);
+      const visible = matchCategory && matchSearch;
+      card.classList.toggle("hidden", !visible);
+      if (visible) visibleCount += 1;
     });
 
-    if (searchInput) {
-      searchInput.addEventListener("input", () => {
-        searchQuery = searchInput.value.toLowerCase().trim();
-        applyFilters();
-      });
-    }
-  })();
+    if (emptyState) emptyState.classList.toggle("hidden", visibleCount > 0);
+  };
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeFilter = btn.dataset.filter || "all";
+      updateFiltersUI();
+      applyFilters();
+    });
+  });
+
+  if (searchInput) searchInput.addEventListener("input", applyFilters);
+
+  updateFiltersUI();
+  applyFilters();
 </script>

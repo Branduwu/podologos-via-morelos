@@ -51,14 +51,14 @@ const captureCases: CaptureCase[] = [
   },
   {
     name: "agendar desktop",
-    route: "/agendar?service=podologia",
+    route: "/agendar?service=roedores",
     fileName: "ux-agendar-desktop.png",
     viewport: { width: 1440, height: 2200 },
     readySelector: "#appointment-form",
   },
   {
     name: "agendar mobile",
-    route: "/agendar?service=podologia",
+    route: "/agendar?service=roedores",
     fileName: "ux-agendar-mobile.png",
     viewport: { width: 430, height: 2200 },
     readySelector: "#appointment-form",

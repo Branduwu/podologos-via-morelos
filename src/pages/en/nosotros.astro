@@ -2,176 +2,380 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { getBusinessInfo, getAboutSection, getSpecialists, getServices } from "../../lib/sanity.js";
 import { business as businessConfig } from "../../config/clinic";
-import { resolveWhatsAppNumber } from "../../utils/whatsapp";
-const cms = await getBusinessInfo();
-const about = await getAboutSection();
-const technicians = (await getSpecialists()) || [];
+import { getAboutSection, getBusinessInfo, getServices, getSpecialists } from "../../lib/sanity.js";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../utils/whatsapp";
+
+type AboutSection = {
+  title?: string;
+  titleEn?: string;
+  intro?: string;
+  introEn?: string;
+  secondary?: string;
+  secondaryEn?: string;
+  keyPoints?: string[];
+  keyPointsEn?: string[];
+  specialistsTitle?: string;
+  specialistsTitleEn?: string;
+  specialistsSubtitle?: string;
+  specialistsSubtitleEn?: string;
+  servicesTitle?: string;
+  servicesTitleEn?: string;
+  servicesSubtitle?: string;
+  servicesSubtitleEn?: string;
+  mainImageUrl?: string;
+  galleryImageUrls?: string[];
+  galleryCarouselIntervalMs?: number;
+};
+
+type Specialist = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  specialtyEn?: string;
+  shortBio?: string;
+  shortBioEn?: string;
+  focusAreas?: string[];
+  focusAreasEn?: string[];
+  ctaText?: string;
+  ctaTextEn?: string;
+  ctaUrl?: string;
+  useWhatsAppButton?: boolean;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+  photoUrl?: string;
+};
+
+const business = await getBusinessInfo();
+const about: AboutSection | null = await getAboutSection();
 const services = (await getServices()) || [];
-const businessName = cms?.name || businessConfig.name;
-const waFallback = resolveWhatsAppNumber(cms?.whatsappSpecialistsNumber, businessConfig.whatsappNumber);
+const specialists: Specialist[] = (await getSpecialists()) || [];
 
-const intro = about?.introEn || about?.intro ||
-  `${businessName} is a professional pest control company serving Charlotte, NC and surrounding areas.`;
-const secondary = about?.secondaryEn || about?.secondary ||
-  "Our team of licensed technicians uses proven, safe treatments to eliminate pests and keep them away for good.";
-const keyPoints: string[] = Array.isArray(about?.keyPointsEn) && about.keyPointsEn.length
-  ? about.keyPointsEn.filter(Boolean)
+const generalWaNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  businessConfig.whatsappNumber
+);
+const specialistsWaNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWaNumber
+);
+
+const title = about?.titleEn || about?.title || `About ${business?.name || "FumiPro NC"}`;
+const intro =
+  about?.introEn ||
+  about?.intro ||
+  `We are a pest control company in Charlotte, NC with fast response, certified technicians, and guaranteed results on every treatment.`;
+const secondary =
+  about?.secondaryEn ||
+  about?.secondary ||
+  "We eliminate rodents, cockroaches, termites, bed bugs, ants, and wasps using safe, proven, certified methods to protect your family and pets.";
+const mainImage =
+  about?.mainImageUrl ||
+  "https://images.unsplash.com/photo-1601615588175-d81f02cbef0a?auto=format&fit=crop&w=1400&q=80";
+const points = Array.isArray(about?.keyPointsEn) && about.keyPointsEn.length
+  ? about.keyPointsEn.filter(Boolean).slice(0, 8)
   : Array.isArray(about?.keyPoints)
-    ? about.keyPoints.filter(Boolean)
-    : [
-        "Licensed & insured technicians",
-        "EPA-registered products",
-        "Same-day service available",
-        "Serving Charlotte, NC area",
-      ];
-const mainImage = about?.mainImageUrl || "";
+    ? about.keyPoints.filter(Boolean).slice(0, 8)
+    : [];
+const gallery = Array.isArray(about?.galleryImageUrls) ? about.galleryImageUrls.filter(Boolean).slice(0, 6) : [];
+const galleryAutoplayMsRaw = Number(about?.galleryCarouselIntervalMs);
+const galleryAutoplayMs =
+  Number.isFinite(galleryAutoplayMsRaw) && galleryAutoplayMsRaw >= 1200 && galleryAutoplayMsRaw <= 10000
+    ? Math.round(galleryAutoplayMsRaw)
+    : 2200;
+const specialistsTitle = about?.specialistsTitleEn || "Our Technicians";
+const specialistsSubtitle =
+  about?.specialistsSubtitleEn ||
+  "Meet the certified technicians who protect your home or business in Charlotte, NC.";
+const servicesTitle = about?.servicesTitleEn || "Pest Control Services";
+const servicesSubtitle = about?.servicesSubtitleEn || "Professional treatments for all types of pests with guaranteed results.";
 
-const getSlug = (s: any) =>
-  typeof s.slug === "string" ? s.slug : s.slug?.current || "";
+function specialistLink(specialist: Specialist) {
+  const shouldUseWhatsApp = specialist.useWhatsAppButton !== false;
+  const waNumber = resolveWhatsAppNumber(specialist?.whatsAppNumber, specialistsWaNumber);
+
+  if (shouldUseWhatsApp && waNumber) {
+    const customReasonRaw = String(specialist.whatsAppMessage || "").trim();
+    const reason = resolveWhatsAppReason(
+      customReasonRaw || business?.whatsappSpecialistsMessage,
+      "Hi, I'd like to schedule with {especialista} at {negocio}. Do you have availability?",
+      {
+        specialist: specialist.name || "this technician",
+        service: specialist.specialtyEn || specialist.specialty || "Technician",
+        business: business?.name || businessConfig.name,
+        problem: business?.whatsappQuickProblemDefault || "",
+      }
+    );
+    return buildWhatsAppUrl(
+      buildContactMessage({
+        service: specialist.specialtyEn || specialist.specialty || "Technician",
+        reason,
+      }),
+      waNumber
+    );
+  }
+  return specialist.ctaUrl || "/en/agendar";
+}
+
+function specialistUsesWhatsApp(specialist: Specialist) {
+  const waNumber = resolveWhatsAppNumber(specialist?.whatsAppNumber, specialistsWaNumber);
+  return specialist.useWhatsAppButton !== false && Boolean(waNumber);
+}
+
+function specialistProfileHref(specialist: Specialist) {
+  return `/en/especialistas/${encodeURIComponent((specialist.slug || specialist._id || "").trim())}`;
+}
 ---
 
 <Layout
-  title={`About Us – ${businessName}`}
-  description={`Learn about ${businessName}, a professional pest control company in Charlotte, NC.`}
+  title={`About Us | ${business?.name || "FumiPro NC"}`}
+  description={`Meet the team at ${business?.name || "FumiPro NC"}. Certified pest control company in ${business?.area || "Charlotte, NC"}.`}
 >
   <Header />
-  <main id="contenido-principal">
 
-    <!-- Hero -->
-    <section class="bg-gradient-to-b from-red-50 to-white py-14 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-5xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Who we are</p>
-        <h1 class="mt-2 font-['Manrope',sans-serif] text-4xl font-extrabold text-slate-900 sm:text-5xl dark:text-white">
-          About FumiPro NC
-        </h1>
-        <div class="mt-6 grid gap-8 lg:grid-cols-[1fr_auto]">
-          <div>
-            <p class="text-lg leading-relaxed text-slate-700 dark:text-[rgb(248,220,220)]">{intro}</p>
-            {secondary && (
-              <p class="mt-4 text-base leading-relaxed text-slate-600 dark:text-[rgb(245,200,200)]">{secondary}</p>
-            )}
-            <div class="mt-8 flex flex-wrap gap-3">
-              <a href="/en/agendar" class="btn-base btn-primary">Request service</a>
-              <a href="/en/servicios" class="btn-base btn-secondary">Our services</a>
-            </div>
-          </div>
-          {mainImage && (
-            <img
-              src={mainImage}
-              alt={businessName}
-              class="h-64 w-full rounded-2xl object-cover lg:h-72 lg:w-80"
-              loading="eager"
-              data-fallback-src="/placeholder.jpg"
-            />
-          )}
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <section class="card-surface grid gap-8 rounded-3xl p-8 md:grid-cols-[1.1fr,0.9fr] md:items-center">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">Who we are</p>
+        <h1 class="mt-2 text-4xl font-bold tracking-tight md:text-5xl">{title}</h1>
+        <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{intro}</p>
+        <p class="mt-4 text-lg text-slate-700 dark:text-slate-300">{secondary}</p>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="btn-base btn-primary" href="/en/agendar">Request service</a>
+          <a class="btn-base btn-secondary" href="/en/servicios">Our services</a>
         </div>
+      </div>
+
+      <div>
+        <img class="h-80 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-lg md:h-[31rem] dark:ring-slate-700" src={mainImage} alt="Team and service" loading="eager" />
       </div>
     </section>
 
-    <!-- Why choose us -->
-    {keyPoints.length > 0 && (
-      <section class="border-t border-slate-100 bg-white py-12 dark:border-[rgb(36,10,10)] dark:bg-[rgb(26,5,5)]">
-        <div class="mx-auto max-w-5xl px-4">
-          <h2 class="text-xl font-bold text-slate-900 dark:text-white">Why choose us</h2>
-          <div class="mt-6 grid gap-3 sm:grid-cols-2">
-            {keyPoints.map((point: string) => (
-              <div class="flex items-start gap-2.5 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-[rgb(36,10,10)] dark:bg-[rgb(28,6,6)]">
-                <span class="mt-0.5 shrink-0 text-red-500">✓</span>
-                <span class="text-sm font-medium text-slate-700 dark:text-[rgb(248,220,220)]">{point}</span>
+    {points.length > 0 && (
+      <section class="card-surface mt-8 rounded-3xl p-6">
+        <h2 class="text-2xl font-bold tracking-tight">Why choose us</h2>
+        <ul class="mt-4 grid gap-3 text-base text-slate-700 sm:grid-cols-2 dark:text-slate-300">
+          {points.map((point) => (
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>{point}</span></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="card-surface mt-8 rounded-3xl p-6">
+      <h2 class="text-2xl font-bold tracking-tight">{specialistsTitle}</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialistsSubtitle}</p>
+
+      {specialists.length === 0 ? (
+        <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Technician profiles coming soon.
+        </div>
+      ) : (
+        <div class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {specialists.map((specialist) => (
+            <article class="card-surface overflow-hidden rounded-2xl transition hover:-translate-y-0.5 hover:shadow-lg">
+              <img
+                class="h-52 w-full object-cover ring-1 ring-slate-200/70 transition duration-300 hover:opacity-95 dark:ring-slate-700/70"
+                src={specialist.photoUrl || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1000&q=80"}
+                alt={specialist.name || "Technician"}
+                loading="lazy"
+              />
+              <div class="p-4">
+                <p class="text-lg font-bold">{specialist.name || "Technician"}</p>
+                <p class="mt-1 text-sm font-semibold text-red-700 dark:text-red-300">{specialist.specialtyEn || specialist.specialty || "Specialty"}</p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{specialist.shortBioEn || specialist.shortBio || "Profile available soon."}</p>
+
+                {Array.isArray(specialist.focusAreasEn || specialist.focusAreas) && (specialist.focusAreasEn || specialist.focusAreas || []).length > 0 && (
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    {(specialist.focusAreasEn || specialist.focusAreas || []).slice(0, 4).map((area) => (
+                      <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-300">{area}</span>
+                    ))}
+                  </div>
+                )}
+
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                  <a
+                    class="btn-base btn-primary w-full"
+                    href={specialistLink(specialist)}
+                    target={specialistUsesWhatsApp(specialist) ? "_blank" : undefined}
+                    rel={specialistUsesWhatsApp(specialist) ? "noopener noreferrer" : undefined}
+                  >
+                    {specialist.ctaTextEn || specialist.ctaText || "Schedule"}
+                  </a>
+                  <a
+                    class="btn-base btn-secondary w-full"
+                    href={specialistProfileHref(specialist)}
+                  >
+                    Profile
+                  </a>
+                </div>
               </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="card-surface mt-8 rounded-3xl p-6">
+      <h2 class="text-2xl font-bold tracking-tight">{servicesTitle}</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{servicesSubtitle}</p>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {services.map((service: { title?: string; titleEn?: string; short?: string; shortEn?: string }) => (
+          <article class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-base font-semibold">{service.titleEn || service.title || "Service"}</p>
+            {(service.shortEn || service.short) && <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">{service.shortEn || service.short}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
+
+    {gallery.length > 0 && (
+      <section
+        class="mt-8"
+        data-about-page-gallery-carousel
+        data-about-page-gallery-autoplay-ms={String(galleryAutoplayMs)}
+      >
+        <h2 class="text-2xl font-bold tracking-tight">Our facilities</h2>
+        <div class="relative mt-4">
+          <button
+            type="button"
+            data-about-page-gallery-prev
+            aria-label="Previous"
+            class={`absolute left-1 top-1/2 z-20 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white sm:left-2 md:left-3 md:h-10 md:w-10 md:text-xl lg:-left-10 xl:-left-14 dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900 ${gallery.length > 1 ? "" : "hidden"}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button
+            type="button"
+            data-about-page-gallery-next
+            aria-label="Next"
+            class={`absolute right-1 top-1/2 z-20 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg text-slate-700 shadow-sm transition hover:scale-105 hover:bg-white sm:right-2 md:right-3 md:h-10 md:w-10 md:text-xl lg:-right-10 xl:-right-14 dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100 dark:hover:bg-slate-900 ${gallery.length > 1 ? "" : "hidden"}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
+          </button>
+
+          <div data-about-page-gallery-track class="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
+            {gallery.map((img, idx) => (
+              <article data-about-page-gallery-item={idx} class="min-w-[88%] snap-start overflow-hidden rounded-2xl bg-white sm:min-w-[64%] md:min-w-[48%] lg:min-w-[34%] dark:bg-slate-950">
+                <img class="h-52 w-full rounded-2xl object-cover ring-1 ring-slate-200 transition duration-300 hover:shadow-md dark:ring-slate-700" src={img} alt={`Photo ${idx + 1}`} loading="lazy" />
+              </article>
             ))}
           </div>
         </div>
       </section>
     )}
-
-    <!-- Technicians -->
-    {technicians.length > 0 && (
-      <section class="py-14">
-        <div class="mx-auto max-w-5xl px-4">
-          <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {about?.specialistsTitleEn || "Our Technicians"}
-          </h2>
-          <p class="mt-2 text-slate-600 dark:text-[rgb(245,210,210)]">
-            Licensed and certified to protect your family and home in Charlotte, NC.
-          </p>
-          <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {technicians.map((tech: any) => {
-              const specialty = tech.specialtyEn || tech.specialty || "";
-              const bio = tech.shortBioEn || tech.shortBio || "";
-              const waNum = resolveWhatsAppNumber(tech.whatsAppNumber, waFallback);
-              const waMsg = encodeURIComponent(
-                tech.whatsAppMessage ||
-                `Hi, I'd like to request service with ${tech.name || "your technician"} at ${businessName}.`
-              );
-              const slug = getSlug(tech);
-              return (
-                <article class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                  {tech.photoUrl ? (
-                    <img src={tech.photoUrl} alt={tech.name} class="h-44 w-full object-cover" loading="lazy" data-fallback-src="/placeholder.jpg" />
-                  ) : (
-                    <div class="flex h-44 w-full items-center justify-center bg-red-50 dark:bg-[rgb(24,6,6)]">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z"/>
-                      </svg>
-                    </div>
-                  )}
-                  <div class="p-5">
-                    <p class="font-bold text-slate-900 dark:text-white">{tech.name}</p>
-                    {specialty && <p class="mt-0.5 text-sm font-medium text-red-700 dark:text-red-400">{specialty}</p>}
-                    {bio && <p class="mt-2 text-sm text-slate-600 dark:text-[rgb(245,210,210)]">{bio.slice(0, 120)}{bio.length > 120 ? "…" : ""}</p>}
-                    <div class="mt-4 flex flex-col gap-2">
-                      <a href={`/en/especialistas/${slug || ""}`} class="btn-base btn-secondary w-full text-center text-sm">View profile</a>
-                      {waNum && (
-                        <a href={`https://wa.me/${String(waNum).replace(/\D/g,"")}?text=${waMsg}`} target="_blank" rel="noopener noreferrer" class="btn-base btn-primary w-full text-center text-sm">WhatsApp</a>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-    )}
-
-    <!-- Services -->
-    {services.length > 0 && (
-      <section class="border-t border-slate-100 py-14 dark:border-[rgb(36,10,10)]">
-        <div class="mx-auto max-w-5xl px-4">
-          <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {about?.servicesTitleEn || "Pest Control Services"}
-          </h2>
-          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {services.slice(0, 6).map((svc: any) => {
-              const title = svc.titleEn || svc.title || "Service";
-              const desc = svc.shortEn || svc.short || "";
-              const slug = getSlug(svc);
-              return (
-                <div class="rounded-xl border border-slate-100 bg-white p-5 dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                  <p class="font-semibold text-slate-900 dark:text-white">{title}</p>
-                  {desc && <p class="mt-1 text-sm text-slate-500 dark:text-[rgb(240,190,190)]">{desc.slice(0, 90)}{desc.length > 90 ? "…" : ""}</p>}
-                  {svc.priceFrom != null && (
-                    <p class="mt-2 text-sm font-semibold text-red-700 dark:text-red-400">From ${svc.priceFrom}</p>
-                  )}
-                  <a href={`/en/agendar${slug ? `?service=${encodeURIComponent(slug)}` : ""}`} class="mt-3 inline-block text-xs font-semibold text-red-700 hover:underline dark:text-red-400">
-                    Request →
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-          {services.length > 6 && (
-            <div class="mt-6 text-center">
-              <a href="/en/servicios" class="btn-base btn-secondary">See all services</a>
-            </div>
-          )}
-        </div>
-      </section>
-    )}
-
   </main>
+
   <Footer />
 </Layout>
+
+<script is:inline>
+  const initLoopCarousel = ({ trackSelector, itemSelector, prevSelector, nextSelector, autoplayMs }) => {
+    const track = document.querySelector(trackSelector);
+    const prev = document.querySelector(prevSelector);
+    const next = document.querySelector(nextSelector);
+    if (!track || !prev || !next) return;
+
+    let intervalId;
+    let currentIndex = 0;
+
+    const getItems = () => Array.from(track.querySelectorAll(itemSelector));
+
+    const updateCurrentIndex = () => {
+      const items = getItems();
+      if (!items.length) return;
+      currentIndex = items.reduce(
+        (best, item, index) => {
+          const dist = Math.abs(item.offsetLeft - track.scrollLeft);
+          return dist < best.dist ? { index, dist } : best;
+        },
+        { index: 0, dist: Number.POSITIVE_INFINITY }
+      ).index;
+    };
+
+    const updateControls = () => {
+      const isSingleItem = getItems().length <= 1;
+      prev.disabled = isSingleItem;
+      next.disabled = isSingleItem;
+      prev.classList.toggle("opacity-50", isSingleItem);
+      prev.classList.toggle("cursor-not-allowed", isSingleItem);
+      next.classList.toggle("opacity-50", isSingleItem);
+      next.classList.toggle("cursor-not-allowed", isSingleItem);
+    };
+
+    const goToIndex = (index) => {
+      const items = getItems();
+      if (!items.length) return;
+      const normalized = ((index % items.length) + items.length) % items.length;
+      const target = items[normalized];
+      if (!target) return;
+      currentIndex = normalized;
+      track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+      updateControls();
+    };
+
+    const move = (dir) => {
+      const items = getItems();
+      if (items.length <= 1) return;
+      goToIndex(currentIndex + dir);
+    };
+
+    const stopAutoplay = () => {
+      if (!intervalId) return;
+      clearInterval(intervalId);
+      intervalId = undefined;
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (getItems().length <= 1) return;
+      if (document.hidden) return;
+      intervalId = setInterval(() => {
+        updateCurrentIndex();
+        move(1);
+      }, autoplayMs);
+    };
+
+    prev.addEventListener("click", () => { updateCurrentIndex(); move(-1); startAutoplay(); });
+    next.addEventListener("click", () => { updateCurrentIndex(); move(1); startAutoplay(); });
+    track.addEventListener("scroll", () => { updateCurrentIndex(); updateControls(); }, { passive: true });
+    track.addEventListener("mouseenter", stopAutoplay);
+    track.addEventListener("mouseleave", startAutoplay);
+    track.addEventListener("focusin", stopAutoplay);
+    track.addEventListener("focusout", startAutoplay);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+
+    updateCurrentIndex();
+    updateControls();
+    startAutoplay();
+  };
+
+  const aboutPageGalleryNode = document.querySelector("[data-about-page-gallery-carousel]");
+  const aboutPageGalleryAutoplayFromDom = Number(
+    aboutPageGalleryNode?.getAttribute("data-about-page-gallery-autoplay-ms") || "2200"
+  );
+  const aboutPageGalleryAutoplayFinal =
+    Number.isFinite(aboutPageGalleryAutoplayFromDom) &&
+    aboutPageGalleryAutoplayFromDom >= 1200 &&
+    aboutPageGalleryAutoplayFromDom <= 10000
+      ? aboutPageGalleryAutoplayFromDom
+      : 2200;
+
+  initLoopCarousel({
+    trackSelector: "[data-about-page-gallery-track]",
+    itemSelector: "[data-about-page-gallery-item]",
+    prevSelector: "[data-about-page-gallery-prev]",
+    nextSelector: "[data-about-page-gallery-next]",
+    autoplayMs: aboutPageGalleryAutoplayFinal,
+  });
+</script>
