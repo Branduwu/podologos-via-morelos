@@ -5,6 +5,7 @@ import Footer from "../../components/Footer.astro";
 import VideoEmbed from "../../components/VideoEmbed.astro";
 import { getBusinessInfo, getGallery } from "../../lib/sanity.js";
 import { business } from "../../config/clinic";
+import { getCategoryLabelEn } from "../../utils/category";
 
 type GalleryItem = {
   _id?: string;
@@ -89,6 +90,11 @@ const mediaFilters = [
             <article data-gallery-item data-media-type="image" class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-2">
+                  <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                    {getCategoryLabelEn(it.category)}
+                  </span>
+                </p>
               </div>
               {it.imageUrl ? (
                 <img class="aspect-[4/3] w-full object-cover" src={it.imageUrl} alt={it.title} loading="lazy" data-fallback-src="/placeholder.jpg" />
@@ -109,6 +115,11 @@ const mediaFilters = [
             <article data-gallery-item data-media-type="youtube" class="self-start overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-2">
+                  <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                    {getCategoryLabelEn(it.category)}
+                  </span>
+                </p>
               </div>
               <div class="px-4 pb-4">
                 <VideoEmbed platform={it.platform} url={it.url} title={it.title} linkOnly={it.linkOnly} linkText={it.linkText} previewImage={it.linkPreviewImageUrl} />
@@ -129,6 +140,11 @@ const mediaFilters = [
             <article data-gallery-item data-media-type="tiktok" class="self-start overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-2">
+                  <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                    {getCategoryLabelEn(it.category)}
+                  </span>
+                </p>
               </div>
               <div class="px-4 pb-4">
                 <VideoEmbed platform={it.platform} url={it.url} title={it.title} linkOnly={it.linkOnly} linkText={it.linkText} previewImage={it.linkPreviewImageUrl} />
@@ -149,6 +165,11 @@ const mediaFilters = [
             <article data-gallery-item data-media-type="facebook" class="self-start overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950">
               <div class="p-4">
                 <p class="text-sm font-semibold">{it.title}</p>
+                <p class="mt-2">
+                  <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                    {getCategoryLabelEn(it.category)}
+                  </span>
+                </p>
               </div>
               <div class="px-4 pb-4">
                 <VideoEmbed platform={it.platform} url={it.url} title={it.title} linkOnly={it.linkOnly} linkText={it.linkText} previewImage={it.linkPreviewImageUrl} />

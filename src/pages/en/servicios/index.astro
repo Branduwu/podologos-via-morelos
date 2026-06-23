@@ -1,132 +1,388 @@
 ---
-/**
- * English services page – /en/servicios
- * Shows service catalog with English fields preferred.
- */
 import Layout from "../../../layouts/Layout.astro";
 import Header from "../../../components/Header.astro";
 import Footer from "../../../components/Footer.astro";
-import { getBusinessInfo, getServices } from "../../../lib/sanity.js";
-import { business } from "../../../config/clinic";
+import { business as businessConfig } from "../../../config/clinic";
+import { getBusinessInfo, getServices, getSpecialists } from "../../../lib/sanity.js";
+import { normalizeServiceSlug } from "../../../utils/prefill";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../../utils/whatsapp";
+import { moneyUSD } from "../../../utils/format";
 
 type ServiceItem = {
-  _id?: string;
   title?: string;
   titleEn?: string;
   slug?: string | { current?: string };
   short?: string;
   shortEn?: string;
-  long?: string;
-  longEn?: string;
   duration?: string;
   priceFrom?: number;
   category?: string;
+  leadSpecialistSlug?: string;
   whatsAppNumber?: string;
   whatsAppMessage?: string;
 };
 
-const cms = await getBusinessInfo();
+type SpecialistRoutingItem = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  specialtyCategory?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+  useWhatsAppButton?: boolean;
+};
+
+const business = await getBusinessInfo();
 const services: ServiceItem[] = (await getServices()) || [];
-const businessName = cms?.name || business.name;
+const specialists: SpecialistRoutingItem[] = (await getSpecialists()) || [];
+const validSlugRe = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const grouped = business.serviceCategories.map((cat) => ({
-  key: cat.key,
-  label: cat.labelEn,
-  services: services.filter((s) => s.category === cat.key),
-})).filter((g) => g.services.length > 0);
+const generalWaNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  businessConfig.whatsappNumber
+);
+const specialistsWaNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWaNumber
+);
 
-const getSlug = (s: ServiceItem) =>
-  typeof s.slug === "string" ? s.slug : s.slug?.current || "";
+const serviceCategories = [
+  { key: "all",        label: "All" },
+  { key: "roedores",   label: "Rodents" },
+  { key: "cucarachas", label: "Cockroaches" },
+  { key: "termitas",   label: "Termites" },
+  { key: "chinches",   label: "Bed Bugs" },
+  { key: "hormigas",   label: "Ants" },
+  { key: "avispas",    label: "Wasps & Bees" },
+  { key: "inspeccion", label: "Inspection" },
+  { key: "general",    label: "General" },
+];
+const serviceCategoryLabelByKey = new Map(serviceCategories.map((item) => [item.key, item.label]));
+const servicesCategoryCount =
+  new Set(
+    services
+      .map((service) => normalizeServiceSlug(service?.category || service?.title || ""))
+      .filter(Boolean)
+  ).size || Math.max(1, serviceCategories.length - 1);
+const servicesPageContent = (business as any)?.servicesPageContentEn || business?.servicesPageContent || {};
+const servicesPageText = {
+  eyebrow: String(servicesPageContent.eyebrow || "Certified pest control").trim(),
+  title: String(servicesPageContent.title || "Pest Control Services").trim(),
+  intro: String(
+    servicesPageContent.intro ||
+      "Browse our pest control treatments, review pricing and choose the plan that works best for you. Questions? Write to us and we'll guide you."
+  ).trim(),
+  primaryCtaText: String(servicesPageContent.primaryCtaText || "Request inspection").trim(),
+  primaryCtaUrl: String(servicesPageContent.primaryCtaUrl || "/en/agendar").trim(),
+  secondaryCtaText: String(servicesPageContent.secondaryCtaText || "View pricing").trim(),
+  secondaryCtaUrl: String(servicesPageContent.secondaryCtaUrl || "/en/precios").trim(),
+  panelLabel: String(servicesPageContent.panelLabel || "We'll help you choose").trim(),
+  stepOneTitle: String(servicesPageContent.stepOneTitle || "Choose the pest type").trim(),
+  stepOneBody: String(
+    servicesPageContent.stepOneBody ||
+      "Select the pest type to see available treatments and find the fastest solution."
+  ).trim(),
+  stepTwoTitle: String(servicesPageContent.stepTwoTitle || "Request your service").trim(),
+  stepTwoBody: String(
+    servicesPageContent.stepTwoBody ||
+      "From each treatment you can view details, review pricing or request an inspection via WhatsApp."
+  ).trim(),
+  servicesCountLabel: String(servicesPageContent.servicesCountLabel || "available treatments").trim(),
+  areasCountLabel: String(servicesPageContent.areasCountLabel || "pest types").trim(),
+  emptyStateText: String(
+    servicesPageContent.emptyStateText ||
+      "We'll publish our treatments soon. Contact us for a free inspection."
+  ).trim(),
+  cardFallbackText: String(
+    servicesPageContent.cardFallbackText ||
+      "Professional treatment with guaranteed results and safe products for your family."
+  ).trim(),
+  filteredEmptyStateText: String(
+    servicesPageContent.filteredEmptyStateText ||
+      "No treatments in that category yet."
+  ).trim(),
+};
+
+const specialistBySlug = new Map<string, SpecialistRoutingItem>();
+for (const specialist of specialists) {
+  const slug = String(specialist?.slug || specialist?._id || "").trim();
+  if (!slug) continue;
+  specialistBySlug.set(slug, specialist);
+}
 ---
 
 <Layout
-  title={`Services – ${businessName}`}
-  description="Browse our pest control services in Charlotte, NC: rodents, termites, bed bugs, cockroaches, ants, wasps and more."
+  title={`Services | ${business?.name || "FumiPro NC Charlotte"}`}
+  description={`Pest control and fumigation services in ${business?.area || "Charlotte, NC"}. Inspections, treatments and maintenance plans available.`}
 >
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-6xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">What we do</p>
-        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white sm:text-5xl">
-          Pest Control Services
-        </h1>
-        <p class="mt-4 max-w-xl text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          Specialized treatments to eliminate and prevent pests in homes and businesses in Charlotte, NC.
-        </p>
-        <div class="mt-6 flex flex-wrap gap-2">
-          {business.serviceCategories.map((cat) => (
-            <a
-              href={`#${cat.key}`}
-              class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-red-400 hover:text-red-700 dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)] dark:text-[rgb(248,220,220)]"
-            >
-              {cat.labelEn}
-            </a>
-          ))}
+  <main class="mx-auto max-w-[88rem] px-4 py-10 xl:px-6">
+    <section class="page-intro">
+      <div class="page-intro__layout">
+        <div>
+          <p class="page-intro__eyebrow">{servicesPageText.eyebrow}</p>
+          <h1 class="page-intro__title mt-3">{servicesPageText.title}</h1>
+          <p class="page-intro__copy mt-3">{servicesPageText.intro}</p>
+          <div class="page-intro__actions mt-6">
+            <a class="btn-base btn-primary" href={servicesPageText.primaryCtaUrl}>{servicesPageText.primaryCtaText}</a>
+            <a class="btn-base btn-secondary" href={servicesPageText.secondaryCtaUrl}>{servicesPageText.secondaryCtaText}</a>
+          </div>
         </div>
-      </div>
-    </section>
 
-    {grouped.length === 0 ? (
-      <section class="py-20 text-center">
-        <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No services available at this time. Please check back soon.</p>
-      </section>
-    ) : (
-      <section class="py-12">
-        <div class="mx-auto max-w-6xl px-4 space-y-12">
-          {grouped.map((group) => (
-            <div id={group.key} data-reveal>
-              <h2 class="font-['Manrope',sans-serif] mb-5 text-2xl font-bold text-slate-900 dark:text-white">
-                {group.label}
-              </h2>
-              <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {group.services.map((svc) => {
-                  const title = svc.titleEn || svc.title || "Service";
-                  const desc = svc.shortEn || svc.short || "";
-                  const slug = getSlug(svc);
-                  return (
-                    <div class="rounded-xl border border-slate-100 bg-white p-6 shadow-sm transition hover:shadow-md dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                      <h3 class="font-['Manrope',sans-serif] font-bold text-slate-900 dark:text-white">{title}</h3>
-                      {desc && <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-[rgb(245,210,210)]">{desc}</p>}
-                      <div class="mt-4 flex flex-wrap items-center gap-3">
-                        {svc.priceFrom != null && (
-                          <span class="text-sm font-semibold text-red-700 dark:text-red-400">
-                            From ${svc.priceFrom}
-                          </span>
-                        )}
-                        {svc.duration && (
-                          <span class="text-xs text-slate-500 dark:text-[rgb(240,190,190)]">{svc.duration}</span>
-                        )}
-                      </div>
-                      <div class="mt-4">
-                        <a
-                          href={`/en/agendar${slug ? `?service=${encodeURIComponent(slug)}` : ""}`}
-                          class="btn-base btn-secondary text-sm"
-                        >
-                          Request this service
-                        </a>
-                      </div>
-                    </div>
-                  );
-                })}
+        <aside class="page-intro__panel">
+          <p class="page-intro__panel-label">{servicesPageText.panelLabel}</p>
+          <div class="page-intro__panel-list mt-4">
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">1</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{servicesPageText.stepOneTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{servicesPageText.stepOneBody}</p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-    )}
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">2</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{servicesPageText.stepTwoTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{servicesPageText.stepTwoBody}</p>
+              </div>
+            </div>
+          </div>
 
-    <section class="bg-red-700 py-12 text-white dark:bg-red-900" data-reveal>
-      <div class="mx-auto max-w-2xl px-4 text-center">
-        <h2 class="font-['Manrope',sans-serif] text-2xl font-extrabold">Ready to get started?</h2>
-        <p class="mt-2 text-red-100">Contact us today for a fast quote.</p>
-        <a href="/en/agendar" class="btn-base mt-5 inline-block bg-white px-6 py-2.5 font-bold text-red-700 hover:bg-red-50">
-          Request service
-        </a>
+          <div class="page-intro__meta-grid">
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{services.length}</span>
+              <span class="page-intro__meta-label">{servicesPageText.servicesCountLabel}</span>
+            </div>
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{servicesCategoryCount}</span>
+              <span class="page-intro__meta-label">{servicesPageText.areasCountLabel}</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
+    {services.length === 0 && (
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        {servicesPageText.emptyStateText}
+      </div>
+    )}
+
+    {services.length > 0 && (
+      <div class="mt-8 flex flex-wrap gap-2.5" id="service-filters">
+        {serviceCategories.map((cat, idx) => (
+          <button
+            type="button"
+            data-service-filter={cat.key}
+            class:list={["category-chip", idx === 0 && "category-chip--active"]}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div class="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3 xl:items-stretch 2xl:gap-7">
+      {services.map((service: ServiceItem) => {
+        const rawSlug =
+          typeof service.slug === "string" ? service.slug : service.slug?.current;
+        const cleanSlug = typeof rawSlug === "string" ? rawSlug.trim() : "";
+        const hasValidSlug = validSlugRe.test(cleanSlug);
+        const detailHref = hasValidSlug ? `/en/servicios/${cleanSlug}` : "/en/servicios";
+
+        const serviceLabel = service.titleEn || service.title || "Service";
+        const serviceCategory = normalizeServiceSlug(
+          service.category || service.title || cleanSlug
+        );
+        const categoryLabel = serviceCategoryLabelByKey.get(serviceCategory) || "Pest Control";
+        const servicePrice = Number(service.priceFrom || 0);
+        const summaryText = String(service.shortEn || service.short || "").trim();
+
+        const preferredSpecialistSlug = String(service.leadSpecialistSlug || "").trim();
+        const routingSpecialist = preferredSpecialistSlug
+          ? specialistBySlug.get(preferredSpecialistSlug)
+          : undefined;
+        const manualServiceWaNumber = String(service.whatsAppNumber || "").trim();
+        const manualServiceWaMessage = String(service.whatsAppMessage || "").trim();
+
+        const agendarParams = new URLSearchParams();
+        if (serviceCategory) agendarParams.set("service", serviceCategory);
+        if (preferredSpecialistSlug) agendarParams.set("specialist", preferredSpecialistSlug);
+        if (serviceLabel) agendarParams.append("services", serviceLabel);
+        if (servicePrice > 0) {
+          agendarParams.set("approxTotal", String(Math.round(servicePrice)));
+        }
+        const agendarHref = agendarParams.toString()
+          ? `/en/agendar?${agendarParams.toString()}`
+          : "/en/agendar";
+
+        const useSpecialistWa = !manualServiceWaNumber && routingSpecialist?.useWhatsAppButton !== false;
+        const waReasonTemplate = manualServiceWaMessage
+          ? manualServiceWaMessage
+          : useSpecialistWa
+            ? routingSpecialist?.whatsAppMessage ||
+              business?.whatsappSpecialistsMessage ||
+              business?.whatsappGeneralMessage
+            : business?.whatsappGeneralMessage;
+        const waTargetNumber = resolveWhatsAppNumber(
+          manualServiceWaNumber,
+          useSpecialistWa ? routingSpecialist?.whatsAppNumber : "",
+          specialistsWaNumber,
+          generalWaNumber
+        );
+        const waHref = buildWhatsAppUrl(
+          buildContactMessage({
+            service: serviceLabel,
+            reason: resolveWhatsAppReason(
+              waReasonTemplate,
+              useSpecialistWa
+                ? "Hi, I'm interested in {servicio} and would like to schedule with {especialista} at {negocio}. Do you have availability?"
+                : "Hi, I'm interested in the {servicio} service at {negocio}. Do you have availability?",
+              {
+                specialist: routingSpecialist?.name || "available technician",
+                service: serviceLabel,
+                business: business?.name || businessConfig.name,
+                problem: business?.whatsappQuickProblemDefault || "",
+              }
+            ),
+          }),
+          waTargetNumber
+        );
+
+        return (
+          <article
+            data-service-card
+            data-category={serviceCategory || "general"}
+            class="card-surface group flex h-full flex-col rounded-3xl p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl md:p-7"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-[0.74rem] font-extrabold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">
+                  {categoryLabel}
+                </p>
+                <h2 class="mt-3 text-[1.3rem] font-semibold leading-tight text-slate-900 dark:text-slate-100 md:text-[1.45rem]">
+                  {serviceLabel}
+                </h2>
+              </div>
+            </div>
+
+            <div class="flex-1">
+              {summaryText ? (
+                <p class="mt-3 text-[0.98rem] leading-7 text-slate-600 dark:text-slate-300">
+                  {summaryText}
+                </p>
+              ) : (
+                <p class="mt-3 text-[0.98rem] leading-7 text-slate-500 dark:text-slate-400">
+                  {servicesPageText.cardFallbackText}
+                </p>
+              )}
+
+              <div class="mt-5 flex flex-wrap gap-2 text-[0.82rem] font-medium text-slate-600 dark:text-slate-300">
+                {service.duration && (
+                  <span class="rounded-full border border-slate-200 px-3 py-1.5 dark:border-slate-800">
+                    Duration {service.duration}
+                  </span>
+                )}
+                {!!moneyUSD(service.priceFrom) && (
+                  <span class="rounded-full border border-slate-200 px-3 py-1.5 dark:border-slate-800">
+                    From {moneyUSD(service.priceFrom)}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div class="mt-7 space-y-3 pt-1">
+              <a class="btn-base btn-primary w-full" href={agendarHref}>
+                Request this service
+              </a>
+              <a class="btn-base btn-secondary w-full" href={detailHref}>
+                View details
+              </a>
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
+                <a class="link-inline" href="/en/precios">
+                  View pricing
+                </a>
+                <a
+                  class="link-inline"
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <p
+      id="services-empty"
+      class="mt-6 hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300"
+    >
+      {servicesPageText.filteredEmptyStateText}
+    </p>
   </main>
+
   <Footer />
 </Layout>
+
+<script is:inline>
+  const serviceFilterButtons = Array.from(document.querySelectorAll("[data-service-filter]"));
+  const serviceCards = Array.from(document.querySelectorAll("[data-service-card]"));
+  const servicesEmpty = document.getElementById("services-empty");
+  let activeServiceFilter = "all";
+
+  const animateFilteredItems = (items) => {
+    items.forEach((item, index) => {
+      item.classList.remove("filter-item-in", "filter-item-in-slide");
+      item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+      void item.offsetWidth;
+      item.classList.add("filter-item-in-slide");
+    });
+  };
+
+  const updateServiceFilterUI = () => {
+    serviceFilterButtons.forEach((btn) => {
+      const isActive = btn.dataset.serviceFilter === activeServiceFilter;
+      btn.classList.toggle("category-chip--active", isActive);
+    });
+  };
+
+  const applyServiceFilter = (animate = false) => {
+    let visibleCount = 0;
+    const visibleCards = [];
+
+    serviceCards.forEach((card) => {
+      const category = card.dataset.category || "general";
+      const visible = activeServiceFilter === "all" || category === activeServiceFilter;
+      card.classList.toggle("hidden", !visible);
+      if (visible) {
+        visibleCount += 1;
+        visibleCards.push(card);
+      }
+    });
+
+    if (servicesEmpty) servicesEmpty.classList.toggle("hidden", visibleCount > 0);
+    if (animate) requestAnimationFrame(() => animateFilteredItems(visibleCards));
+  };
+
+  serviceFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeServiceFilter = btn.dataset.serviceFilter || "all";
+      updateServiceFilterUI();
+      applyServiceFilter(true);
+    });
+  });
+
+  updateServiceFilterUI();
+  applyServiceFilter(false);
+</script>

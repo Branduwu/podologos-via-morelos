@@ -3,78 +3,269 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { getBusinessInfo } from "../../lib/sanity.js";
-import { business } from "../../config/clinic";
+import { safeCmsUrl } from "../../utils/url";
 
-const cms = await getBusinessInfo();
-const businessName = cms?.name || business.name;
-const address = cms?.address || business.address;
-const mapsUrl = cms?.mapsUrl || business.googleMapsUrl;
+const business = await getBusinessInfo();
+const mapsUrl = safeCmsUrl(business?.mapsUrl, "https://www.google.com/maps");
+const phoneDigits = String(business?.phone || "").replace(/\D/g, "");
+const whatsappDigits = String(business?.whatsappCitasNumber || "").replace(/\D/g, "");
+const callHref = phoneDigits ? `tel:${phoneDigits}` : null;
+const normalizeComparableText = (value: string) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
+const addressText = String(business?.address || "").trim();
+const rawZoneText = String(business?.locationZoneText || "").trim();
+const defaultZoneText = String(business?.area || "").trim() || "Charlotte, NC 28201.";
+const zoneText = (() => {
+  if (!rawZoneText) return defaultZoneText;
+  if (normalizeComparableText(rawZoneText) === normalizeComparableText(addressText)) return defaultZoneText;
+  return rawZoneText;
+})();
+const referencesText =
+  (business as any)?.locationReferencesTextEn ||
+  business?.locationReferencesText ||
+  "Contact us via WhatsApp for exact references to find us more easily.";
+const parkingText = String((business as any)?.locationParkingTextEn || business?.locationParkingText || "").trim();
+const accessText = String((business as any)?.locationAccessTextEn || business?.locationAccessText || "").trim();
+const guideTips =
+  Array.isArray((business as any)?.locationGuideTipsEn) && (business as any).locationGuideTipsEn.length > 0
+    ? (business as any).locationGuideTipsEn
+    : Array.isArray(business?.locationGuideTips) && business.locationGuideTips.length > 0
+    ? business.locationGuideTips
+    : [
+        'Easiest way to find us: search "FumiPro NC" on Google Maps.',
+        "Book your visit in advance for faster service.",
+        "If you have photos of the affected area, share them when contacting us for a better estimate.",
+      ];
+
+const serviceGuides = {
+  roedores: [
+    "Remove exposed food and seal bags before the treatment.",
+    "Keep pets and children away from the treated area for at least 2 hours.",
+  ],
+  cucarachas: [
+    "Clean under appliances and corners before the service.",
+    "Do not sweep or mop the treated area for 48 hours for maximum effectiveness.",
+  ],
+  termitas: [
+    "Provide access to walls, frames and wooden structures.",
+    "If you notice mounds or structural damage, document the area before the visit.",
+  ],
+  chinches: [
+    "Wash bedding in hot water before the treatment.",
+    "Unplug mattresses and remove blankets for full access to the area.",
+  ],
+  inspeccion: [
+    "Make sure we have access to basement, attic and enclosed spaces.",
+    "Note areas where you have seen signs of pests to inform the technician.",
+  ],
+  general: [
+    "Store food in sealed containers before the service.",
+    "Ventilate the treated area following the technician's instructions.",
+  ],
+};
+
+const serviceGuideLabels = {
+  roedores: "Rodents",
+  cucarachas: "Cockroaches",
+  termitas: "Termites",
+  chinches: "Bed Bugs",
+  inspeccion: "Inspection",
+  general: "General",
+};
+
+const defaultServiceGuideKey = "inspeccion";
+const defaultServiceGuideTips = serviceGuides[defaultServiceGuideKey];
+const facadeImage =
+  business?.locationFacadeImageUrl ||
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1600&q=80";
+const scheduleText =
+  (business as any)?.hoursTextEn ||
+  business?.hoursText ||
+  "Mon–Fri: 10:00 – 18:00 · Sat: 10:00 – 16:00 · Sun: closed";
 ---
 
-<Layout
-  title={`Location – ${businessName}`}
-  description={`Find ${businessName} in Charlotte, NC. Get directions and view our location on Google Maps.`}
->
+<Layout title={`Location | ${business?.name || "FumiPro NC"}`}>
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-4xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Where we are</p>
-        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">Location</h1>
-        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          We serve Charlotte and surrounding areas in North Carolina.
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="text-3xl font-bold tracking-tight md:text-4xl">Location</h1>
+    <p class="mt-2 text-slate-800 dark:text-slate-200">{addressText || "Address not configured yet."}</p>
+
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <section class="card-surface rounded-2xl p-6">
+        <h2 class="text-lg font-semibold">How to get here</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          <strong>Hours:</strong> {scheduleText}
         </p>
-      </div>
-    </section>
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-4xl px-4 space-y-6">
-        <div class="rounded-2xl border border-slate-100 bg-white p-7 shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-          <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Address</p>
-          <p class="font-['Manrope',sans-serif] text-xl font-bold text-slate-900 dark:text-white">{address}</p>
-          <div class="mt-4 flex flex-wrap gap-3">
-            {mapsUrl && (
-              <a
-                href={mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn-base btn-secondary"
-              >
-                Open in Google Maps
-              </a>
-            )}
-            <a href="/en/agendar" class="btn-base btn-primary">Request service</a>
-          </div>
+        <div class="mt-8 grid gap-2 text-sm text-slate-800 dark:text-slate-100">
+          <p><strong>Address:</strong> {addressText || "-"}</p>
+          <p><strong>Phone:</strong> {business?.phone || "-"}</p>
+          <p><strong>WhatsApp:</strong> {whatsappDigits || "-"}</p>
+          <p><strong>Hours:</strong> {scheduleText}</p>
+          <p><strong>Area:</strong> {zoneText}</p>
+          <p><strong>References:</strong> {referencesText}</p>
         </div>
 
-        {cms?.locationFacadeImageUrl && (
-          <div class="overflow-hidden rounded-2xl border border-slate-100 dark:border-[rgb(36,58,86)]">
-            <img
-              src={cms.locationFacadeImageUrl}
-              alt="Business location"
-              class="h-64 w-full object-cover sm:h-80"
-              loading="lazy"
-            />
-          </div>
-        )}
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="btn-base btn-primary" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+            Get directions
+          </a>
+          {callHref && (
+            <a class="btn-base btn-secondary" href={callHref}>
+              Call
+            </a>
+          )}
+          <button type="button" id="copy-address-btn" class="btn-base btn-secondary">
+            Copy address
+          </button>
+        </div>
 
-        {cms?.locationGuideTips && cms.locationGuideTips.length > 0 && (
-          <div class="rounded-2xl border border-slate-100 bg-white p-7 shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-            <h2 class="font-['Manrope',sans-serif] mb-4 text-lg font-bold text-slate-900 dark:text-white">Getting here</h2>
-            <ul class="space-y-2">
-              {cms.locationGuideTips.map((tip: string) => (
-                <li class="flex items-start gap-2 text-sm text-slate-600 dark:text-[rgb(245,210,210)]">
-                  <span class="mt-0.5 text-red-500">→</span>
-                  {tip}
-                </li>
+        <div class="mt-7 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Quick guide</h3>
+          <ul class="mt-3 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+            {guideTips.map((tip: string) => (
+              <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>{tip}</span></li>
+            ))}
+          </ul>
+
+          <div class="mt-5 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Select your service
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2" id="service-guide-filters">
+              {Object.entries(serviceGuideLabels).map(([key, label]) => (
+                <button
+                  type="button"
+                  data-service-guide-filter={key}
+                  class={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                    key === defaultServiceGuideKey
+                      ? "border-red-700 bg-red-700 text-white"
+                      : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  {label}
+                </button>
               ))}
-            </ul>
+            </div>
+            <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950/60">
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100" id="service-guide-title">
+                If you're coming for {serviceGuideLabels[defaultServiceGuideKey]}
+              </p>
+              <ul class="mt-2 grid gap-2 text-sm text-slate-700 dark:text-slate-300" id="service-guide-list">
+                {defaultServiceGuideTips.map((tip) => (
+                  <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>{tip}</span></li>
+                ))}
+              </ul>
+            </div>
           </div>
-        )}
-      </div>
-    </section>
+          {parkingText && <p class="mt-3 text-sm text-slate-700 dark:text-slate-300"><strong>Parking:</strong> {parkingText}</p>}
+          {accessText && <p class="mt-1 text-sm text-slate-700 dark:text-slate-300"><strong>Access:</strong> {accessText}</p>}
+        </div>
+      </section>
 
+      <aside class="card-surface rounded-2xl p-6">
+        <h2 class="text-lg font-semibold">Map</h2>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          If the map doesn't load, use the "Get directions" button or the facade photo to locate the entrance.
+        </p>
+
+        <a class="btn-base btn-secondary mt-3" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+          Open route in Google Maps
+        </a>
+
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+          <iframe
+            title={`Location map for ${business?.name || "FumiPro NC"}`}
+            class="h-[28rem] w-full"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(business?.address || "Charlotte, NC 28201")}&output=embed`}
+          ></iframe>
+        </div>
+
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+          <img src={facadeImage} alt="FumiPro NC Charlotte entrance" class="h-52 w-full object-cover" loading="lazy" />
+        </div>
+      </aside>
+    </div>
   </main>
+
   <Footer />
 </Layout>
+
+<script
+  is:inline
+  define:vars={{
+    address: business?.address || "",
+    serviceGuides,
+    serviceGuideLabels,
+    defaultServiceGuideKey,
+  }}
+>
+  const copyButton = document.getElementById("copy-address-btn");
+  if (copyButton) {
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(String(address || ""));
+        copyButton.textContent = "Address copied";
+      } catch {
+        copyButton.textContent = "Could not copy";
+      }
+      setTimeout(() => {
+        copyButton.textContent = "Copy address";
+      }, 1800);
+    });
+  }
+
+  const guideButtons = Array.from(document.querySelectorAll("[data-service-guide-filter]"));
+  const guideTitle = document.getElementById("service-guide-title");
+  const guideList = document.getElementById("service-guide-list");
+  let activeGuide = defaultServiceGuideKey;
+
+  const renderGuide = () => {
+    if (!guideTitle || !guideList) return;
+    const label = serviceGuideLabels?.[activeGuide] || "Service";
+    const tips = Array.isArray(serviceGuides?.[activeGuide]) ? serviceGuides[activeGuide] : [];
+
+    guideTitle.textContent = `If you're coming for ${label}`;
+    guideList.replaceChildren();
+    tips.forEach((tip) => {
+      const li = document.createElement("li");
+      li.className = "flex items-start gap-2";
+      const dot = document.createElement("span");
+      dot.className = "mt-1 h-2 w-2 rounded-full bg-red-600";
+      const text = document.createElement("span");
+      text.textContent = String(tip || "");
+      li.appendChild(dot);
+      li.appendChild(text);
+      guideList.appendChild(li);
+    });
+  };
+
+  const updateGuideButtons = () => {
+    guideButtons.forEach((btn) => {
+      const isActive = btn.dataset.serviceGuideFilter === activeGuide;
+      btn.classList.toggle("border-red-700", isActive);
+      btn.classList.toggle("bg-red-700", isActive);
+      btn.classList.toggle("text-white", isActive);
+    });
+  };
+
+  guideButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeGuide = btn.dataset.serviceGuideFilter || defaultServiceGuideKey;
+      updateGuideButtons();
+      renderGuide();
+    });
+  });
+
+  updateGuideButtons();
+  renderGuide();
+</script>

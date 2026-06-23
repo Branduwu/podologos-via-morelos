@@ -3,161 +3,625 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import { getBusinessInfo, getPrices } from "../../lib/sanity.js";
-import { business } from "../../config/clinic";
-import { getCategoryLabelEn } from "../../utils/category";
+import { business as businessConfig } from "../../config/clinic";
+import { normalizeCategory } from "../../utils/category";
 import { moneyUSD } from "../../utils/format";
 
 type PriceRow = {
   _id?: string;
-  title?: string;
   serviceTitle?: string;
   category?: string;
+  leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
   priceFrom?: number;
   duration?: string;
   note?: string;
 };
 
-const cms = await getBusinessInfo();
+const business = await getBusinessInfo();
 const prices: PriceRow[] = (await getPrices()) || [];
-const businessName = cms?.name || business.name;
+const quoteSelectionLimit = Math.max(1, Number(businessConfig.quoteSelectionLimit || 6));
+const noneSpecialistValue = "__none__";
 
-const categories = [
-  { key: "all",       label: "All"              },
-  { key: "roedores",  label: "Rodents"          },
-  { key: "cucarachas",label: "Cockroaches"      },
-  { key: "termitas",  label: "Termites"         },
-  { key: "chinches",  label: "Bed Bugs"         },
-  { key: "hormigas",  label: "Ants"             },
-  { key: "avispas",   label: "Wasps & Bees"     },
-  { key: "inspeccion",label: "Inspection"       },
-  { key: "general",   label: "General"          },
+const priceCategories = [
+  { key: "all",        label: "All" },
+  { key: "roedores",   label: "Rodents" },
+  { key: "cucarachas", label: "Cockroaches" },
+  { key: "termitas",   label: "Termites" },
+  { key: "chinches",   label: "Bed Bugs" },
+  { key: "hormigas",   label: "Ants" },
+  { key: "avispas",    label: "Wasps" },
+  { key: "inspeccion", label: "Inspection" },
+  { key: "general",    label: "General" },
 ];
+const priceCategoryLabelByKey = new Map(priceCategories.map((item) => [item.key, item.label]));
 
-function getPriceLabel(item: PriceRow) {
-  return item.serviceTitle || item.title || "Service";
+function applyTemplate(value: string | null | undefined, replacements: Record<string, string | number>) {
+  let resolved = String(value || "");
+  Object.entries(replacements).forEach(([key, replacement]) => {
+    resolved = resolved.replaceAll(`{${key}}`, String(replacement));
+  });
+  return resolved;
+}
+
+function priceCategoryKey(price: PriceRow) {
+  const fromCms = normalizeCategory(price.category || "");
+  if (["roedores", "cucarachas", "termitas", "chinches", "hormigas", "avispas", "inspeccion", "general"].includes(fromCms)) return fromCms;
+  const text = normalizeCategory(`${price.serviceTitle || ""} ${price.note || ""}`);
+  if (!text) return "general";
+  if (text.includes("roed") || text.includes("rata") || text.includes("raton")) return "roedores";
+  if (text.includes("cucar")) return "cucarachas";
+  if (text.includes("termit")) return "termitas";
+  if (text.includes("chinch")) return "chinches";
+  if (text.includes("hormig")) return "hormigas";
+  if (text.includes("avispa") || text.includes("abeja")) return "avispas";
+  if (text.includes("inspec")) return "inspeccion";
+  return "general";
+}
+
+const priceCategoryCount =
+  new Set(prices.map((price) => priceCategoryKey(price)).filter((key) => key && key !== "general")).size ||
+  Math.max(1, priceCategories.length - 1);
+
+const pricesPageContentRaw = (business as any)?.pricesPageContentEn || business?.pricesPageContent || {};
+const pricesPageText = {
+  eyebrow: String(pricesPageContentRaw.eyebrow || "Estimate & service").trim(),
+  title: String(pricesPageContentRaw.title || "Pest Control Pricing").trim(),
+  intro: String(
+    pricesPageContentRaw.intro ||
+      "Review each treatment's pricing and compare options. Need multiple services? Include them all in a single WhatsApp quote."
+  ).trim(),
+  primaryCtaText: String(pricesPageContentRaw.primaryCtaText || "Request inspection").trim(),
+  primaryCtaUrl: String(pricesPageContentRaw.primaryCtaUrl || "/en/agendar").trim(),
+  secondaryCtaText: String(pricesPageContentRaw.secondaryCtaText || "View services").trim(),
+  secondaryCtaUrl: String(pricesPageContentRaw.secondaryCtaUrl || "/en/servicios").trim(),
+  panelLabel: String(pricesPageContentRaw.panelLabel || "Before you decide").trim(),
+  stepOneTitle: String(pricesPageContentRaw.stepOneTitle || "Choose your treatment").trim(),
+  stepOneBody: String(
+    pricesPageContentRaw.stepOneBody || "This helps you estimate cost before contacting us."
+  ).trim(),
+  stepTwoTitle: String(pricesPageContentRaw.stepTwoTitle || "Combine treatments").trim(),
+  stepTwoBody: String(
+    pricesPageContentRaw.stepTwoBody ||
+      "If you need to treat multiple pests, add them and we'll send you a complete quote."
+  ).trim(),
+  pricesCountLabel: String(pricesPageContentRaw.pricesCountLabel || "priced treatments").trim(),
+  areasCountLabel: String(pricesPageContentRaw.areasCountLabel || "pest types").trim(),
+  emptyStateText: String(pricesPageContentRaw.emptyStateText || "No pricing published yet.").trim(),
+  filterLabel: String(pricesPageContentRaw.filterLabel || "Choose a category").trim(),
+  quoteTitle: String(pricesPageContentRaw.quoteTitle || "Your quote").trim(),
+  quoteSingleActionLabel: String(pricesPageContentRaw.quoteSingleActionLabel || "Request only this").trim(),
+  quoteSingleActionHelp: String(pricesPageContentRaw.quoteSingleActionHelp || "sends a single service.").trim(),
+  quoteAddActionLabel: String(pricesPageContentRaw.quoteAddActionLabel || "Add to quote").trim(),
+  quoteAddActionHelp: String(
+    pricesPageContentRaw.quoteAddActionHelp || "save several to send in one message."
+  ).trim(),
+  quoteMobileHelp: String(
+    pricesPageContentRaw.quoteMobileHelp || "As you scroll the list, your summary stays below."
+  ).trim(),
+  quoteLimitBadge: applyTemplate(
+    pricesPageContentRaw.quoteLimitBadgeTemplate || "Up to {limite} services",
+    { limite: quoteSelectionLimit }
+  ).trim(),
+  quoteDisabledCtaLabel: String(pricesPageContentRaw.quoteDisabledCtaLabel || "Select services").trim(),
+  quoteContinueCtaLabel: String(pricesPageContentRaw.quoteContinueCtaLabel || "Continue with selection").trim(),
+  quoteMobileCtaLabel: String(pricesPageContentRaw.quoteMobileCtaLabel || "Request services").trim(),
+  quoteSelectedLabel: String(pricesPageContentRaw.quoteSelectedLabel || "Selected:").trim(),
+  quoteSelectedCountSuffix: String(
+    pricesPageContentRaw.quoteSelectedCountSuffix || "services selected"
+  ).trim(),
+  quoteTotalLabel: String(pricesPageContentRaw.quoteTotalLabel || "Approx. total:").trim(),
+  quoteEmptyStateText: String(
+    pricesPageContentRaw.quoteEmptyStateText || "You haven't chosen any services yet."
+  ).trim(),
+  quoteLimitReachedText: applyTemplate(
+    pricesPageContentRaw.quoteLimitReachedTemplate ||
+      "You reached the limit of {limite} services. Remove one to add another.",
+    { limite: quoteSelectionLimit }
+  ).trim(),
+  quoteRemoveLabel: String(pricesPageContentRaw.quoteRemoveLabel || "Remove").trim(),
+  sectionEyebrow: String(pricesPageContentRaw.sectionEyebrow || "Pricing & options").trim(),
+  sectionTitle: String(
+    pricesPageContentRaw.sectionTitle || "Take your time and review our pricing"
+  ).trim(),
+  sectionNote: String(
+    pricesPageContentRaw.sectionNote || "Your quote stays above so you can review before scrolling the list."
+  ).trim(),
+  tableServiceLabel: String(pricesPageContentRaw.tableServiceLabel || "Service").trim(),
+  tableFromLabel: String(pricesPageContentRaw.tableFromLabel || "From").trim(),
+  tableDurationLabel: String(pricesPageContentRaw.tableDurationLabel || "Duration").trim(),
+  tableNoteLabel: String(pricesPageContentRaw.tableNoteLabel || "Note").trim(),
+  tableActionLabel: String(pricesPageContentRaw.tableActionLabel || "Action").trim(),
+  filteredEmptyStateText: String(
+    pricesPageContentRaw.filteredEmptyStateText || "No pricing in that category yet."
+  ).trim(),
+};
+
+function resolvePreferredSpecialistSlug(price: PriceRow) {
+  return String(price.leadSpecialistSlug || "").trim();
+}
+
+function buildAgendarHref(price: PriceRow) {
+  const category = priceCategoryKey(price);
+  const title = String(price.serviceTitle || "").trim();
+  const preferredSpecialistSlug = resolvePreferredSpecialistSlug(price);
+  const priceFrom = Number(price.priceFrom);
+  const params = new URLSearchParams();
+  if (category) params.set("service", category);
+  if (preferredSpecialistSlug) params.set("specialist", preferredSpecialistSlug);
+  if (price._id) params.append("priceIds", price._id);
+  if (title) params.append("services", title);
+  if (title) params.append("specialists", preferredSpecialistSlug || noneSpecialistValue);
+  if (Number.isFinite(priceFrom) && priceFrom > 0) params.set("approxTotal", String(priceFrom));
+  return params.toString() ? `/en/agendar?${params.toString()}` : "/en/agendar";
 }
 ---
 
 <Layout
-  title={`Pricing – ${businessName}`}
-  description={`Transparent pest control pricing in Charlotte, NC. No hidden fees. Get a free quote from ${businessName} today.`}
+  title={`Pricing | ${business?.name || businessConfig.name}`}
+  description={`Pest control pricing in ${business?.area || "Charlotte, NC"}. Transparent rates. Request a free quote online.`}
 >
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-14 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-5xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Transparent rates</p>
-        <h1 class="mt-2 font-['Manrope',sans-serif] text-4xl font-extrabold text-slate-900 sm:text-5xl dark:text-white">
-          Pricing
-        </h1>
-        <p class="mt-3 max-w-xl text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          No hidden fees. Final price may vary based on space size and infestation level.
-          <a href="/en/agendar" class="font-semibold text-red-700 hover:underline dark:text-red-400">Contact us</a> for a free quote.
-        </p>
+  <main class="mx-auto max-w-[92rem] px-4 py-10 pb-36 xl:px-6 md:pb-10">
+    <section class="page-intro">
+      <div class="page-intro__layout">
+        <div>
+          <p class="page-intro__eyebrow">{pricesPageText.eyebrow}</p>
+          <h1 class="page-intro__title mt-3">{pricesPageText.title}</h1>
+          <p class="page-intro__copy mt-3">{pricesPageText.intro}</p>
+          <div class="page-intro__actions mt-6">
+            <a class="btn-base btn-primary" href={pricesPageText.primaryCtaUrl}>{pricesPageText.primaryCtaText}</a>
+            <a class="btn-base btn-secondary" href={pricesPageText.secondaryCtaUrl}>{pricesPageText.secondaryCtaText}</a>
+          </div>
+        </div>
+
+        <aside class="page-intro__panel">
+          <p class="page-intro__panel-label">{pricesPageText.panelLabel}</p>
+          <div class="page-intro__panel-list mt-4">
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">1</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{pricesPageText.stepOneTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{pricesPageText.stepOneBody}</p>
+              </div>
+            </div>
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">2</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{pricesPageText.stepTwoTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{pricesPageText.stepTwoBody}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-intro__meta-grid">
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{prices.length}</span>
+              <span class="page-intro__meta-label">{pricesPageText.pricesCountLabel}</span>
+            </div>
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{priceCategoryCount}</span>
+              <span class="page-intro__meta-label">{pricesPageText.areasCountLabel}</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-5xl px-4">
-
-        {prices.length === 0 ? (
-          <div class="rounded-2xl border border-slate-100 bg-white p-10 text-center dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-            <p class="text-slate-500 dark:text-[rgb(240,190,190)]">Pricing details coming soon. Contact us for a custom quote.</p>
-            <a href="/en/agendar" class="btn-base btn-primary mt-5 inline-block">Request a quote</a>
-          </div>
-        ) : (
-          <>
-            <div class="mt-4 flex flex-wrap gap-2" id="price-filters">
-              {categories.map((cat, idx) => (
+    {prices.length === 0 ? (
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 text-left text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        {pricesPageText.emptyStateText}
+      </div>
+    ) : (
+      <>
+        <div class="mt-6 space-y-4">
+          <section class="rounded-3xl border border-slate-200 bg-white/92 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 md:p-5">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">{pricesPageText.filterLabel}</p>
+            <div class="mt-4 flex flex-wrap gap-2.5" id="price-filters">
+              {priceCategories.map((cat, idx) => (
                 <button
                   type="button"
                   data-price-filter={cat.key}
-                  class:list={["category-chip", idx === 0 && "category-chip--active"]}
+                  class:list={[
+                    "category-chip",
+                    idx === 0 && "category-chip--active",
+                  ]}
                 >
                   {cat.label}
                 </button>
               ))}
             </div>
+          </section>
 
-            <div class="mt-8 space-y-4" id="price-list">
-              {prices.map((item) => {
-                const label = getPriceLabel(item);
-                const cat = item.category || "general";
-                const catLabel = getCategoryLabelEn(cat);
+          <section
+            class="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_24px_40px_-34px_rgba(15,23,42,0.5)] dark:border-slate-800 dark:bg-slate-950 md:p-6"
+            id="quote-builder"
+            data-quote-limit={quoteSelectionLimit}
+          >
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div class="max-w-4xl">
+                <p class="text-base font-semibold">{pricesPageText.quoteTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <strong>{pricesPageText.quoteSingleActionLabel}</strong> {pricesPageText.quoteSingleActionHelp}
+                  {" "}
+                  <strong>{pricesPageText.quoteAddActionLabel}</strong> {pricesPageText.quoteAddActionHelp}
+                </p>
+                <p class="mt-2 text-xs font-medium text-red-700 md:hidden dark:text-red-300">
+                  {pricesPageText.quoteMobileHelp}
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-200 dark:bg-red-950/30 dark:text-red-300 dark:ring-red-900/40">
+                  {pricesPageText.quoteLimitBadge}
+                </span>
+                <a
+                  id="quote-agendar-link"
+                  href="/en/agendar"
+                  class="btn-base btn-muted pointer-events-none"
+                >
+                  {pricesPageText.quoteDisabledCtaLabel}
+                </a>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.98rem]">
+              <p><span class="font-semibold">{pricesPageText.quoteSelectedLabel}</span> <span id="quote-count">0</span></p>
+              <p><span class="font-semibold">{pricesPageText.quoteTotalLabel}</span> <span id="quote-total">$0</span></p>
+            </div>
+            <p id="quote-list" class="mt-2 text-sm text-slate-600 dark:text-slate-300">{pricesPageText.quoteEmptyStateText}</p>
+            <p id="quote-limit-msg" class="mt-2 hidden text-xs font-medium text-amber-700 dark:text-amber-300">
+              {pricesPageText.quoteLimitReachedText}
+            </p>
+          </section>
+
+          <section class="space-y-6">
+            <div class="hidden items-start justify-between gap-4 rounded-3xl border border-slate-200 bg-white/78 p-4 shadow-sm md:flex dark:border-slate-800 dark:bg-slate-950/90">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">{pricesPageText.sectionEyebrow}</p>
+                <p class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">{pricesPageText.sectionTitle}</p>
+              </div>
+              <p class="max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {pricesPageText.sectionNote}
+              </p>
+            </div>
+
+            <div
+              id="quote-mobile-bar"
+              class="fixed bottom-20 left-4 right-[5.25rem] z-[68] hidden rounded-2xl border border-slate-200 bg-white/98 p-3 shadow-[0_18px_36px_-18px_rgba(15,23,42,0.55)] backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/98"
+            >
+              <div class="flex items-center gap-3">
+                <div class="min-w-0 flex-1">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                    {pricesPageText.quoteTitle}
+                  </p>
+                  <p class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <span id="quote-mobile-count">0</span> {pricesPageText.quoteSelectedCountSuffix}
+                  </p>
+                  <p class="text-sm text-slate-600 dark:text-slate-300">
+                    {pricesPageText.quoteTotalLabel} <span id="quote-mobile-total">$0</span>
+                  </p>
+                </div>
+                <a
+                  id="quote-mobile-link"
+                  href="/en/agendar"
+                  class="btn-base btn-muted !min-w-0 !px-4 text-center"
+                >
+                  {pricesPageText.quoteDisabledCtaLabel}
+                </a>
+              </div>
+            </div>
+
+            <div id="prices-cards-mobile" class="grid gap-3 md:hidden">
+              {prices.map((p: PriceRow) => {
+                const categoryKey = priceCategoryKey(p);
+                const categoryLabel = priceCategoryLabelByKey.get(categoryKey) || "Pest Control";
                 return (
                   <article
-                    data-price-card
-                    data-category={cat}
-                    class="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]"
+                    data-price-row
+                    data-category={categoryKey}
+                    data-service-title={p.serviceTitle || ""}
+                    data-service-id={p._id || ""}
+                    data-service-category={categoryKey}
+                    data-service-specialist={resolvePreferredSpecialistSlug(p)}
+                    data-service-price={Number(p.priceFrom || 0)}
+                    class="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950"
                   >
-                    <div class="min-w-0 flex-1">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <h3 class="font-semibold text-slate-900 dark:text-white">{label}</h3>
-                        <span class="rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
-                          {catLabel}
-                        </span>
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <p class="text-[0.72rem] font-extrabold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">
+                          {categoryLabel}
+                        </p>
+                        <p class="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">{p.serviceTitle || "-"}</p>
                       </div>
-                      {item.note && (
-                        <p class="mt-1 text-sm text-slate-500 dark:text-[rgb(210,170,170)]">{item.note}</p>
-                      )}
+                      <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                        {moneyUSD(p.priceFrom)}
+                      </span>
                     </div>
-                    <div class="flex shrink-0 items-center gap-6">
-                      <div class="text-right">
-                        {item.priceFrom != null && (
-                          <p class="text-lg font-bold text-red-700 dark:text-red-400">{moneyUSD(item.priceFrom)}</p>
-                        )}
-                        {item.duration && (
-                          <p class="text-xs text-slate-500 dark:text-[rgb(210,170,170)]">{item.duration}</p>
-                        )}
-                      </div>
+
+                    <div class="mt-3 grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+                      <p class="text-slate-500 dark:text-slate-400">Duration</p>
+                      <p class="font-medium text-slate-900 dark:text-slate-100">{p.duration || "-"}</p>
+                      <p class="text-slate-500 dark:text-slate-400">Note</p>
+                      <p class="font-medium text-slate-700 dark:text-slate-300">{p.note || "-"}</p>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-2 gap-2">
                       <a
-                        href={`/en/agendar?service=${encodeURIComponent(cat)}&services=${encodeURIComponent(label)}`}
-                        class="btn-base btn-primary shrink-0 text-sm"
+                        class="btn-base btn-primary w-full"
+                        href={buildAgendarHref(p)}
                       >
-                        Request
+                        {pricesPageText.quoteSingleActionLabel}
                       </a>
+                      <button
+                        type="button"
+                        data-select-service
+                        class="btn-base btn-secondary w-full"
+                      >
+                        {pricesPageText.quoteAddActionLabel}
+                      </button>
                     </div>
                   </article>
                 );
               })}
             </div>
 
-            <div id="price-empty" class="mt-8 hidden rounded-2xl border border-slate-100 bg-white p-8 text-center dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-              <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No services in this category yet.</p>
+            <div class="hidden overflow-x-auto rounded-3xl border border-slate-200 bg-white/95 md:block xl:overflow-visible dark:border-slate-800 dark:bg-slate-950">
+              <table class="min-w-[1080px] w-full table-auto text-[15px] lg:text-base">
+                <colgroup>
+                  <col class="w-[24%]" />
+                  <col class="w-[10%]" />
+                  <col class="w-[12%]" />
+                  <col class="w-[31%]" />
+                  <col class="w-[23%]" />
+                </colgroup>
+                <thead class="bg-slate-50 text-[0.72rem] uppercase tracking-[0.16em] text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                  <tr>
+                    <th class="px-4 py-4 text-left font-medium">{pricesPageText.tableServiceLabel}</th>
+                    <th class="px-4 py-4 text-left font-medium">{pricesPageText.tableFromLabel}</th>
+                    <th class="px-4 py-4 text-left font-medium">{pricesPageText.tableDurationLabel}</th>
+                    <th class="px-4 py-4 text-left font-medium">{pricesPageText.tableNoteLabel}</th>
+                    <th class="px-4 py-4 text-left font-medium">{pricesPageText.tableActionLabel}</th>
+                  </tr>
+                </thead>
+                <tbody id="prices-table-body">
+                  {prices.map((p: PriceRow, index: number) => (
+                    <tr
+                      data-price-row
+                      data-category={priceCategoryKey(p)}
+                      data-service-title={p.serviceTitle || ""}
+                      data-service-id={p._id || ""}
+                      data-service-category={priceCategoryKey(p)}
+                      data-service-specialist={resolvePreferredSpecialistSlug(p)}
+                      data-service-price={Number(p.priceFrom || 0)}
+                      class:list={[
+                        "align-top dark:border-slate-800",
+                        index === 0 ? "" : "border-t border-slate-200",
+                        index % 2 === 1 && "bg-slate-50/40 dark:bg-slate-900/30",
+                      ]}
+                    >
+                      <td class="px-4 py-5 font-semibold leading-7 text-slate-900 dark:text-slate-100">{p.serviceTitle || "-"}</td>
+                      <td class="px-4 py-5 font-medium">{moneyUSD(p.priceFrom)}</td>
+                      <td class="px-4 py-5 leading-7">{p.duration || "-"}</td>
+                      <td class="px-4 py-5 leading-7 text-slate-600 dark:text-slate-300">{p.note || ""}</td>
+                      <td class="px-4 py-5">
+                        <div class="flex min-w-[12.75rem] flex-col gap-2">
+                          <a
+                            class="btn-base btn-primary !min-w-0 w-full !px-3 text-sm"
+                            href={buildAgendarHref(p)}
+                          >
+                            {pricesPageText.quoteSingleActionLabel}
+                          </a>
+                          <button
+                            type="button"
+                            data-select-service
+                            class="btn-base btn-secondary !min-w-0 w-full !px-3 text-sm"
+                          >
+                            {pricesPageText.quoteAddActionLabel}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </>
-        )}
 
-      </div>
-    </section>
-
+            <p id="prices-empty" class="hidden rounded-2xl border border-slate-200 bg-white p-4 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+              {pricesPageText.filteredEmptyStateText}
+            </p>
+          </section>
+        </div>
+      </>
+    )}
   </main>
+
   <Footer />
 </Layout>
 
-<script is:inline>
-  (() => {
-    const buttons = Array.from(document.querySelectorAll("[data-price-filter]"));
-    const cards = Array.from(document.querySelectorAll("[data-price-card]"));
-    const empty = document.getElementById("price-empty");
+<script is:inline define:vars={{ pricesPageText }}>
+  const quoteBuilder = document.getElementById("quote-builder");
+  const MAX_QUOTE_ITEMS = Math.max(1, Number(quoteBuilder?.getAttribute("data-quote-limit") || 6));
+  const priceFilterButtons = Array.from(document.querySelectorAll("[data-price-filter]"));
+  const priceRows = Array.from(document.querySelectorAll("[data-price-row]"));
+  const addButtons = Array.from(document.querySelectorAll("[data-select-service]"));
+  const pricesEmpty = document.getElementById("prices-empty");
+  const quoteCount = document.getElementById("quote-count");
+  const quoteTotal = document.getElementById("quote-total");
+  const quoteList = document.getElementById("quote-list");
+  const quoteLimitMsg = document.getElementById("quote-limit-msg");
+  const quoteAgendarLink = document.getElementById("quote-agendar-link");
+  const quoteMobileBar = document.getElementById("quote-mobile-bar");
+  const quoteMobileCount = document.getElementById("quote-mobile-count");
+  const quoteMobileTotal = document.getElementById("quote-mobile-total");
+  const quoteMobileLink = document.getElementById("quote-mobile-link");
+  let activePriceFilter = "all";
+  const selectedServices = new Map();
+  const getRowKey = (row) =>
+    String(
+      row?.getAttribute("data-service-id") ||
+      row?.getAttribute("data-service-title") ||
+      ""
+    ).trim();
 
-    const setFilter = (key) => {
-      let visible = 0;
-      cards.forEach((card) => {
-        const cat = card.getAttribute("data-category") || "general";
-        const show = key === "all" || cat === key;
-        card.classList.toggle("hidden", !show);
-        if (show) visible++;
-      });
-      if (empty) empty.classList.toggle("hidden", visible > 0);
-      buttons.forEach((btn) => {
-        btn.classList.toggle("category-chip--active", btn.getAttribute("data-price-filter") === key);
-      });
+  const animateFilteredItems = (items) => {
+    items.forEach((item, index) => {
+      item.classList.remove("filter-item-in", "filter-item-in-slide");
+      item.style.animationDelay = `${Math.min(index, 10) * 40}ms`;
+      void item.offsetWidth;
+      item.classList.add(item.tagName === "TR" ? "filter-item-in" : "filter-item-in-slide");
+    });
+  };
+
+  const moneyUSD = (value) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value || 0);
+
+  const updatePriceFilterUI = () => {
+    priceFilterButtons.forEach((btn) => {
+      const isActive = btn.dataset.priceFilter === activePriceFilter;
+      btn.classList.toggle("category-chip--active", isActive);
+    });
+  };
+
+  const applyPriceFilter = (animate = false) => {
+    let visibleCount = 0;
+    const visibleRows = [];
+
+    priceRows.forEach((row) => {
+      const category = row.dataset.category || "general";
+      const visible = activePriceFilter === "all" || category === activePriceFilter;
+      row.classList.toggle("hidden", !visible);
+      if (visible) {
+        visibleCount += 1;
+        visibleRows.push(row);
+      }
+    });
+
+    if (pricesEmpty) pricesEmpty.classList.toggle("hidden", visibleCount > 0);
+    if (animate) requestAnimationFrame(() => animateFilteredItems(visibleRows));
+  };
+
+  const updateQuoteUI = () => {
+    const selected = Array.from(selectedServices.values());
+    const total = selected.reduce((acc, item) => acc + (Number(item.price) || 0), 0);
+    const reachedLimit = selected.length >= MAX_QUOTE_ITEMS;
+    if (quoteCount) quoteCount.textContent = String(selected.length);
+    if (quoteTotal) quoteTotal.textContent = moneyUSD(total);
+    if (quoteMobileBar) quoteMobileBar.classList.toggle("hidden", selected.length === 0);
+    if (quoteMobileCount) quoteMobileCount.textContent = String(selected.length);
+    if (quoteMobileTotal) quoteMobileTotal.textContent = moneyUSD(total);
+    if (quoteLimitMsg) quoteLimitMsg.classList.toggle("hidden", !reachedLimit);
+
+    if (quoteList) {
+      quoteList.textContent = selected.length > 0
+        ? selected.map((item) => item.title).join(" | ")
+        : pricesPageText.quoteEmptyStateText;
+    }
+
+    const setQuoteLinkState = (link, { enabled, href, text }) => {
+      if (!link) return;
+      link.setAttribute("href", href);
+      link.textContent = text;
+      link.classList.toggle("pointer-events-none", !enabled);
+      link.classList.toggle("btn-muted", !enabled);
+      link.classList.toggle("btn-primary", enabled);
     };
 
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => setFilter(btn.getAttribute("data-price-filter") || "all"));
+    if (selected.length === 0) {
+      setQuoteLinkState(quoteAgendarLink, {
+        enabled: false,
+        href: "/en/agendar",
+        text: pricesPageText.quoteDisabledCtaLabel,
+      });
+      setQuoteLinkState(quoteMobileLink, {
+        enabled: false,
+        href: "/en/agendar",
+        text: pricesPageText.quoteDisabledCtaLabel,
+      });
+      return;
+    }
+
+    const params = new URLSearchParams();
+    params.set("service", selected[0].category || "general");
+    const uniqueSpecialists = Array.from(
+      new Set(selected.map((item) => String(item.specialist || "").trim()).filter(Boolean))
+    );
+    const hasMultipleSelection = selected.length > 1;
+    const shouldSetPrimaryRouting = !hasMultipleSelection;
+
+    if (shouldSetPrimaryRouting && selected[0].specialist) params.set("specialist", selected[0].specialist);
+    if (hasMultipleSelection && uniqueSpecialists.length > 1) {
+      params.set("routing", "general");
+    }
+    selected.forEach((item) => {
+      if (item.id) params.append("priceIds", item.id);
     });
-  })();
+    selected.forEach((item) => params.append("services", item.title));
+    selected.forEach((item) => params.append("specialists", item.specialist || "__none__"));
+    if (total > 0) params.set("approxTotal", String(Math.round(total)));
+    const targetHref = `/en/agendar?${params.toString()}`;
+    setQuoteLinkState(quoteAgendarLink, {
+      enabled: true,
+      href: targetHref,
+      text: pricesPageText.quoteContinueCtaLabel,
+    });
+    setQuoteLinkState(quoteMobileLink, {
+      enabled: true,
+      href: targetHref,
+      text: pricesPageText.quoteMobileCtaLabel,
+    });
+
+    addButtons.forEach((button) => {
+      const row = button.closest("[data-price-row]");
+      const rowKey = getRowKey(row);
+      const isSelected = selectedServices.has(rowKey);
+      const disableAdd = reachedLimit && !isSelected;
+
+      button.textContent = isSelected ? pricesPageText.quoteRemoveLabel : pricesPageText.quoteAddActionLabel;
+      button.classList.toggle("bg-red-100", isSelected);
+      button.classList.toggle("text-red-800", isSelected);
+      button.classList.toggle("border-red-300", isSelected);
+
+      button.toggleAttribute("disabled", disableAdd);
+      button.classList.toggle("opacity-50", disableAdd);
+      button.classList.toggle("cursor-not-allowed", disableAdd);
+    });
+  };
+
+  addButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest("[data-price-row]");
+      if (!row) return;
+
+      const rowKey = getRowKey(row);
+      const title = String(row.getAttribute("data-service-title") || "").trim();
+      const category = String(row.getAttribute("data-service-category") || "").trim();
+      const specialist = String(row.getAttribute("data-service-specialist") || "").trim();
+      const price = Number(row.getAttribute("data-service-price") || 0);
+      if (!rowKey || !title) return;
+
+      if (selectedServices.has(rowKey)) {
+        selectedServices.delete(rowKey);
+      } else {
+        if (selectedServices.size >= MAX_QUOTE_ITEMS) {
+          updateQuoteUI();
+          return;
+        }
+        selectedServices.set(rowKey, { id: rowKey, title, category, specialist, price });
+      }
+      updateQuoteUI();
+    });
+  });
+
+  priceFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activePriceFilter = btn.dataset.priceFilter || "all";
+      updatePriceFilterUI();
+      applyPriceFilter(true);
+    });
+  });
+
+  updatePriceFilterUI();
+  applyPriceFilter(false);
+  updateQuoteUI();
 </script>

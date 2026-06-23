@@ -2,131 +2,280 @@
 import Layout from "../../../layouts/Layout.astro";
 import Header from "../../../components/Header.astro";
 import Footer from "../../../components/Footer.astro";
+import { business as businessConfig } from "../../../config/clinic";
 import { getBusinessInfo, getSpecialists } from "../../../lib/sanity.js";
-import { business } from "../../../config/clinic";
-import { resolveWhatsAppNumber } from "../../../utils/whatsapp";
-import { getCategoryLabelEn } from "../../../utils/category";
+import { normalizeServiceSlug } from "../../../utils/prefill";
+import { normalizeCategory } from "../../../utils/category";
+import {
+  buildContactMessage,
+  buildWhatsAppUrl,
+  resolveWhatsAppNumber,
+  resolveWhatsAppReason,
+} from "../../../utils/whatsapp";
 
-type Technician = {
+type Specialist = {
   _id?: string;
+  slug?: string;
   name?: string;
   specialty?: string;
   specialtyEn?: string;
+  specialtyCategory?: string;
   shortBio?: string;
   shortBioEn?: string;
   focusAreas?: string[];
   focusAreasEn?: string[];
-  photoUrl?: string;
   ctaText?: string;
   ctaTextEn?: string;
   ctaUrl?: string;
   useWhatsAppButton?: boolean;
   whatsAppNumber?: string;
   whatsAppMessage?: string;
-  specialtyCategory?: string;
-  slug?: string | { current?: string };
+  photoUrl?: string;
 };
 
-const cms = await getBusinessInfo();
-const technicians: Technician[] = (await getSpecialists()) || [];
-const businessName = cms?.name || business.name;
-const waFallback = resolveWhatsAppNumber(cms?.whatsappSpecialistsNumber, business.whatsappNumber);
+const business = await getBusinessInfo();
+const specialists: Specialist[] = (await getSpecialists()) || [];
 
-const getSlug = (t: Technician) =>
-  typeof t.slug === "string" ? t.slug : t.slug?.current || "";
+function specialistHref(specialist: Specialist) {
+  return `/en/especialistas/${encodeURIComponent((specialist?.slug || specialist?._id || "").trim())}`;
+}
+
+const specialistCategories = [
+  { key: "all",        label: "All" },
+  { key: "roedores",   label: "Rodents" },
+  { key: "cucarachas", label: "Cockroaches" },
+  { key: "termitas",   label: "Termites" },
+  { key: "chinches",   label: "Bed Bugs" },
+  { key: "hormigas",   label: "Ants" },
+  { key: "avispas",    label: "Wasps" },
+  { key: "inspeccion", label: "Inspection" },
+  { key: "general",    label: "General" },
+];
+
+function specialistCategoryKey(specialty: string | undefined) {
+  const text = normalizeCategory(specialty || "");
+  if (!text) return "general";
+  if (text.includes("roed") || text.includes("rata") || text.includes("raton")) return "roedores";
+  if (text.includes("cucar")) return "cucarachas";
+  if (text.includes("termit")) return "termitas";
+  if (text.includes("chinch")) return "chinches";
+  if (text.includes("hormig")) return "hormigas";
+  if (text.includes("avispa") || text.includes("abeja")) return "avispas";
+  if (text.includes("inspec")) return "inspeccion";
+  return "general";
+}
+
+function specialistCategoryFromData(specialist: Specialist) {
+  const fromCms = normalizeCategory(specialist.specialtyCategory || "");
+  if (["roedores", "cucarachas", "termitas", "chinches", "hormigas", "avispas", "inspeccion", "general"].includes(fromCms)) return fromCms;
+  return specialistCategoryKey(specialist.specialty);
+}
+
+const generalWaNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  businessConfig.whatsappNumber
+);
+const specialistsWaNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWaNumber
+);
+
+function agendarSpecialistHref(specialist: Specialist) {
+  const service = normalizeServiceSlug(specialist.specialtyCategory || specialist.specialty || "");
+  const slug = (specialist.slug || specialist._id || "").trim();
+  const serviceName = (specialist.specialtyEn || specialist.specialty || "").trim();
+  const params = new URLSearchParams();
+  if (service) params.set("service", service);
+  if (slug) params.set("specialist", slug);
+  if (serviceName) params.append("services", serviceName);
+  const qs = params.toString();
+  return qs ? `/en/agendar?${qs}` : "/en/agendar";
+}
+
+function specialistWhatsAppHref(specialist: Specialist) {
+  const waNumber = resolveWhatsAppNumber(
+    specialist?.whatsAppNumber,
+    specialistsWaNumber
+  );
+  const customReasonRaw = String(specialist.whatsAppMessage || "").trim();
+  const reason = resolveWhatsAppReason(
+    customReasonRaw || business?.whatsappSpecialistsMessage,
+    "Hi, I'd like to schedule with {especialista} at {negocio}. Do you have availability?",
+    {
+      specialist: specialist.name || "this technician",
+      service: specialist.specialtyEn || specialist.specialty || "Technician",
+      business: business?.name || businessConfig.name,
+      problem: business?.whatsappQuickProblemDefault || "",
+    }
+  );
+
+  return buildWhatsAppUrl(
+    buildContactMessage({
+      service: specialist.specialtyEn || specialist.specialty || "Technician",
+      reason,
+    }),
+    waNumber
+  );
+}
+
+function canUseSpecialistWhatsApp(specialist: Specialist) {
+  const waNumber = resolveWhatsAppNumber(
+    specialist?.whatsAppNumber,
+    specialistsWaNumber
+  );
+  return specialist.useWhatsAppButton !== false && Boolean(waNumber);
+}
 ---
 
 <Layout
-  title={`Technicians – ${businessName}`}
-  description={`Meet our certified pest control technicians at ${businessName} in Charlotte, NC.`}
+  title={`Technicians | ${business?.name || "FumiPro NC"}`}
+  description={`Meet the certified team at ${business?.name || "FumiPro NC"} in ${business?.area || "Charlotte, NC"}. Licensed pest control technicians.`}
 >
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-5xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Our team</p>
-        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">Technicians</h1>
-        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          Our licensed and certified pest control specialists.
-        </p>
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="max-w-4xl text-left text-3xl font-bold tracking-tight md:text-4xl">Our Technicians</h1>
+    <p class="mt-2 max-w-4xl text-left text-slate-800 dark:text-slate-200">
+      Meet the certified team that protects your home or business in Charlotte, NC.
+    </p>
+
+    {specialists.length === 0 ? (
+      <div class="mt-6 max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        We'll share specialist profiles soon.
       </div>
-    </section>
+    ) : (
+      <>
+        <div class="mt-6 flex flex-wrap gap-2" id="specialist-filters">
+          {specialistCategories.map((cat, idx) => (
+            <button
+              type="button"
+              data-specialist-filter={cat.key}
+              class:list={[
+                "category-chip",
+                idx === 0 && "category-chip--active",
+              ]}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-5xl px-4">
-        {technicians.length === 0 ? (
-          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">Technician profiles coming soon.</p>
-        ) : (
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal>
-            {technicians.map((tech) => {
-              const specialty = tech.specialtyEn || tech.specialty || "";
-              const bio = tech.shortBioEn || tech.shortBio || "";
-              const areas = tech.focusAreasEn || tech.focusAreas || [];
-              const ctaLabel = tech.ctaTextEn || tech.ctaText || "Request this technician";
-              const waNum = resolveWhatsAppNumber(tech.whatsAppNumber, waFallback);
-              const waMsg = encodeURIComponent(
-                tech.whatsAppMessage ||
-                `Hi, I'd like to request service with ${tech.name || "your technician"} at ${businessName}.`
-              );
-              const ctaHref = tech.useWhatsAppButton && waNum
-                ? `https://wa.me/${waNum}?text=${waMsg}`
-                : (tech.ctaUrl || `/en/agendar${getSlug(tech) ? `?technician=${getSlug(tech)}` : ""}`);
-              const isExternal = ctaHref.startsWith("https://wa.me");
-              return (
-                <div class="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-                  {tech.photoUrl ? (
-                    <img
-                      src={tech.photoUrl}
-                      alt={tech.name || "Technician"}
-                      class="h-48 w-full rounded-t-2xl object-cover"
-                      loading="lazy"
-                      data-fallback-src="/placeholder.jpg"
-                    />
-                  ) : (
-                    <div class="flex h-48 w-full items-center justify-center rounded-t-2xl bg-red-100 dark:bg-[rgb(24,6,6)]">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" />
-                      </svg>
-                    </div>
-                  )}
-                  <div class="p-5">
-                    <h3 class="font-['Manrope',sans-serif] font-bold text-slate-900 dark:text-white">{tech.name}</h3>
-                    {specialty && (
-                      <p class="mt-0.5 text-sm font-medium text-red-700 dark:text-red-400">{specialty}</p>
-                    )}
-                    {getCategoryLabelEn(tech.specialtyCategory) && (
-                      <span class="mt-2 inline-block rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:bg-[rgb(24,6,6)] dark:text-red-400">
-                        {getCategoryLabelEn(tech.specialtyCategory)}
-                      </span>
-                    )}
-                    {bio && <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-[rgb(245,210,210)]">{bio.slice(0, 160)}{bio.length > 160 ? "…" : ""}</p>}
-                    {areas.length > 0 && (
-                      <ul class="mt-3 space-y-1">
-                        {areas.slice(0, 4).map((area: string) => (
-                          <li class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-[rgb(245,200,200)]">
-                            <span class="text-red-400">✓</span> {area}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" id="specialists-list">
+          {specialists.map((specialist: Specialist) => (
+            <article
+              data-specialist-card
+              data-category={specialistCategoryFromData(specialist)}
+              class="card-surface overflow-hidden rounded-2xl shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg flex h-full flex-col"
+            >
+              <img
+                class="h-56 w-full object-cover"
+                src={specialist.photoUrl || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1000&q=80"}
+                alt={specialist.name || "Technician"}
+                loading="lazy"
+                data-fallback-src="/placeholder.jpg"
+              />
+              <div class="flex flex-1 flex-col p-5">
+                <h2 class="text-lg font-bold">{specialist.name || "Technician"}</h2>
+                <p class="mt-1 text-sm font-semibold text-red-700 dark:text-red-300">
+                  {specialist.specialtyEn || specialist.specialty || "Specialty"}
+                </p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  {specialist.shortBioEn || specialist.shortBio || "Profile available soon."}
+                </p>
+
+                {Array.isArray(specialist.focusAreasEn || specialist.focusAreas) &&
+                  (specialist.focusAreasEn || specialist.focusAreas || []).length > 0 && (
+                  <ul class="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                    {(specialist.focusAreasEn || specialist.focusAreas || []).slice(0, 4).map((area: string) => (
+                      <li class="truncate">- {area}</li>
+                    ))}
+                  </ul>
+                )}
+
+                <div class="mt-4 grid gap-2 pt-1 md:mt-auto">
+                  <a class="btn-base btn-primary w-full" href={specialistHref(specialist)}>
+                    View profile
+                  </a>
+                  <a
+                    class="btn-base btn-secondary w-full"
+                    href={agendarSpecialistHref(specialist)}
+                  >
+                    Request this technician
+                  </a>
+                  {canUseSpecialistWhatsApp(specialist) && (
                     <a
-                      href={ctaHref}
-                      target={isExternal ? "_blank" : undefined}
-                      rel={isExternal ? "noopener noreferrer" : undefined}
-                      class="btn-base btn-primary mt-5 w-full text-center text-sm"
+                      class="btn-base btn-secondary w-full"
+                      href={specialistWhatsAppHref(specialist)}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      {ctaLabel}
+                      WhatsApp
                     </a>
-                  </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </section>
+              </div>
+            </article>
+          ))}
+        </div>
+      </>
+    )}
 
+    <p id="specialists-empty" class="mt-6 hidden max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+      No specialists in that category yet.
+    </p>
   </main>
+
   <Footer />
 </Layout>
+
+<script is:inline>
+  const specialistFilterButtons = Array.from(document.querySelectorAll("[data-specialist-filter]"));
+  const specialistCards = Array.from(document.querySelectorAll("[data-specialist-card]"));
+  const specialistEmpty = document.getElementById("specialists-empty");
+  let activeSpecialistFilter = "all";
+
+  const animateFilteredItems = (items) => {
+    items.forEach((item, index) => {
+      item.classList.remove("filter-item-in", "filter-item-in-slide");
+      item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+      void item.offsetWidth;
+      item.classList.add("filter-item-in-slide");
+    });
+  };
+
+  const updateSpecialistFilterUI = () => {
+    specialistFilterButtons.forEach((btn) => {
+      const isActive = btn.dataset.specialistFilter === activeSpecialistFilter;
+      btn.classList.toggle("category-chip--active", isActive);
+    });
+  };
+
+  const applySpecialistFilter = (animate = false) => {
+    let visibleCount = 0;
+    const visibleCards = [];
+
+    specialistCards.forEach((card) => {
+      const category = card.dataset.category || "general";
+      const visible = activeSpecialistFilter === "all" || category === activeSpecialistFilter;
+      card.classList.toggle("hidden", !visible);
+      if (visible) {
+        visibleCount += 1;
+        visibleCards.push(card);
+      }
+    });
+
+    if (specialistEmpty) specialistEmpty.classList.toggle("hidden", visibleCount > 0);
+    if (animate) requestAnimationFrame(() => animateFilteredItems(visibleCards));
+  };
+
+  specialistFilterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeSpecialistFilter = btn.dataset.specialistFilter || "all";
+      updateSpecialistFilterUI();
+      applySpecialistFilter(true);
+    });
+  });
+
+  updateSpecialistFilterUI();
+  applySpecialistFilter(false);
+</script>

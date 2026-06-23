@@ -2,243 +2,1623 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { getBusinessInfo, getServices } from "../../lib/sanity.js";
-import { business } from "../../config/clinic";
+import { business as businessConfig } from "../../config/clinic";
+import { getBusinessInfo, getPrices, getServices, getSpecialists } from "../../lib/sanity.js";
+import { getPrefillFromUrl, normalizeServiceSlug } from "../../utils/prefill";
+import { safeCmsUrl } from "../../utils/url";
 import { resolveWhatsAppNumber } from "../../utils/whatsapp";
 
-const cms = await getBusinessInfo();
-const businessName = cms?.name || business.name;
-const waNumber = resolveWhatsAppNumber(cms?.whatsappCitasNumber, business.whatsappNumber);
+type ServiceItem = {
+  title?: string;
+  titleEn?: string;
+  category?: string;
+  slug?: string | { current?: string };
+  priceFrom?: number;
+  leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+};
 
-const allServices = (await getServices()) || [];
-const activeServices = allServices.filter((s: any) => s.title || s.titleEn);
+type Specialist = {
+  _id?: string;
+  slug?: string;
+  name?: string;
+  specialty?: string;
+  specialtyEn?: string;
+  specialtyCategory?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+  active?: boolean;
+};
 
-const { service: serviceParam } = Astro.url.searchParams
-  ? Object.fromEntries(Astro.url.searchParams.entries())
-  : {};
+type PriceRow = {
+  _id?: string;
+  serviceTitle?: string;
+  category?: string;
+  leadSpecialistSlug?: string;
+  whatsAppNumber?: string;
+  whatsAppMessage?: string;
+  priceFrom?: number;
+};
 
-const getSlug = (s: any) =>
-  typeof s.slug === "string" ? s.slug : s.slug?.current || "";
+const business = await getBusinessInfo();
+const services: ServiceItem[] = (await getServices()) || [];
+const specialists: Specialist[] = (await getSpecialists()) || [];
+const prices: PriceRow[] = (await getPrices()) || [];
+
+const generalWhatsappNumber = resolveWhatsAppNumber(
+  business?.whatsappCitasNumber,
+  businessConfig.whatsappNumber
+);
+const specialistsWhatsappNumber = resolveWhatsAppNumber(
+  business?.whatsappSpecialistsNumber,
+  generalWhatsappNumber
+);
+const generalWhatsAppMessage = String(business?.whatsappGeneralMessage || "").trim();
+const specialistsWhatsAppMessage = String(business?.whatsappSpecialistsMessage || "").trim();
+const quickProblemDefault = String(business?.whatsappQuickProblemDefault || "").trim();
+const address = business?.address || businessConfig.address;
+const phoneDisplay = business?.phone || businessConfig.phoneDisplay;
+const phoneHref = `tel:${String(phoneDisplay).replace(/\D/g, "") || businessConfig.phoneTel}`;
+const hoursText =
+  (business as any)?.hoursTextEn ||
+  business?.hoursText ||
+  "Mon–Fri 10:00 – 18:00 · Sat 10:00 – 16:00 · Sun closed";
+const mapsUrl = safeCmsUrl(business?.mapsUrl, businessConfig.googleMapsUrl);
+const hasQuickWhatsApp = Boolean(generalWhatsappNumber);
+const quickWhatsAppHref = hasQuickWhatsApp
+  ? `https://wa.me/${generalWhatsappNumber}?text=${encodeURIComponent(`Hi, I'd like to schedule a service at ${business?.name || businessConfig.name}. Can you help me?`)}`
+  : "/en/servicios";
+
+const categoryMap = new Map<string, string>();
+for (const c of businessConfig.serviceCategories) {
+  categoryMap.set(c.key, (c as any).labelEn || c.label);
+}
+for (const s of services) {
+  const key = normalizeServiceSlug(s?.category || "");
+  if (key && !categoryMap.has(key)) categoryMap.set(key, s?.category || key);
+}
+for (const sp of specialists) {
+  const key = normalizeServiceSlug(sp?.specialtyCategory || sp?.specialty || "");
+  if (key && !categoryMap.has(key)) categoryMap.set(key, sp?.specialtyCategory || key);
+}
+
+const serviceOptions = Array.from(categoryMap.entries()).map(([key, label]) => ({ key, label }));
+
+const specialistOptions = specialists
+  .filter((sp) => Boolean((sp?.slug || sp?._id || "").trim()))
+  .map((sp) => ({
+    slug: String(sp?.slug || sp?._id || "").trim(),
+    name: sp?.name || "Technician",
+    category: normalizeServiceSlug(sp?.specialtyCategory || sp?.specialty || ""),
+    specialty: sp?.specialtyEn || sp?.specialty || "",
+    whatsAppNumber: String(sp?.whatsAppNumber || "").trim(),
+    whatsAppMessage: String(sp?.whatsAppMessage || "").trim(),
+  }));
+
+const prefill = getPrefillFromUrl(Astro.url);
+const quoteSelectionLimit = Math.max(1, Number(businessConfig.quoteSelectionLimit || 6));
+const rawPrefillServices = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteSelectionLimit) : [];
+
+const priceCatalog = prices.map((item) => ({
+  id: item._id || "",
+  title: item.serviceTitle || "",
+  category: normalizeServiceSlug(item.category || ""),
+  specialist: String(item.leadSpecialistSlug || "").trim(),
+  waNumber: resolveWhatsAppNumber(item.whatsAppNumber),
+  waMessage: String(item.whatsAppMessage || "").trim(),
+  priceFrom: Number(item.priceFrom || 0),
+}));
+
+const serviceCatalog = services.map((item) => ({
+  title: item.titleEn || item.title || "",
+  category: normalizeServiceSlug(item.category || item.title || ""),
+  specialist: String(item.leadSpecialistSlug || "").trim(),
+  waNumber: resolveWhatsAppNumber(item.whatsAppNumber),
+  waMessage: String(item.whatsAppMessage || "").trim(),
+  priceFrom: Number(item.priceFrom || 0),
+}));
+
+function normalizeCatalogText(value: string | null | undefined) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const prefillPriceIds = Array.isArray(prefill.priceIds) ? prefill.priceIds.slice(0, quoteSelectionLimit) : [];
+const prefillServicesFromIds = prefillPriceIds
+  .map((priceId) => priceCatalog.find((row) => row.id === priceId)?.title || "")
+  .filter(Boolean);
+const prefillServices =
+  rawPrefillServices.length > 0
+    ? rawPrefillServices.map((serviceName, index) => {
+        const priceId = prefillPriceIds[index] || "";
+        const trustedPrice = priceId ? priceCatalog.find((row) => row.id === priceId) : undefined;
+        return trustedPrice?.title || serviceName;
+      })
+    : prefillServicesFromIds;
+const prefillApproxTotal = prefillServices.reduce((sum, serviceName, index) => {
+  const priceId = prefillPriceIds[index] || "";
+  const priceMatch =
+    (priceId &&
+      priceCatalog.find(
+        (row) => row.id === priceId && normalizeCatalogText(row.title) === normalizeCatalogText(serviceName)
+      )) ||
+    priceCatalog.find(
+      (row) => normalizeCatalogText(row.title) === normalizeCatalogText(serviceName)
+    );
+  const price = Number(priceMatch?.priceFrom || 0);
+  return sum + (Number.isFinite(price) && price > 0 ? price : 0);
+}, 0);
+
+const bookingPageContentRaw = (business as any)?.bookingPageContentEn || business?.bookingPageContent || {};
+const bookingPageText = {
+  eyebrow: String(bookingPageContentRaw.eyebrow || "Quick request").trim(),
+  title: String(bookingPageContentRaw.title || "Request your service").trim(),
+  intro: String(
+    bookingPageContentRaw.intro ||
+      "Leave your details and we'll help you request service via WhatsApp. If you're coming from services or pricing, your selection is already here so you don't have to start over."
+  ).trim(),
+  primaryCtaText: String(bookingPageContentRaw.primaryCtaText || "Fill out form").trim(),
+  primaryCtaUrl: String(bookingPageContentRaw.primaryCtaUrl || "#appointment-form").trim(),
+  secondaryCtaText: String(bookingPageContentRaw.secondaryCtaText || "View services").trim(),
+  secondaryCtaUrl: String(bookingPageContentRaw.secondaryCtaUrl || "/en/servicios").trim(),
+  panelLabel: String(bookingPageContentRaw.panelLabel || "It takes just a minute").trim(),
+  stepOneTitle: String(bookingPageContentRaw.stepOneTitle || "Tell us the basics").trim(),
+  stepOneBody: String(
+    bookingPageContentRaw.stepOneBody || "With your service, name and phone number we can already receive your request."
+  ).trim(),
+  stepTwoTitle: String(bookingPageContentRaw.stepTwoTitle || "We handle the rest with you").trim(),
+  stepTwoBody: String(
+    bookingPageContentRaw.stepTwoBody || "If you don't know the date, time or technician yet, you can decide later."
+  ).trim(),
+  metaOneValue: String(bookingPageContentRaw.metaOneValue || "WhatsApp").trim(),
+  metaOneLabel: String(bookingPageContentRaw.metaOneLabel || "we reply by message").trim(),
+  metaTwoValue: String(bookingPageContentRaw.metaTwoValue || "No rush").trim(),
+  metaTwoLabel: String(bookingPageContentRaw.metaTwoLabel || "date and time can wait").trim(),
+  formTitle: String(bookingPageContentRaw.formTitle || "Service details").trim(),
+  summaryTitle: String(bookingPageContentRaw.summaryTitle || "Your request summary").trim(),
+  summaryEmptyStateText: String(
+    bookingPageContentRaw.summaryEmptyStateText || "Select a service and we'll show you an approximate price."
+  ).trim(),
+  summaryCategoriesLabel: String(bookingPageContentRaw.summaryCategoriesLabel || "Selected areas:").trim(),
+  summaryCategoriesHint: String(bookingPageContentRaw.summaryCategoriesHint || "Tap one to remove it.").trim(),
+  summaryRestoreLabel: String(bookingPageContentRaw.summaryRestoreLabel || "Restore my list").trim(),
+  summaryTotalLabel: String(bookingPageContentRaw.summaryTotalLabel || "Approximate total:").trim(),
+};
+
+const validServiceKeys = new Set(serviceOptions.map((option) => option.key));
+let resolvedPrefillService = prefill.service || "";
+if (!validServiceKeys.has(resolvedPrefillService)) {
+  const firstServiceFromList = prefillServices[0] || "";
+  const matchedCatalog = priceCatalog.find(
+    (row) =>
+      row.title &&
+      row.category &&
+      row.title.toLowerCase().trim() === firstServiceFromList.toLowerCase().trim() &&
+      validServiceKeys.has(row.category)
+  );
+  if (matchedCatalog?.category) resolvedPrefillService = matchedCatalog.category;
+}
 ---
 
-<Layout
-  title={`Request Service – ${businessName}`}
-  description={`Request pest control service in Charlotte, NC. Fill out the form and we'll contact you to confirm via WhatsApp.`}
->
+<Layout title={`Book Service | ${business?.name || "FumiPro NC"}`}>
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-14 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-5xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Quick booking</p>
-        <h1 class="mt-2 font-['Manrope',sans-serif] text-4xl font-extrabold text-slate-900 sm:text-5xl dark:text-white">
-          Request Service
-        </h1>
-        <p class="mt-3 max-w-lg text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          Fill in your details below and we'll reach out via WhatsApp to confirm your appointment.
-        </p>
+  <main class="mx-auto max-w-7xl px-4 py-10" id="contenido-principal">
+    <section class="page-intro">
+      <div class="page-intro__layout">
+        <div>
+          <p class="page-intro__eyebrow">{bookingPageText.eyebrow}</p>
+          <h1 class="page-intro__title mt-3">{bookingPageText.title}</h1>
+          <p class="page-intro__copy mt-3">{bookingPageText.intro}</p>
+          <div class="page-intro__actions mt-6">
+            <a class="btn-base btn-primary" href={bookingPageText.primaryCtaUrl}>{bookingPageText.primaryCtaText}</a>
+            <a class="btn-base btn-secondary" href={bookingPageText.secondaryCtaUrl}>{bookingPageText.secondaryCtaText}</a>
+          </div>
+        </div>
+
+        <aside class="page-intro__panel">
+          <p class="page-intro__panel-label">{bookingPageText.panelLabel}</p>
+          <div class="page-intro__panel-list mt-4">
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">1</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{bookingPageText.stepOneTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{bookingPageText.stepOneBody}</p>
+              </div>
+            </div>
+            <div class="page-intro__panel-item">
+              <span class="page-intro__step">2</span>
+              <div>
+                <p class="font-semibold text-slate-900 dark:text-slate-100">{bookingPageText.stepTwoTitle}</p>
+                <p class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{bookingPageText.stepTwoBody}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-intro__meta-grid">
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{bookingPageText.metaOneValue}</span>
+              <span class="page-intro__meta-label">{bookingPageText.metaOneLabel}</span>
+            </div>
+            <div class="page-intro__meta">
+              <span class="page-intro__meta-value">{bookingPageText.metaTwoValue}</span>
+              <span class="page-intro__meta-label">{bookingPageText.metaTwoLabel}</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-5xl px-4">
-        <div class="grid gap-8 lg:grid-cols-[1fr_340px]">
+    <div class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:items-start">
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_24px_40px_-34px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950 md:p-7">
+        <h2 class="text-lg font-semibold">{bookingPageText.formTitle}</h2>
 
-          <div class="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-            <h2 class="mb-6 font-['Manrope',sans-serif] text-xl font-bold text-slate-900 dark:text-white">
-              Service request form
-            </h2>
+        <form id="appointment-form" class="mt-4 grid gap-4" novalidate autocomplete="off">
+          <div id="quote-summary" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm dark:border-red-900/40 dark:bg-red-950/20">
+            <p class="font-semibold text-slate-900 dark:text-slate-100">{bookingPageText.summaryTitle}</p>
+            <p id="context-badge" class="mt-1 hidden text-xs font-semibold text-red-700 dark:text-red-300">
+              Suggested technician
+            </p>
+            <p id="quote-routing-target" class="mt-1 hidden text-xs font-medium text-slate-600 dark:text-slate-300"></p>
+            <p id="quote-services" class="mt-1 text-slate-700 dark:text-slate-200">
+              {prefillServices.length > 0 ? prefillServices.join(" · ") : bookingPageText.summaryEmptyStateText}
+            </p>
+            <div id="quote-categories-wrap" class="mt-1 hidden">
+              <p class="text-xs font-medium text-slate-600 dark:text-slate-300">{bookingPageText.summaryCategoriesLabel}</p>
+              <div id="quote-categories" class="mt-1 flex flex-wrap gap-2"></div>
+              <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{bookingPageText.summaryCategoriesHint}</p>
+            </div>
+            <button id="restore-quote-btn" type="button" class="btn-base btn-ghost mt-2 hidden !h-8 !gap-1 !px-3 !text-xs">
+              <span aria-hidden="true">↺</span>
+              <span>{bookingPageText.summaryRestoreLabel}</span>
+            </button>
+            <p id="quote-total" class={`mt-1 text-slate-700 dark:text-slate-200 ${prefillApproxTotal > 0 ? "" : "hidden"}`}>
+              <span class="font-semibold">{bookingPageText.summaryTotalLabel}</span>{" "}
+              {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(prefillApproxTotal)}
+            </p>
+          </div>
 
-            <form id="booking-form-en" class="space-y-5" novalidate>
-              <div>
-                <label class="mb-1 block text-sm font-semibold text-slate-700 dark:text-[rgb(248,220,220)]" for="name-en">
-                  Full name <span class="text-red-600" aria-hidden="true">*</span>
-                </label>
-                <input
-                  id="name-en"
-                  name="name"
-                  type="text"
-                  required
-                  autocomplete="name"
-                  placeholder="Your full name"
-                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(70,15,15)] dark:bg-[rgb(28,5,5)] dark:text-white"
-                />
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-900/40">
+            <div class="flex items-start gap-3">
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-700 text-sm font-bold text-white">
+                1
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">Basic details</p>
+                <h3 class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">Basic service details</h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">With your service, name and phone we can receive your request and follow up with you.</p>
               </div>
+            </div>
 
-              <div>
-                <label class="mb-1 block text-sm font-semibold text-slate-700 dark:text-[rgb(248,220,220)]" for="phone-en">
-                  Phone number <span class="text-red-600" aria-hidden="true">*</span>
-                </label>
-                <input
-                  id="phone-en"
-                  name="phone"
-                  type="tel"
-                  required
-                  autocomplete="tel"
-                  inputmode="numeric"
-                  placeholder="(704) 000-0000"
-                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(70,15,15)] dark:bg-[rgb(28,5,5)] dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label class="mb-1 block text-sm font-semibold text-slate-700 dark:text-[rgb(248,220,220)]" for="service-en">
-                  Service needed
-                </label>
-                <select
-                  id="service-en"
-                  name="service"
-                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(70,15,15)] dark:bg-[rgb(28,5,5)] dark:text-white"
-                >
-                  <option value="">-- Select a service --</option>
-                  {activeServices.length > 0 ? (
-                    activeServices.map((svc: any) => {
-                      const slug = getSlug(svc);
-                      const label = svc.titleEn || svc.title || slug;
-                      return <option value={slug}>{label}</option>;
-                    })
-                  ) : (
-                    <>
-                      <option value="roedores">Rodent Control</option>
-                      <option value="cucarachas">Cockroach Treatment</option>
-                      <option value="termitas">Termite Treatment</option>
-                      <option value="chinches">Bed Bug Treatment</option>
-                      <option value="hormigas">Ant Control</option>
-                      <option value="avispas">Wasps &amp; Bees</option>
-                      <option value="inspeccion">Inspection</option>
-                      <option value="general">General Fumigation</option>
-                    </>
-                  )}
+            <div class="mt-4 grid gap-4">
+              <div class="grid gap-2">
+                <label class="text-[0.95rem] font-semibold" for="service">Service</label>
+                <select id="service" name="service" required class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950">
+                  <option value="" selected={!resolvedPrefillService} disabled>Select service...</option>
+                  {serviceOptions.map((s) => (
+                    <option value={s.key} selected={resolvedPrefillService === s.key}>{s.label}</option>
+                  ))}
                 </select>
               </div>
 
-              <div>
-                <label class="mb-1 block text-sm font-semibold text-slate-700 dark:text-[rgb(248,220,220)]" for="address-en">
-                  Service address
-                </label>
-                <input
-                  id="address-en"
-                  name="address"
-                  type="text"
-                  autocomplete="street-address"
-                  placeholder="Street address, city"
-                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(70,15,15)] dark:bg-[rgb(28,5,5)] dark:text-white"
-                />
+              <div class="grid gap-2">
+                <label class="text-[0.95rem] font-semibold" for="name">Name</label>
+                <input id="name" name="name" required minlength="2" maxlength="80" autocomplete="name" class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950" placeholder="Your full name" />
               </div>
 
-              <div>
-                <label class="mb-1 block text-sm font-semibold text-slate-700 dark:text-[rgb(248,220,220)]" for="notes-en">
-                  Additional details
-                </label>
-                <textarea
-                  id="notes-en"
-                  name="notes"
-                  rows={3}
-                  placeholder="Describe the pest issue, severity, or any other details that might help us..."
-                  class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-100 dark:border-[rgb(70,15,15)] dark:bg-[rgb(28,5,5)] dark:text-white"
-                ></textarea>
+              <div class="grid gap-2">
+                <label class="text-[0.95rem] font-semibold" for="phone">Phone</label>
+                <input id="phone" name="phone" type="tel" required autocomplete="tel" inputmode="numeric" aria-describedby="phone-error" class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950" placeholder="e.g. +1 704 555 0100" />
+                <p class="text-xs text-slate-500 dark:text-slate-400">Accepts spaces or dashes. Must be between 10 and 15 digits.</p>
+                <p id="phone-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Enter a valid phone number with 10 to 15 digits.</p>
               </div>
-
-              <button type="submit" class="btn-base btn-primary w-full py-3.5 text-base">
-                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 inline h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                  <path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.004L2.01 22l5.132-1.348A9.963 9.963 0 0011.999 22C17.522 22 22 17.523 22 12S17.522 2 11.999 2zm0 18a7.96 7.96 0 01-4.052-1.103l-.29-.173-3.047.799.815-2.98-.19-.306A7.96 7.96 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-7.999 8z"/>
-                </svg>
-                Send via WhatsApp
-              </button>
-
-              <p class="text-xs text-slate-400 dark:text-[rgb(210,130,130)]">
-                By submitting this form you agree to be contacted via WhatsApp. We do not share your information with third parties.
-              </p>
-            </form>
+            </div>
           </div>
 
-          <aside class="space-y-4">
-            <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-              <p class="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-[rgb(240,190,190)]">Contact options</p>
-              <div class="mt-4 space-y-3">
-                <a
-                  href={`https://wa.me/${String(waNumber || "").replace(/\D/g, "")}?text=${encodeURIComponent(`Hi, I'd like to request a pest control service at ${businessName}. Can you help me?`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="btn-base btn-primary flex w-full items-center justify-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                    <path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.004L2.01 22l5.132-1.348A9.963 9.963 0 0011.999 22C17.522 22 22 17.523 22 12S17.522 2 11.999 2zm0 18a7.96 7.96 0 01-4.052-1.103l-.29-.173-3.047.799.815-2.98-.19-.306A7.96 7.96 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-7.999 8z"/>
-                  </svg>
-                  WhatsApp direct
-                </a>
+          <details id="appointment-optional-panel" class="rounded-2xl border border-slate-200 bg-white/90 p-5 dark:border-slate-800 dark:bg-slate-950/80">
+            <summary class="flex cursor-pointer list-none items-start gap-3">
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                2
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Optional details</p>
+                <h3 class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">Schedule, technician and details</h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Open this section only if you want to refine your request before sending.</p>
+              </div>
+              <span class="mt-1 text-slate-500 transition details-chevron dark:text-slate-400" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="h-5 w-5" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.512a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd"></path>
+                </svg>
+              </span>
+            </summary>
+
+            <div class="mt-4 grid gap-4">
+              <div class="grid gap-2">
+                <label class="text-[0.95rem] font-semibold" for="specialist">Technician (optional)</label>
+                <select id="specialist" name="specialist" disabled class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950">
+                  <option value="">No preference (first available)</option>
+                </select>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-3">
+                <div class="grid gap-2 sm:col-span-2">
+                  <label class="text-[0.95rem] font-semibold" for="date">Preferred date (optional)</label>
+                  <input
+                    id="date"
+                    name="date"
+                    type="date"
+                    class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950"
+                  />
+                  <p id="date-readable" class="text-xs text-slate-500 dark:text-slate-400"></p>
+                  <p id="date-error" class="hidden text-xs font-medium text-rose-600 dark:text-rose-400">Select a valid date.</p>
+                </div>
+                <div class="grid gap-2">
+                  <label class="text-[0.95rem] font-semibold" for="timeSlot">Exact time</label>
+                  <select id="timeSlot" name="timeSlot" disabled class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950">
+                    <option value="">Select time</option>
+                  </select>
+                  <p id="time-help" class="text-xs text-slate-500 dark:text-slate-400">If you prefer, leave empty and use the shift.</p>
+                </div>
+              </div>
+
+              <div class="grid gap-2">
+                <label class="text-[0.95rem] font-semibold" for="shift">Shift (if no time chosen)</label>
+                <select id="shift" name="shift" class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950">
+                  <option value="">To be decided</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                </select>
+              </div>
+
+              <div class="grid gap-2">
+                <label class="text-[0.95rem] font-semibold" for="notes">Issue or notes (optional)</label>
+                <textarea id="notes" name="notes" rows="3" maxlength="300" class="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-[0.95rem] dark:border-slate-800 dark:bg-slate-950" placeholder="Briefly describe your issue"></textarea>
               </div>
             </div>
+          </details>
 
-            <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-              <p class="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-[rgb(240,190,190)]">What happens next?</p>
-              <ol class="mt-3 space-y-2.5 text-sm text-slate-600 dark:text-[rgb(245,210,210)]">
-                <li class="flex gap-2.5"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-700 dark:bg-red-900/40 dark:text-red-300">1</span>Fill out the form and tap Send</li>
-                <li class="flex gap-2.5"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-700 dark:bg-red-900/40 dark:text-red-300">2</span>We'll confirm availability via WhatsApp</li>
-                <li class="flex gap-2.5"><span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-700 dark:bg-red-900/40 dark:text-red-300">3</span>Our technician arrives on schedule</li>
-              </ol>
-            </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-900/40">
+            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Confirm and continue</p>
+            <p id="send-whatsapp-help" class="mt-1 text-xs text-slate-600 dark:text-slate-300">
+              You only need service, name and phone. If something required is missing, we'll take you to the first field to fix.
+            </p>
+            <a id="send-whatsapp" href="#appointment-form" role="button" class="btn-base btn-primary mt-4 w-full">
+              Complete your details to continue via WhatsApp
+            </a>
+            <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">Schedule: Mon–Fri 10:00–18:00, Sat 10:00–16:00, Sun closed.</p>
+          </div>
+        </form>
+      </section>
 
-            <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-[rgb(36,58,86)] dark:bg-[rgb(28,6,6)]">
-              <p class="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-[rgb(240,190,190)]">Our promise</p>
-              <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-[rgb(245,210,210)]">
-                <li class="flex items-start gap-2"><span class="mt-0.5 text-red-600" aria-hidden="true">✓</span> Free first inspection included</li>
-                <li class="flex items-start gap-2"><span class="mt-0.5 text-red-600" aria-hidden="true">✓</span> Certified & experienced technicians</li>
-                <li class="flex items-start gap-2"><span class="mt-0.5 text-red-600" aria-hidden="true">✓</span> 30-day satisfaction guarantee</li>
-                <li class="flex items-start gap-2"><span class="mt-0.5 text-red-600" aria-hidden="true">✓</span> EPA-registered safe products</li>
-              </ul>
-            </div>
-          </aside>
-
+      <aside class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_24px_40px_-34px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950 md:p-7 lg:sticky lg:top-32 lg:translate-y-8">
+        <div class="rounded-2xl border border-red-100 bg-red-50/70 p-4 dark:border-red-900/30 dark:bg-red-950/20">
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">Quick contact</p>
+          <div class="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+            <a
+              class="btn-base btn-primary w-full"
+              href={quickWhatsAppHref}
+              target={hasQuickWhatsApp ? "_blank" : undefined}
+              rel={hasQuickWhatsApp ? "noopener noreferrer" : undefined}
+            >
+              Direct WhatsApp
+            </a>
+            <a class="btn-base btn-secondary w-full" href={phoneHref}>Call</a>
+            <a class="btn-base btn-secondary w-full" href={mapsUrl} target="_blank" rel="noopener noreferrer">Get directions</a>
+          </div>
         </div>
-      </div>
-    </section>
 
+        <div class="mt-6">
+          <h2 class="text-lg font-semibold">Information</h2>
+          <p class="mt-2 text-slate-700 dark:text-slate-200">{address}</p>
+          <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">Phone: {phoneDisplay}</p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Hours: {hoursText}</p>
+        </div>
+
+        <div class="mt-6 border-t border-slate-200 pt-6 dark:border-slate-800">
+          <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">What happens after you submit</p>
+          <ul class="mt-3 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>We receive your request via WhatsApp and confirm availability.</span></li>
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>If you chose a service or technician, we use that to better route your request.</span></li>
+            <li class="flex items-start gap-2"><span class="mt-1 h-2 w-2 rounded-full bg-red-600"></span><span>Approximate service time: 30 to 60 minutes depending on assessment.</span></li>
+          </ul>
+        </div>
+
+        <div class="mt-6 border-t border-slate-200 pt-6 dark:border-slate-800">
+          <a class="text-sm font-medium text-red-700 hover:underline dark:text-red-300" href="/en/ubicacion">View full location</a>
+        </div>
+      </aside>
+    </div>
   </main>
+
   <Footer />
 </Layout>
 
-<script is:inline define:vars={{ waNumber, businessName, serviceParam }}>
-  const form = document.getElementById("booking-form-en");
-  if (form) {
-    const serviceSelect = document.getElementById("service-en");
-    if (serviceParam && serviceSelect) {
-      serviceSelect.value = serviceParam;
+<style>
+  #appointment-optional-panel > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #appointment-optional-panel[open] .details-chevron {
+    transform: rotate(180deg);
+  }
+</style>
+
+<script
+  id="agendar-config"
+  type="application/json"
+  is:inline
+  set:html={JSON.stringify({
+    generalWhatsappNumber,
+    specialistsWhatsappNumber,
+    generalWhatsAppMessage,
+    specialistsWhatsAppMessage,
+    quickProblemDefault,
+    businessName: business?.name || businessConfig.name,
+    pageText: bookingPageText,
+    serviceOptions,
+    specialistOptions,
+    prefill: {
+      ...prefill,
+      service: resolvedPrefillService || prefill.service,
+      services: prefillServices.length > 0 ? prefillServices : prefill.services,
+      priceIds: prefillPriceIds.length > 0 ? prefillPriceIds : prefill.priceIds,
+    },
+    quoteSelectionLimit,
+    priceCatalog,
+    serviceCatalog,
+  })}
+></script>
+
+<script>
+  import {
+    buildAppointmentMessage,
+    buildWhatsAppUrl,
+    resolveWhatsAppNumber,
+    resolveWhatsAppReason,
+  } from "../../utils/whatsapp";
+  import { formatDateMX, isSunday, isValidPhone, isValidPhoneInput, isWithinSchedule, sanitizePhone } from "../../utils/validation";
+  import { getPrefillFromUrl, normalizeServiceSlug } from "../../utils/prefill";
+
+  type SpecialistOption = {
+    slug: string;
+    name: string;
+    category: string;
+    specialty?: string;
+    whatsAppNumber?: string;
+    whatsAppMessage?: string;
+  };
+
+  type ClientConfig = {
+    generalWhatsappNumber?: string;
+    specialistsWhatsappNumber?: string;
+    generalWhatsAppMessage?: string;
+    specialistsWhatsAppMessage?: string;
+    quickProblemDefault?: string;
+    businessName?: string;
+    pageText?: Record<string, string>;
+    prefill?: {
+      service?: string;
+      specialist?: string;
+      services?: string[];
+      priceIds?: string[];
+      specialists?: string[];
+      waNumber?: string;
+      waMessage?: string;
+      waNumbers?: string[];
+      waMessages?: string[];
+      approxTotal?: number;
+      routing?: "general";
+    };
+    specialistOptions?: SpecialistOption[];
+    quoteSelectionLimit?: number;
+    priceCatalog?: CatalogRoute[];
+    serviceCatalog?: CatalogRoute[];
+  };
+
+  type CatalogRoute = {
+    id?: string;
+    title: string;
+    category: string;
+    specialist?: string;
+    waNumber?: string;
+    waMessage?: string;
+    priceFrom: number;
+  };
+
+  const configEl = document.getElementById("agendar-config");
+  const config = JSON.parse(configEl?.textContent || "{}") as ClientConfig;
+
+  const form = document.getElementById("appointment-form") as HTMLFormElement | null;
+  const sendBtn = document.getElementById("send-whatsapp") as HTMLAnchorElement | null;
+  const nameInput = document.getElementById("name") as HTMLInputElement | null;
+  const phoneInput = document.getElementById("phone") as HTMLInputElement | null;
+  const serviceSelect = document.getElementById("service") as HTMLSelectElement | null;
+  const specialistSelect = document.getElementById("specialist") as HTMLSelectElement | null;
+  const dateInput = document.getElementById("date") as HTMLInputElement | null;
+  const timeSlotSelect = document.getElementById("timeSlot") as HTMLSelectElement | null;
+  const shiftSelect = document.getElementById("shift") as HTMLSelectElement | null;
+  const notesInput = document.getElementById("notes") as HTMLTextAreaElement | null;
+  const dateReadable = document.getElementById("date-readable") as HTMLParagraphElement | null;
+  const dateError = document.getElementById("date-error") as HTMLParagraphElement | null;
+  const phoneError = document.getElementById("phone-error") as HTMLParagraphElement | null;
+  const timeHelp = document.getElementById("time-help") as HTMLParagraphElement | null;
+  const quoteServicesEl = document.getElementById("quote-services") as HTMLParagraphElement | null;
+  const quoteRoutingTargetEl = document.getElementById("quote-routing-target") as HTMLParagraphElement | null;
+  const quoteCategoriesWrapEl = document.getElementById("quote-categories-wrap") as HTMLDivElement | null;
+  const quoteCategoriesEl = document.getElementById("quote-categories") as HTMLDivElement | null;
+  const restoreQuoteBtn = document.getElementById("restore-quote-btn") as HTMLButtonElement | null;
+  const quoteTotalEl = document.getElementById("quote-total") as HTMLParagraphElement | null;
+  const contextBadgeEl = document.getElementById("context-badge") as HTMLParagraphElement | null;
+  const optionalDetails = document.getElementById("appointment-optional-panel") as HTMLDetailsElement | null;
+
+  if (!form || !sendBtn || !nameInput || !phoneInput || !serviceSelect || !specialistSelect || !dateInput || !timeSlotSelect || !shiftSelect || !notesInput) {
+    throw new Error("Could not find booking form elements");
+  }
+
+  dateInput.autocomplete = "off";
+  dateInput.lang = "en-US";
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+
+  const specialistItems: SpecialistOption[] = Array.isArray(config.specialistOptions)
+    ? config.specialistOptions
+    : [];
+  const serverPrefill = config.prefill || {};
+  const urlPrefill = getPrefillFromUrl(window.location.href);
+  const prefill = {
+    ...serverPrefill,
+    ...urlPrefill,
+    services: Array.isArray(urlPrefill.services) && urlPrefill.services.length > 0
+      ? urlPrefill.services
+      : (Array.isArray(serverPrefill.services) ? serverPrefill.services : []),
+    priceIds: Array.isArray(urlPrefill.priceIds) && urlPrefill.priceIds.length > 0
+      ? urlPrefill.priceIds
+      : (Array.isArray(serverPrefill.priceIds) ? serverPrefill.priceIds : []),
+    specialists: Array.isArray(urlPrefill.specialists) && urlPrefill.specialists.length > 0
+      ? urlPrefill.specialists
+      : (Array.isArray(serverPrefill.specialists) ? serverPrefill.specialists : []),
+    waNumbers: [],
+    waMessages: [],
+    approxTotal: 0,
+    routing:
+      String(urlPrefill.routing || serverPrefill.routing || "").trim().toLowerCase() === "general"
+        ? "general"
+        : undefined,
+  };
+  const noneSpecialistValue = "__none__";
+  const normalizeSpecialistSlug = (value: string) => {
+    const slug = String(value || "").trim();
+    if (!slug || slug === noneSpecialistValue) return "";
+    return slug;
+  };
+  const quoteLimit = Math.max(1, Number(config.quoteSelectionLimit || 6));
+  const priceCatalog: CatalogRoute[] = Array.isArray(config.priceCatalog) ? config.priceCatalog : [];
+  const serviceCatalog: CatalogRoute[] = Array.isArray(config.serviceCatalog) ? config.serviceCatalog : [];
+  const initialPriceIds = Array.isArray(prefill.priceIds)
+    ? prefill.priceIds.map((value: string) => String(value || "").trim()).slice(0, quoteLimit)
+    : [];
+  let selectedServicesState = Array.isArray(prefill.services) ? prefill.services.slice(0, quoteLimit) : [];
+  if (initialPriceIds.length > 0) {
+    selectedServicesState = selectedServicesState.length > 0
+      ? selectedServicesState.map((serviceName: string, index: number) => {
+          const trustedPrice = priceCatalog.find((row) => String(row.id || "") === initialPriceIds[index]);
+          return trustedPrice?.title || serviceName;
+        })
+      : initialPriceIds
+          .map((priceId: string) => priceCatalog.find((row) => String(row.id || "") === priceId)?.title || "")
+          .filter(Boolean);
+  }
+  let selectedPriceIdsState = initialPriceIds;
+  let selectedServicesSpecialistsState = Array.isArray(prefill.specialists)
+    ? prefill.specialists
+        .map((value: string) => normalizeSpecialistSlug(value))
+        .slice(0, quoteLimit)
+    : [];
+  let selectedServicesWaNumbersState: string[] = [];
+  let selectedServicesWaMessagesState: string[] = [];
+  if (selectedPriceIdsState.length < selectedServicesState.length) {
+    selectedPriceIdsState = [
+      ...selectedPriceIdsState,
+      ...Array(selectedServicesState.length - selectedPriceIdsState.length).fill(""),
+    ];
+  } else if (selectedPriceIdsState.length > selectedServicesState.length) {
+    selectedPriceIdsState = selectedPriceIdsState.slice(0, selectedServicesState.length);
+  }
+  if (selectedServicesSpecialistsState.length < selectedServicesState.length) {
+    selectedServicesSpecialistsState = [
+      ...selectedServicesSpecialistsState,
+      ...Array(selectedServicesState.length - selectedServicesSpecialistsState.length).fill(""),
+    ];
+  } else if (selectedServicesSpecialistsState.length > selectedServicesState.length) {
+    selectedServicesSpecialistsState = selectedServicesSpecialistsState.slice(0, selectedServicesState.length);
+  }
+  if (selectedServicesWaNumbersState.length < selectedServicesState.length) {
+    selectedServicesWaNumbersState = [
+      ...selectedServicesWaNumbersState,
+      ...Array(selectedServicesState.length - selectedServicesWaNumbersState.length).fill(""),
+    ];
+  } else if (selectedServicesWaNumbersState.length > selectedServicesState.length) {
+    selectedServicesWaNumbersState = selectedServicesWaNumbersState.slice(0, selectedServicesState.length);
+  }
+  if (selectedServicesWaMessagesState.length < selectedServicesState.length) {
+    selectedServicesWaMessagesState = [
+      ...selectedServicesWaMessagesState,
+      ...Array(selectedServicesState.length - selectedServicesWaMessagesState.length).fill(""),
+    ];
+  } else if (selectedServicesWaMessagesState.length > selectedServicesState.length) {
+    selectedServicesWaMessagesState = selectedServicesWaMessagesState.slice(0, selectedServicesState.length);
+  }
+  if (
+    selectedServicesState.length === 1 &&
+    selectedServicesSpecialistsState.every((slug: string) => !slug) &&
+    typeof prefill.specialist === "string" &&
+    prefill.specialist.trim()
+  ) {
+    selectedServicesSpecialistsState[0] = prefill.specialist.trim();
+  }
+  let quoteTotalState = Number(prefill.approxTotal || 0);
+  const specialistBySlug = new Map<string, SpecialistOption>();
+  specialistItems.forEach((specialist) => {
+    if (specialist.slug) specialistBySlug.set(specialist.slug, specialist);
+  });
+  const generalWaNumber = resolveWhatsAppNumber(config.generalWhatsappNumber);
+  const specialistsWaNumber = resolveWhatsAppNumber(
+    config.specialistsWhatsappNumber,
+    generalWaNumber
+  );
+  const generalWhatsAppMessage = String(config.generalWhatsAppMessage || "").trim();
+  const specialistsWhatsAppMessage = String(config.specialistsWhatsAppMessage || "").trim();
+  const quickProblemDefault = String(config.quickProblemDefault || "").trim();
+  const businessName = String(config.businessName || "FumiPro NC").trim();
+  const pageText = config.pageText || {};
+  const scheduleByDay: Record<number, { open: string; close: string } | null> = {
+    0: null,
+    1: { open: "10:00", close: "18:00" },
+    2: { open: "10:00", close: "18:00" },
+    3: { open: "10:00", close: "18:00" },
+    4: { open: "10:00", close: "18:00" },
+    5: { open: "10:00", close: "18:00" },
+    6: { open: "10:00", close: "16:00" },
+  };
+
+  const setFieldErrorStyle = (input: HTMLElement, hasError: boolean) => {
+    input.classList.remove("border-emerald-500", "ring-emerald-300", "dark:ring-emerald-500/40");
+    input.classList.toggle("border-rose-500", hasError);
+    input.classList.toggle("ring-1", hasError);
+    input.classList.toggle("ring-rose-300", hasError);
+    input.classList.toggle("dark:ring-rose-500/40", hasError);
+  };
+
+  const setFieldSuccessStyle = (input: HTMLElement, hasSuccess: boolean) => {
+    input.classList.remove("border-rose-500", "ring-rose-300", "dark:ring-rose-500/40");
+    input.classList.toggle("border-emerald-500", hasSuccess);
+    input.classList.toggle("ring-1", hasSuccess);
+    input.classList.toggle("ring-emerald-300", hasSuccess);
+    input.classList.toggle("dark:ring-emerald-500/40", hasSuccess);
+  };
+
+  const validatePhoneField = () => {
+    const hasValue = phoneInput.value.trim().length > 0;
+    const valid = isValidPhoneInput(phoneInput.value || "");
+    const hasError = hasValue && !valid;
+    phoneInput.setCustomValidity(hasError ? "Enter a valid phone number." : "");
+    setFieldErrorStyle(phoneInput, hasError);
+    setFieldSuccessStyle(phoneInput, hasValue && valid);
+    if (phoneError) phoneError.classList.toggle("hidden", !hasError);
+    return valid;
+  };
+
+  const parseDisplayDateToIso = (displayDate: string) => {
+    const value = String(displayDate || "").trim();
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
+
+    const [yyyy, mm, dd] = value.split("-").map((part) => Number(part));
+    const day = Number(dd);
+    const month = Number(mm);
+    const year = Number(yyyy);
+
+    if (!Number.isInteger(day) || !Number.isInteger(month) || !Number.isInteger(year)) return "";
+    if (year < 1900 || year > 2100) return "";
+
+    const iso = `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const date = new Date(`${iso}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const validDate =
+      date.getFullYear() === year &&
+      date.getMonth() + 1 === month &&
+      date.getDate() === day;
+
+    return validDate ? iso : "";
+  };
+
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  dateInput.min = todayIso;
+
+  const toMoneyUSD = (value: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value || 0);
+
+  const getMinPriceByCategory = (category: string): number => {
+    const matches = priceCatalog
+      .filter((row) => row.category === category)
+      .map((row) => Number(row.priceFrom || 0))
+      .filter((value) => value > 0);
+    if (matches.length === 0) return 0;
+    return Math.min(...matches);
+  };
+
+  const normalizeText = (value: string) =>
+    String(value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const findTrustedRouteForService = (serviceName: string, index: number = 0) => {
+    const priceId = String(selectedPriceIdsState[index] || "").trim();
+    const title = normalizeText(serviceName);
+    const selectedCategory = normalizeServiceSlug(String(serviceSelect.value || ""));
+
+    if (priceId) {
+      const byId = priceCatalog.find((row) => String(row.id || "") === priceId);
+      if (byId && (!title || normalizeText(byId.title) === title)) return byId;
     }
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const data = new FormData(form);
-      const name    = String(data.get("name")    || "").trim();
-      const phone   = String(data.get("phone")   || "").trim();
-      const service = String(data.get("service") || "").trim();
-      const address = String(data.get("address") || "").trim();
-      const notes   = String(data.get("notes")   || "").trim();
+    const byPriceTitle = priceCatalog.find((row) => {
+      if (!row.title || normalizeText(row.title) !== title) return false;
+      return !selectedCategory || !row.category || row.category === selectedCategory;
+    });
+    if (byPriceTitle) return byPriceTitle;
 
-      if (!name || !phone) {
-        alert("Please enter your name and phone number.");
-        return;
+    const byServiceTitle = serviceCatalog.find((row) => {
+      if (!row.title || normalizeText(row.title) !== title) return false;
+      return !selectedCategory || !row.category || row.category === selectedCategory;
+    });
+    if (byServiceTitle) return byServiceTitle;
+
+    return undefined;
+  };
+
+  const categoryByServiceTitle = new Map<string, string>();
+  priceCatalog.forEach((row) => {
+    const title = normalizeText(row.title || "");
+    const category = normalizeServiceSlug(row.category || "");
+    if (!title || !category || categoryByServiceTitle.has(title)) return;
+    categoryByServiceTitle.set(title, category);
+  });
+
+  const getCategoryForService = (serviceName: string, index: number = 0) => {
+    const trustedRoute = findTrustedRouteForService(serviceName, index);
+    if (trustedRoute?.category) return trustedRoute.category;
+    const byCatalog = categoryByServiceTitle.get(normalizeText(serviceName));
+    if (byCatalog) return byCatalog;
+    return normalizeServiceSlug(String(serviceSelect.value || serviceName || "").trim());
+  };
+
+  const getQuoteCategoryKeys = (services: string[]) => {
+    const unique = new Set<string>();
+    services.forEach((serviceName, index) => {
+      const categoryKey = getCategoryForService(serviceName, index);
+      if (categoryKey) unique.add(categoryKey);
+    });
+    return Array.from(unique.values());
+  };
+
+  const getCategoryLabel = (categoryKey: string) => {
+    const match = Array.from(serviceSelect.options).find(
+      (opt: HTMLOptionElement) => String(opt.value || "").trim() === categoryKey
+    );
+    return String(match?.textContent || categoryKey).trim();
+  };
+
+  const hasServiceOption = (categoryKey: string) =>
+    Array.from(serviceSelect.options).some(
+      (opt: HTMLOptionElement) => String(opt.value || "").trim() === categoryKey
+    );
+
+  const getApproxTotalFromSelectedServices = (services: string[]) =>
+    services.reduce((sum, serviceName, index) => {
+      const match = findTrustedRouteForService(serviceName, index);
+      const price = Number(match?.priceFrom || 0);
+      return sum + (Number.isFinite(price) && price > 0 ? price : 0);
+    }, 0);
+
+  type QuoteSnapshot = {
+    selectedServices: string[];
+    selectedPriceIds: string[];
+    selectedSpecialists: string[];
+    selectedWaNumbers: string[];
+    selectedWaMessages: string[];
+    quoteTotal: number;
+    serviceValue: string;
+    specialistValue: string;
+  };
+
+  let lastQuoteSnapshot: QuoteSnapshot | null = null;
+
+  const setRestoreButtonVisible = (visible: boolean) => {
+    if (!restoreQuoteBtn) return;
+    restoreQuoteBtn.classList.toggle("hidden", !visible);
+  };
+
+  const clearQuoteSnapshot = () => {
+    lastQuoteSnapshot = null;
+    setRestoreButtonVisible(false);
+  };
+
+  const captureQuoteSnapshot = (): QuoteSnapshot => ({
+    selectedServices: [...selectedServicesState],
+    selectedPriceIds: [...selectedPriceIdsState],
+    selectedSpecialists: [...selectedServicesSpecialistsState],
+    selectedWaNumbers: [...selectedServicesWaNumbersState],
+    selectedWaMessages: [...selectedServicesWaMessagesState],
+    quoteTotal: Number(quoteTotalState || 0),
+    serviceValue: String(serviceSelect.value || ""),
+    specialistValue: String(specialistSelect.value || ""),
+  });
+
+  const restoreQuoteSnapshot = () => {
+    if (!lastQuoteSnapshot) return;
+
+    selectedServicesState = [...lastQuoteSnapshot.selectedServices];
+    selectedPriceIdsState = [...lastQuoteSnapshot.selectedPriceIds];
+    selectedServicesSpecialistsState = [...lastQuoteSnapshot.selectedSpecialists];
+    selectedServicesWaNumbersState = [...lastQuoteSnapshot.selectedWaNumbers];
+    selectedServicesWaMessagesState = [...lastQuoteSnapshot.selectedWaMessages];
+    quoteTotalState = Number(lastQuoteSnapshot.quoteTotal || 0);
+
+    if (lastQuoteSnapshot.serviceValue && hasServiceOption(lastQuoteSnapshot.serviceValue)) {
+      serviceSelect.value = lastQuoteSnapshot.serviceValue;
+    } else {
+      const categoryKeys = getQuoteCategoryKeys(selectedServicesState);
+      const fallbackCategory = categoryKeys.find((key) => hasServiceOption(key)) || "";
+      serviceSelect.value = fallbackCategory;
+    }
+
+    const preferredSpecialist =
+      selectedServicesState.length <= 1 ? String(lastQuoteSnapshot.specialistValue || "").trim() : "";
+    renderSpecialists(serviceSelect.value, preferredSpecialist);
+
+    if (selectedServicesState.length > 1) {
+      specialistSelect.value = "";
+    }
+
+    clearQuoteSnapshot();
+    updateQuoteSummary();
+    updateCta();
+  };
+
+  const removeCategoryFromQuote = (categoryKey: string) => {
+    const key = String(categoryKey || "").trim();
+    if (!key || selectedServicesState.length === 0) return;
+
+    const keepIndexes: number[] = [];
+    selectedServicesState.forEach((serviceName, index) => {
+      if (getCategoryForService(serviceName, index) !== key) keepIndexes.push(index);
+    });
+
+    if (keepIndexes.length === selectedServicesState.length) return;
+
+    lastQuoteSnapshot = captureQuoteSnapshot();
+    setRestoreButtonVisible(true);
+
+    selectedServicesState = keepIndexes.map((index) => selectedServicesState[index]);
+    selectedPriceIdsState = keepIndexes.map((index) => selectedPriceIdsState[index] || "");
+    selectedServicesSpecialistsState = keepIndexes.map(
+      (index) => selectedServicesSpecialistsState[index] || ""
+    );
+    selectedServicesWaNumbersState = keepIndexes.map(
+      (index) => selectedServicesWaNumbersState[index] || ""
+    );
+    selectedServicesWaMessagesState = keepIndexes.map(
+      (index) => selectedServicesWaMessagesState[index] || ""
+    );
+    quoteTotalState = getApproxTotalFromSelectedServices(selectedServicesState);
+
+    const remainingCategoryKeys = getQuoteCategoryKeys(selectedServicesState);
+    if (remainingCategoryKeys.length === 1 && hasServiceOption(remainingCategoryKeys[0])) {
+      serviceSelect.value = remainingCategoryKeys[0];
+      renderSpecialists(serviceSelect.value, "");
+    } else if (remainingCategoryKeys.length === 0) {
+      serviceSelect.value = "";
+      renderSpecialists("", "");
+    } else {
+      specialistSelect.value = "";
+    }
+
+    if (selectedServicesState.length !== 1) {
+      specialistSelect.value = "";
+    }
+
+    updateQuoteSummary();
+    updateCta();
+  };
+
+  const getCurrentQuote = () => {
+    const selectedCategory = String(serviceSelect.value || "");
+    const selectedLabel = selectedCategory
+      ? (serviceSelect.options[serviceSelect.selectedIndex]?.text || "")
+      : "";
+    const hasSelectedSpecialist = Boolean(String(specialistSelect.value || "").trim());
+    const list = selectedServicesState.length > 0
+      ? selectedServicesState
+      : (selectedLabel ? [selectedLabel] : []);
+
+    const catalogTotal = getApproxTotalFromSelectedServices(list);
+    let total = catalogTotal > 0 ? catalogTotal : 0;
+    if (total <= 0 && Number.isFinite(quoteTotalState) && quoteTotalState > 0) {
+      total = quoteTotalState;
+    }
+    if (total <= 0 && selectedCategory && !hasSelectedSpecialist) {
+      total = getMinPriceByCategory(selectedCategory);
+    }
+
+    return { list, total };
+  };
+
+  const getQuoteServiceSpecialists = () => {
+    const { list } = getCurrentQuote();
+    return list.map((serviceName: string, index: number) => {
+      const trustedRoute = findTrustedRouteForService(serviceName, index);
+      const specialistSlug = normalizeSpecialistSlug(
+        selectedServicesSpecialistsState[index] || trustedRoute?.specialist || ""
+      );
+      const waNumber = resolveWhatsAppNumber(trustedRoute?.waNumber || "");
+      const waMessage = String(trustedRoute?.waMessage || "").trim();
+      const specialist = specialistSlug ? specialistBySlug.get(specialistSlug) : undefined;
+      return {
+        service: serviceName,
+        specialistSlug,
+        specialistName: specialist?.name || "",
+        waNumber,
+        waMessage,
+        specialist: specialist || undefined,
+      };
+    });
+  };
+
+  const getQuoteUniqueSpecialists = () => {
+    const pairs = getQuoteServiceSpecialists();
+    const unique = new Map<string, SpecialistOption>();
+    pairs.forEach((pair) => {
+      if (!pair.specialistSlug || !pair.specialist) return;
+      if (!unique.has(pair.specialistSlug)) unique.set(pair.specialistSlug, pair.specialist);
+    });
+    return Array.from(unique.values());
+  };
+
+  const getQuoteUniqueWaNumbers = () => {
+    const pairs = getQuoteServiceSpecialists();
+    const unique = new Set<string>();
+    pairs.forEach((pair) => {
+      const number = resolveWhatsAppNumber(pair.waNumber || "");
+      if (number) unique.add(number);
+    });
+    return Array.from(unique.values());
+  };
+
+  const getQuoteUniqueWaMessages = () => {
+    const pairs = getQuoteServiceSpecialists();
+    const unique = new Set<string>();
+    pairs.forEach((pair) => {
+      const message = String(pair.waMessage || "").trim();
+      if (message) unique.add(message);
+    });
+    return Array.from(unique.values());
+  };
+
+  const updateQuoteSummary = () => {
+    const { list, total } = getCurrentQuote();
+    const selectedServiceLabel = String(serviceSelect.value || "").trim()
+      ? (serviceSelect.options[serviceSelect.selectedIndex]?.text || "")
+      : "";
+    const specialistSlug = String(specialistSelect.value || "").trim();
+    const selectedSpecialist = specialistSlug
+      ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistSlug)
+      : undefined;
+    const uniqueQuoteSpecialists = getQuoteUniqueSpecialists();
+    const uniqueQuoteWaNumbers = getQuoteUniqueWaNumbers();
+    const quoteHasMultipleServices = list.length > 1;
+    const quoteCategoryKeys = getQuoteCategoryKeys(list);
+    const hasMixedCategories = quoteCategoryKeys.length > 1;
+    const hasMultipleRoutingTargets =
+      uniqueQuoteSpecialists.length > 1 || uniqueQuoteWaNumbers.length > 1;
+    const forceGeneralRouting =
+      hasMixedCategories ||
+      prefill.routing === "general" ||
+      (quoteHasMultipleServices && hasMultipleRoutingTargets);
+    const singleCategoryLabel = quoteCategoryKeys.length === 1 ? getCategoryLabel(quoteCategoryKeys[0]) : "";
+    const categoryLabels = quoteCategoryKeys.map((categoryKey) => getCategoryLabel(categoryKey));
+    const routingSpecialist = forceGeneralRouting
+      ? undefined
+      : selectedSpecialist || (uniqueQuoteSpecialists.length === 1 ? uniqueQuoteSpecialists[0] : undefined);
+
+    if (contextBadgeEl) {
+      if (forceGeneralRouting) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = hasMixedCategories
+          ? "Your request will be sent to the general business WhatsApp."
+          : "Your request will be sent to the general WhatsApp.";
+      } else if (routingSpecialist) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Suggested technician: ${routingSpecialist.name || "Technician"}`;
+      } else if (quoteHasMultipleServices && singleCategoryLabel) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Request for multiple ${singleCategoryLabel} services.`;
+      } else if (uniqueQuoteSpecialists.length > 1) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Includes multiple technicians: ${uniqueQuoteSpecialists
+          .map((specialist) => specialist.name || "Technician")
+          .join(" · ")}`;
+      } else if (uniqueQuoteSpecialists.length === 1) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Suggested technician: ${uniqueQuoteSpecialists[0].name || "Technician"}`;
+      } else if (selectedServiceLabel) {
+        contextBadgeEl.classList.remove("hidden");
+        contextBadgeEl.textContent = `Selected service: ${selectedServiceLabel}`;
+      } else {
+        contextBadgeEl.classList.add("hidden");
       }
+    }
 
-      const serviceLabel =
-        serviceSelect instanceof HTMLSelectElement
-          ? serviceSelect.options[serviceSelect.selectedIndex]?.text || service || "pest control"
-          : service || "pest control";
+    if (quoteRoutingTargetEl) {
+      if (forceGeneralRouting) {
+        quoteRoutingTargetEl.classList.remove("hidden");
+        quoteRoutingTargetEl.textContent = "Will be sent to the general WhatsApp.";
+      } else if (routingSpecialist?.name) {
+        quoteRoutingTargetEl.classList.remove("hidden");
+        quoteRoutingTargetEl.textContent = `Will be sent to ${routingSpecialist.name}'s WhatsApp.`;
+      } else if (uniqueQuoteWaNumbers.length === 1) {
+        quoteRoutingTargetEl.classList.remove("hidden");
+        quoteRoutingTargetEl.textContent = "Will be sent to the selected service's WhatsApp.";
+      } else {
+        quoteRoutingTargetEl.classList.add("hidden");
+        quoteRoutingTargetEl.textContent = "";
+      }
+    }
 
-      const lines = [
-        `Hi, I'd like to request a service at ${businessName}.`,
-        `Name: ${name}`,
-        `Phone: ${phone}`,
-        service  ? `Service: ${serviceLabel}` : "",
-        address  ? `Address: ${address}`      : "",
-        notes    ? `Notes: ${notes}`          : "",
-      ].filter(Boolean);
+    if (quoteServicesEl) {
+      const pairs = getQuoteServiceSpecialists();
+      const hasSpecialistsInPairs = pairs.some((pair) => Boolean(pair.specialistName));
+      quoteServicesEl.textContent = list.length > 0
+        ? (hasSpecialistsInPairs
+          ? pairs
+              .map((pair) =>
+                pair.specialistName ? `${pair.service} (${pair.specialistName})` : pair.service
+              )
+              .join(" · ")
+          : list.join(" · "))
+        : String(pageText.summaryEmptyStateText || "Select a service and we'll show you an approximate price.");
+    }
 
-      const number = String(waNumber || "").replace(/\D/g, "");
-      if (!number) { alert("WhatsApp number not configured. Please call us directly."); return; }
-      window.open(`https://wa.me/${number}?text=${encodeURIComponent(lines.join("\n"))}`, "_blank", "noopener,noreferrer");
+    if (quoteTotalEl) {
+      if (total > 0) {
+        quoteTotalEl.classList.remove("hidden");
+        quoteTotalEl.innerHTML = `<span class="font-semibold">${String(pageText.summaryTotalLabel || "Approximate total:")}</span> ${toMoneyUSD(total)}`;
+      } else {
+        quoteTotalEl.classList.add("hidden");
+      }
+    }
+
+    if (quoteCategoriesWrapEl && quoteCategoriesEl) {
+      quoteCategoriesEl.innerHTML = "";
+      if (hasMixedCategories && categoryLabels.length > 0) {
+        quoteCategoriesWrapEl.classList.remove("hidden");
+        quoteCategoryKeys.forEach((categoryKey, index) => {
+          const label = categoryLabels[index] || getCategoryLabel(categoryKey);
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.dataset.quoteCategoryChip = categoryKey;
+          chip.className = "category-chip category-chip--active";
+          chip.textContent = `${label} x`;
+          chip.setAttribute("aria-label", `Remove category ${label} from quote`);
+          quoteCategoriesEl.appendChild(chip);
+        });
+      } else {
+        quoteCategoriesWrapEl.classList.add("hidden");
+      }
+    }
+  };
+
+  const buildTimeSlots = (open: string, close: string): string[] => {
+    const [openH, openM] = open.split(":").map((x) => Number(x));
+    const [closeH, closeM] = close.split(":").map((x) => Number(x));
+    const start = openH * 60 + openM;
+    const end = closeH * 60 + closeM;
+    const slots: string[] = [];
+    for (let minutes = start; minutes < end; minutes += 30) {
+      const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+      const m = String(minutes % 60).padStart(2, "0");
+      slots.push(`${h}:${m}`);
+    }
+    return slots;
+  };
+
+  const updateTimeLimitsByDate = () => {
+    const previousValue = timeSlotSelect.value;
+    const isoDate = parseDisplayDateToIso(dateInput.value);
+    timeSlotSelect.innerHTML = "";
+    const baseOption = document.createElement("option");
+    baseOption.value = "";
+    baseOption.textContent = "Select time";
+    timeSlotSelect.appendChild(baseOption);
+
+    if (!dateInput.value) {
+      timeSlotSelect.disabled = true;
+      if (timeHelp) {
+        timeHelp.textContent = "If you prefer, leave the date open or use the shift.";
+        timeHelp.classList.remove("text-rose-600", "dark:text-rose-400");
+        timeHelp.classList.add("text-slate-500", "dark:text-slate-400");
+      }
+      return;
+    }
+
+    if (!isoDate) {
+      timeSlotSelect.disabled = true;
+      if (timeHelp) {
+        timeHelp.textContent = "Select a valid date to enable time slots.";
+        timeHelp.classList.remove("text-slate-500", "dark:text-slate-400");
+        timeHelp.classList.add("text-rose-600", "dark:text-rose-400");
+      }
+      return;
+    }
+
+    const date = new Date(`${isoDate}T12:00:00`);
+    const day = date.getDay();
+    const schedule = scheduleByDay[day];
+
+    if (!schedule) {
+      timeSlotSelect.disabled = true;
+      if (timeHelp) {
+        timeHelp.textContent = "Sunday is closed. Select another day.";
+        timeHelp.classList.remove("text-slate-500", "dark:text-slate-400");
+        timeHelp.classList.add("text-rose-600", "dark:text-rose-400");
+      }
+      return;
+    }
+
+    const slots = buildTimeSlots(schedule.open, schedule.close);
+    slots.forEach((slot) => {
+      const option = document.createElement("option");
+      option.value = slot;
+      option.textContent = slot;
+      timeSlotSelect.appendChild(option);
+    });
+    timeSlotSelect.disabled = false;
+
+    if (slots.includes(previousValue)) {
+      timeSlotSelect.value = previousValue;
+    } else {
+      timeSlotSelect.value = "";
+    }
+
+    if (timeHelp) {
+      timeHelp.textContent = `Available hours: ${schedule.open} to ${schedule.close}.`;
+      timeHelp.classList.remove("text-rose-600", "dark:text-rose-400");
+      timeHelp.classList.add("text-slate-500", "dark:text-slate-400");
+    }
+  };
+
+  const renderSpecialists = (serviceKey: string, preferredSpecialist: string = "") => {
+    const filtered = specialistItems.filter((sp: SpecialistOption) => sp.category === serviceKey);
+    specialistSelect.innerHTML = "";
+
+    const baseOption = document.createElement("option");
+    baseOption.value = "";
+    baseOption.textContent = "No preference (first available)";
+    specialistSelect.appendChild(baseOption);
+
+    filtered.forEach((sp: SpecialistOption) => {
+      const opt = document.createElement("option");
+      opt.value = sp.slug;
+      opt.textContent = sp.name;
+      specialistSelect.appendChild(opt);
+    });
+
+    specialistSelect.disabled = !serviceKey;
+    if (preferredSpecialist && filtered.some((sp: SpecialistOption) => sp.slug === preferredSpecialist)) {
+      specialistSelect.value = preferredSpecialist;
+    } else {
+      specialistSelect.value = "";
+    }
+  };
+
+  const applyPrefill = () => {
+    let serviceValue = "";
+    if (prefill.service) {
+      const matchService = Array.from(serviceSelect.options).find(
+        (opt: HTMLOptionElement) => opt.value === prefill.service
+      );
+      if (matchService) serviceValue = prefill.service;
+    }
+
+    if (!serviceValue && selectedServicesState.length > 0) {
+      const firstSelected = normalizeText(selectedServicesState[0] || "");
+      const fromCatalog = priceCatalog.find((row) => {
+        const title = normalizeText(row.title || "");
+        const category = String(row.category || "").trim();
+        return Boolean(title) && Boolean(category) && title === firstSelected;
+      });
+      if (fromCatalog?.category) {
+        const existsInSelect = Array.from(serviceSelect.options).some(
+          (opt: HTMLOptionElement) => opt.value === fromCatalog.category
+        );
+        if (existsInSelect) serviceValue = fromCatalog.category;
+      }
+    }
+
+    if (!serviceValue && prefill.specialist) {
+      const specialistMatch = specialistItems.find((sp: SpecialistOption) => sp.slug === prefill.specialist);
+      if (specialistMatch?.category) serviceValue = specialistMatch.category;
+    }
+
+    if (serviceValue) {
+      serviceSelect.value = serviceValue;
+    }
+
+    const shouldPrefillSpecialist =
+      selectedServicesState.length <= 1 ? String(prefill.specialist || "").trim() : "";
+    renderSpecialists(serviceSelect.value, shouldPrefillSpecialist);
+  };
+
+  const updateDatePreview = () => {
+    if (!dateReadable) return;
+    const isoDate = parseDisplayDateToIso(dateInput.value);
+    if (!dateInput.value) {
+      dateReadable.textContent = "If you don't choose a date, it will be sent as to be determined.";
+      dateReadable.classList.remove("text-emerald-600", "dark:text-emerald-400", "text-rose-600", "dark:text-rose-400");
+      dateReadable.classList.add("text-slate-500", "dark:text-slate-400");
+      return;
+    }
+
+    if (isoDate) {
+      dateReadable.textContent = `Selected date: ${formatDateMX(isoDate)}`;
+      dateReadable.classList.remove("text-slate-500", "dark:text-slate-400", "text-rose-600", "dark:text-rose-400");
+      dateReadable.classList.add("text-emerald-600", "dark:text-emerald-400");
+      return;
+    }
+
+    dateReadable.textContent = "Select a valid date from the calendar.";
+    dateReadable.classList.remove("text-slate-500", "dark:text-slate-400", "text-emerald-600", "dark:text-emerald-400");
+    dateReadable.classList.add("text-rose-600", "dark:text-rose-400");
+  };
+
+  const validateSchedule = () => {
+    const isoDate = parseDisplayDateToIso(dateInput.value);
+    dateInput.setCustomValidity("");
+    timeSlotSelect.setCustomValidity("");
+    setFieldErrorStyle(dateInput, false);
+    setFieldSuccessStyle(dateInput, false);
+    setFieldErrorStyle(timeSlotSelect, false);
+    const selectedTime = timeSlotSelect.value;
+
+    if (dateError) dateError.classList.add("hidden");
+
+    if (dateInput.value && !isoDate) {
+      dateInput.setCustomValidity("Select a valid date.");
+      setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "Select a valid date.";
+        dateError.classList.remove("hidden");
+      }
+      return false;
+    }
+
+    if (isoDate && isoDate < todayIso) {
+      dateInput.setCustomValidity("You cannot choose a past date.");
+      setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "You cannot choose a past date.";
+        dateError.classList.remove("hidden");
+      }
+      return false;
+    }
+
+    if (isoDate && isSunday(isoDate)) {
+      dateInput.setCustomValidity("We are closed on Sundays.");
+      setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "Sunday is closed. Choose another day.";
+        dateError.classList.remove("hidden");
+      }
+      return false;
+    }
+
+    if (isoDate) {
+      setFieldSuccessStyle(dateInput, true);
+    }
+
+    if (selectedTime && !isoDate) {
+      dateInput.setCustomValidity("Select a date to validate the time.");
+      setFieldErrorStyle(dateInput, true);
+      if (dateError) {
+        dateError.textContent = "Select a valid date to use exact time.";
+        dateError.classList.remove("hidden");
+      }
+      return false;
+    }
+
+    if (isoDate && selectedTime && !isWithinSchedule(isoDate, selectedTime)) {
+      timeSlotSelect.setCustomValidity("That time is outside our hours for that day.");
+      setFieldErrorStyle(timeSlotSelect, true);
+      return false;
+    }
+
+    if (dateError) {
+      dateError.textContent = "Select a valid date.";
+      dateError.classList.add("hidden");
+    }
+
+    return true;
+  };
+
+  const openOptionalPanel = () => {
+    if (optionalDetails && !optionalDetails.open) {
+      optionalDetails.open = true;
+    }
+  };
+
+  const focusFirstInvalidField = () => {
+    const orderedFields = [serviceSelect, nameInput, phoneInput, dateInput, timeSlotSelect];
+    const firstInvalid = orderedFields.find((field) => field && !field.checkValidity());
+    if (!firstInvalid) return;
+    if (firstInvalid === dateInput || firstInvalid === timeSlotSelect) {
+      openOptionalPanel();
+    }
+    firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => firstInvalid.focus(), 90);
+  };
+
+  const setDisabledCta = (text: string) => {
+    sendBtn.classList.remove("pointer-events-none", "btn-muted");
+    sendBtn.classList.add("btn-primary");
+    sendBtn.textContent = text;
+    sendBtn.setAttribute("href", "#appointment-form");
+    sendBtn.setAttribute("data-cta-state", "invalid");
+    sendBtn.setAttribute("role", "button");
+    sendBtn.removeAttribute("target");
+    sendBtn.removeAttribute("rel");
+  };
+
+  const setEnabledCta = (href: string) => {
+    sendBtn.classList.remove("pointer-events-none", "btn-muted");
+    sendBtn.classList.add("btn-primary");
+    sendBtn.textContent = "Send request via WhatsApp";
+    sendBtn.setAttribute("href", href);
+    sendBtn.setAttribute("data-cta-state", "ready");
+    sendBtn.setAttribute("target", "_blank");
+    sendBtn.setAttribute("rel", "noopener noreferrer");
+  };
+
+  const updateCta = () => {
+    validatePhoneField();
+    updateTimeLimitsByDate();
+    updateDatePreview();
+
+    if (!validateSchedule()) {
+      setDisabledCta("Complete your details to continue via WhatsApp");
+      return;
+    }
+
+    const name = String(nameInput.value || "").trim();
+    const phone = sanitizePhone(String(phoneInput.value || ""));
+    const service = String(serviceSelect.value || "").trim();
+
+    if (!name || !service || !isValidPhoneInput(phoneInput.value || "") || !isValidPhone(phone)) {
+      setDisabledCta("Complete your details to continue via WhatsApp");
+      return;
+    }
+
+    const specialistValue = String(specialistSelect.value || "").trim();
+    const selectedSpecialist = specialistValue
+      ? specialistItems.find((sp: SpecialistOption) => sp.slug === specialistValue)
+      : undefined;
+    const quote = getCurrentQuote();
+    const quotePairs = getQuoteServiceSpecialists();
+    const quoteSpecialists = getQuoteUniqueSpecialists();
+    const quoteWaNumbers = getQuoteUniqueWaNumbers();
+    const quoteWaMessages = getQuoteUniqueWaMessages();
+    const quoteHasMultipleServices = quote.list.length > 1;
+    const quoteCategoryKeys = getQuoteCategoryKeys(quote.list);
+    const hasMixedCategories = quoteCategoryKeys.length > 1;
+    const hasMultipleRoutingTargets =
+      quoteSpecialists.length > 1 || quoteWaNumbers.length > 1;
+    const forceGeneralRouting =
+      hasMixedCategories ||
+      prefill.routing === "general" ||
+      (quoteHasMultipleServices && hasMultipleRoutingTargets);
+    const routingSpecialist = forceGeneralRouting
+      ? undefined
+      : selectedSpecialist ||
+        (quoteSpecialists.length === 1 ? quoteSpecialists[0] : undefined);
+    const selectedServiceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || service;
+    const effectiveServiceLabel = quoteHasMultipleServices
+      ? "Various"
+      : (selectedServiceLabel || service);
+    const specialistName = selectedSpecialist
+      ? selectedSpecialist.name || "Technician"
+      : forceGeneralRouting
+        ? quoteSpecialists.length > 1
+          ? "Multiple technicians"
+          : hasMixedCategories
+            ? "No preference (multiple services)"
+            : "No preference (general routing)"
+      : quoteSpecialists.length > 1
+        ? "Multiple technicians"
+        : routingSpecialist?.name || "No preference";
+    const targetWaNumber = forceGeneralRouting
+      ? resolveWhatsAppNumber(generalWaNumber)
+      : routingSpecialist
+      ? resolveWhatsAppNumber(
+          routingSpecialist?.whatsAppNumber,
+          specialistsWaNumber,
+          generalWaNumber
+        )
+      : resolveWhatsAppNumber(
+          quoteWaNumbers.length === 1 ? quoteWaNumbers[0] : "",
+          generalWaNumber
+        );
+
+    if (!targetWaNumber) {
+      setDisabledCta("WhatsApp not configured");
+      return;
+    }
+
+    const notesValue = String(notesInput.value || "").trim();
+    const problemValue = notesValue || quickProblemDefault || "To be determined";
+    const introTemplate = forceGeneralRouting
+      ? generalWhatsAppMessage
+      : routingSpecialist
+      ? (routingSpecialist?.whatsAppMessage || specialistsWhatsAppMessage || generalWhatsAppMessage)
+      : (quoteWaMessages.length === 1 ? quoteWaMessages[0] : "") ||
+        generalWhatsAppMessage;
+    const introMessage = resolveWhatsAppReason(
+      introTemplate,
+      routingSpecialist
+        ? "Hi, I'd like to request service with {especialista} at {negocio}."
+        : quoteSpecialists.length > 1
+          ? "Hi, I'd like to request multiple pest control services at {negocio}."
+          : "Hi, I'd like to request a pest control service at {negocio}.",
+      {
+        specialist: specialistName,
+        service: effectiveServiceLabel,
+        business: businessName,
+        problem: problemValue,
+      }
+    );
+
+    const message = buildAppointmentMessage({
+      introMessage,
+      name,
+      phone,
+      service: effectiveServiceLabel,
+      selectedServices: quote.list,
+      serviceSpecialists: quotePairs
+        .filter((pair) => pair.specialistName)
+        .map((pair) => ({ service: pair.service, specialist: pair.specialistName })),
+      approxTotal: quote.total > 0 ? quote.total : undefined,
+      specialist: specialistName,
+      date: parseDisplayDateToIso(dateInput.value) || undefined,
+      time: timeSlotSelect.value || undefined,
+      shift: String(shiftSelect.value || "") || undefined,
+      notes: notesValue || undefined,
+    });
+
+    const href = buildWhatsAppUrl(message, targetWaNumber);
+    setEnabledCta(href);
+  };
+
+  const revealOptionalPanelIfNeeded = () => {
+    const hasOptionalValue =
+      Boolean(String(specialistSelect.value || "").trim()) ||
+      Boolean(String(dateInput.value || "").trim()) ||
+      Boolean(String(timeSlotSelect.value || "").trim()) ||
+      Boolean(String(shiftSelect.value || "").trim()) ||
+      Boolean(String(notesInput.value || "").trim());
+    if (hasOptionalValue) openOptionalPanel();
+  };
+
+  form.reset();
+  applyPrefill();
+  revealOptionalPanelIfNeeded();
+  updateTimeLimitsByDate();
+  updateDatePreview();
+  updateQuoteSummary();
+  updateCta();
+
+  serviceSelect.addEventListener("change", () => {
+    clearQuoteSnapshot();
+    const selectedLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || "";
+    selectedServicesState = selectedLabel ? [selectedLabel] : [];
+    selectedPriceIdsState = [""];
+    selectedServicesSpecialistsState = [""];
+    selectedServicesWaNumbersState = [""];
+    selectedServicesWaMessagesState = [""];
+    quoteTotalState = 0;
+    renderSpecialists(serviceSelect.value, "");
+    updateQuoteSummary();
+    updateCta();
+  });
+
+  specialistSelect.addEventListener("change", () => {
+    if (selectedServicesState.length <= 1) {
+      selectedServicesSpecialistsState = [String(specialistSelect.value || "").trim()];
+    }
+    revealOptionalPanelIfNeeded();
+    updateQuoteSummary();
+    updateCta();
+  });
+
+  if (quoteCategoriesEl) {
+    quoteCategoriesEl.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement | null;
+      const button = target?.closest("[data-quote-category-chip]") as HTMLButtonElement | null;
+      if (!button) return;
+      const categoryKey = String(button.dataset.quoteCategoryChip || "").trim();
+      removeCategoryFromQuote(categoryKey);
     });
   }
+
+  restoreQuoteBtn?.addEventListener("click", () => {
+    restoreQuoteSnapshot();
+  });
+
+  [nameInput, phoneInput].forEach((el) => {
+    el.addEventListener("input", updateCta);
+    el.addEventListener("change", updateCta);
+  });
+
+  [specialistSelect, timeSlotSelect, notesInput].forEach((el) => {
+    el.addEventListener("input", () => {
+      revealOptionalPanelIfNeeded();
+      updateCta();
+    });
+    el.addEventListener("change", () => {
+      revealOptionalPanelIfNeeded();
+      updateCta();
+    });
+  });
+
+  dateInput.addEventListener("input", () => {
+    revealOptionalPanelIfNeeded();
+    updateCta();
+  });
+
+  dateInput.addEventListener("change", () => {
+    revealOptionalPanelIfNeeded();
+    updateTimeLimitsByDate();
+    updateCta();
+  });
+
+  shiftSelect.addEventListener("change", () => {
+    if (shiftSelect.value && timeSlotSelect.value) {
+      timeSlotSelect.value = "";
+    }
+    revealOptionalPanelIfNeeded();
+    updateCta();
+  });
+
+  sendBtn.addEventListener("click", (event) => {
+    updateCta();
+    if (sendBtn.getAttribute("data-cta-state") === "ready") return;
+
+    event.preventDefault();
+    const scheduleValid = validateSchedule();
+    const formValid = form.reportValidity();
+    if (!scheduleValid) openOptionalPanel();
+    if (!formValid || !scheduleValid) {
+      focusFirstInvalidField();
+    }
+  });
 </script>

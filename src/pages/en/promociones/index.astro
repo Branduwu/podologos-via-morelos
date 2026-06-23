@@ -2,72 +2,391 @@
 import Layout from "../../../layouts/Layout.astro";
 import Header from "../../../components/Header.astro";
 import Footer from "../../../components/Footer.astro";
-import { getBusinessInfo, getPromotions } from "../../../lib/sanity.js";
-import { business } from "../../../config/clinic";
+import { getPromotions } from "../../../lib/sanity.js";
+import { normalizeServiceSlug } from "../../../utils/prefill";
 
-const cms = await getBusinessInfo();
+type Promotion = {
+  _id: string;
+  slug?: string;
+  title: string;
+  label?: string;
+  shortDescription?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  featured?: boolean;
+  pinned?: boolean;
+  targetCategories?: string[];
+  appliesTo: string[];
+  serviceCategories?: string[];
+  categories: string[];
+  imageUrl?: string;
+};
+
 const promos = (await getPromotions()) || [];
-const businessName = cms?.name || business.name;
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
-const today = new Date(); today.setHours(0, 0, 0, 0);
-const activePromos = promos.filter((p: any) => {
-  if (!p.endDate) return true;
-  const end = new Date(p.endDate); end.setHours(0, 0, 0, 0);
-  return today <= end;
-}).sort((a: any, b: any) => Number(b.pinned) - Number(a.pinned));
+const FILTER_OPTIONS = [
+  { label: "All",         value: "todas" },
+  { label: "Rodents",     value: "roedores" },
+  { label: "Cockroaches", value: "cucarachas" },
+  { label: "Termites",    value: "termitas" },
+  { label: "Bed Bugs",    value: "chinches" },
+  { label: "Ants",        value: "hormigas" },
+  { label: "Wasps",       value: "avispas" },
+  { label: "Inspection",  value: "inspeccion" },
+  { label: "General",     value: "general" },
+];
+
+const normalizeCategory = normalizeServiceSlug;
+
+const normalized: Promotion[] = promos.map((p: Partial<Promotion>, idx: number) => ({
+  ...p,
+  pinned: Boolean(p.pinned),
+  featured: Boolean(p.featured),
+  targetCategories: Array.isArray(p.targetCategories) ? p.targetCategories : [],
+  appliesTo: Array.isArray(p.appliesTo) ? p.appliesTo : [],
+  serviceCategories: Array.isArray(p.serviceCategories) ? p.serviceCategories : [],
+  categories: Array.from(
+    new Set(
+      [
+        ...(Array.isArray(p.targetCategories) ? p.targetCategories : []),
+        ...(Array.isArray(p.appliesTo) ? p.appliesTo : []),
+        ...(Array.isArray(p.serviceCategories) ? p.serviceCategories : []),
+      ]
+        .map(normalizeCategory)
+        .filter(Boolean)
+    )
+  ),
+  imageUrl: p.imageUrl || "",
+  shortDescription: p.shortDescription || "",
+  description: p.description || "",
+  title: p.title || "Promotion",
+  _id: p._id || `promo-${idx}`,
+}));
+
+const ordered = [...normalized].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+
+function fmt(d: string | Date | null | undefined) {
+  if (!d) return "";
+  try {
+    return new Date(d).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch {
+    return String(d);
+  }
+}
+
+function excerpt(p: Promotion) {
+  return (p.shortDescription || p.description || "").trim();
+}
+
+function promotionValidityText(p: Promotion) {
+  const hasStart = Boolean(p.startDate);
+  const hasEnd = Boolean(p.endDate);
+  if (!hasStart && !hasEnd) return "";
+  if (hasStart && hasEnd) return `Valid: ${fmt(p.startDate)} – ${fmt(p.endDate)}`;
+  if (hasStart) return `Valid from: ${fmt(p.startDate)}`;
+  return `Valid until: ${fmt(p.endDate)}`;
+}
+
+function promoStatus(p: Promotion) {
+  const start = p.startDate ? new Date(p.startDate) : null;
+  const end = p.endDate ? new Date(p.endDate) : null;
+  if (start) start.setHours(0, 0, 0, 0);
+  if (end) end.setHours(0, 0, 0, 0);
+
+  if (start && today < start) return "Upcoming";
+  if (end && today > end) return "Ended";
+  return "Active";
+}
+
+const visiblePromos = ordered.filter((p) => promoStatus(p) !== "Ended");
+const featured = visiblePromos.filter((p) => p.featured);
+const regular = visiblePromos.filter((p) => !p.featured);
+
+function promotionHref(p: Promotion) {
+  return `/en/promociones/${encodeURIComponent((p.slug || p._id || "").trim())}`;
+}
+
+function agendarPromotionHref(p: Promotion) {
+  const params = new URLSearchParams();
+  const category = p.categories?.[0] || "";
+  if (category) params.set("service", category);
+  if (p.title) params.append("services", p.title);
+  return params.toString() ? `/en/agendar?${params.toString()}` : "/en/agendar";
+}
 ---
 
-<Layout
-  title={`Special Offers – ${businessName}`}
-  description={`Current promotions and special offers from ${businessName} pest control in Charlotte, NC.`}
->
+<Layout title="Special Offers | FumiPro NC Charlotte">
   <Header />
-  <main id="contenido-principal">
 
-    <section class="bg-gradient-to-b from-red-50 to-white py-16 dark:from-[rgb(26,5,5)] dark:to-[rgb(28,5,5)]">
-      <div class="mx-auto max-w-5xl px-4">
-        <p class="text-sm font-semibold uppercase tracking-widest text-red-600 dark:text-red-400">Limited time</p>
-        <h1 class="font-['Manrope',sans-serif] mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">Special Offers</h1>
-        <p class="mt-3 text-lg text-slate-600 dark:text-[rgb(245,210,210)]">
-          Take advantage of our current promotions on pest control services.
+  <main class="mx-auto max-w-6xl px-4 py-10">
+    <h1 class="type-section-title">Special Offers</h1>
+    <p class="type-section-subtitle mt-2 text-slate-800 dark:text-slate-200">
+      Active promotions subject to availability.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      {FILTER_OPTIONS.map((opt, idx) => (
+        <button
+          type="button"
+          data-promo-filter={opt.value}
+          class:list={[
+            "category-chip",
+            idx === 0 && "category-chip--active",
+          ]}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+
+    {visiblePromos.length === 0 && (
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white/95 p-6 dark:border-slate-800 dark:bg-slate-950">
+        <p class="font-medium">We'll be sharing new special offers soon.</p>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          In the meantime, contact us for a free inspection and learn about our pricing.
         </p>
+        <a
+          class="mt-4 btn-base btn-primary"
+          href="/en/agendar"
+        >
+          Request inspection
+        </a>
       </div>
-    </section>
+    )}
 
-    <section class="pb-20">
-      <div class="mx-auto max-w-5xl px-4">
-        {activePromos.length === 0 ? (
-          <p class="text-slate-500 dark:text-[rgb(240,190,190)]">No active promotions at this time. Check back soon!</p>
-        ) : (
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal>
-            {activePromos.map((promo: any) => (
-              <div class="rounded-2xl border border-amber-100 bg-amber-50 p-6 shadow-sm dark:border-[rgb(80,60,20)] dark:bg-[rgb(28,22,8)]">
-                {promo.label && (
-                  <span class="inline-block rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-                    {promo.label}
+    <section class="mt-10">
+      <div class="flex items-center justify-between gap-4">
+        <h2 class="type-card-title">Featured promotions</h2>
+        <a class="text-sm font-medium hover:underline" href="/en/agendar">Book with promo</a>
+      </div>
+
+      {featured.length === 0 ? (
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white/95 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          No featured promotions right now.
+        </div>
+      ) : (
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map((p) => (
+            <article
+              data-promo-card
+              data-promo-categories={p.categories.join(",")}
+              data-promo-end={p.endDate || ""}
+              class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm dark:border-slate-800 dark:bg-slate-950"
+            >
+              {p.imageUrl ? (
+                <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl} alt={p.title} loading="lazy" data-fallback-src="/placeholder.jpg" />
+                </div>
+              ) : null}
+
+              <div class="p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="type-card-title">{p.title}</h3>
+                  <span class="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-slate-900">
+                    {promoStatus(p)}
                   </span>
-                )}
-                <h3 class="font-['Manrope',sans-serif] mt-2 font-bold text-slate-900 dark:text-white">{promo.title}</h3>
-                {(promo.shortDescription || promo.description) && (
-                  <p class="mt-2 text-sm text-slate-600 dark:text-[rgb(245,210,210)]">
-                    {(promo.shortDescription || promo.description || "").slice(0, 160)}
+                </div>
+
+                {excerpt(p) && <p class="type-card-body mt-3 text-slate-600 dark:text-slate-300">{excerpt(p)}</p>}
+
+                {promotionValidityText(p) && (
+                  <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
+                    {promotionValidityText(p)}
                   </p>
                 )}
-                {promo.endDate && (
-                  <p class="mt-3 text-xs text-amber-700 dark:text-amber-400">
-                    Valid until: {new Date(promo.endDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-                  </p>
+
+                {p.appliesTo.length > 0 && (
+                  <div class="mt-4">
+                    <p class="type-meta text-slate-500 dark:text-slate-400">Applies to:</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      {p.appliesTo.map((tag: string) => (
+                        <span class="rounded-full border border-slate-200 px-3 py-1 text-xs dark:border-slate-800">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                <a href="/en/agendar" class="btn-base btn-primary mt-4 block text-center text-sm">
-                  Request now
-                </a>
+
+                <div class="mt-6 flex gap-2">
+                  <a class="btn-base btn-primary flex-1" href={agendarPromotionHref(p)}>
+                    Request
+                  </a>
+                  <a class="btn-base btn-secondary" href={promotionHref(p)}>
+                    View detail
+                  </a>
+                </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
 
+    <section class="mt-12">
+      <h2 class="type-card-title">More promotions</h2>
+
+      {regular.length === 0 ? (
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-white/95 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          For now we only have featured promotions.
+        </div>
+      ) : (
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {regular.map((p) => (
+            <article
+              data-promo-card
+              data-promo-categories={p.categories.join(",")}
+              data-promo-end={p.endDate || ""}
+              class="overflow-hidden rounded-3xl border border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950"
+            >
+              {p.imageUrl ? (
+                <div data-promo-media class="promo-media w-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+                  <img data-promo-image class="h-full w-full object-contain object-center" src={p.imageUrl} alt={p.title} loading="lazy" data-fallback-src="/placeholder.jpg" />
+                </div>
+              ) : null}
+
+              <div class="p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="type-card-title">{p.title}</h3>
+                  <span class="rounded-full border border-slate-200 px-2.5 py-1 text-xs dark:border-slate-800">
+                    {promoStatus(p)}
+                  </span>
+                </div>
+
+                {excerpt(p) && <p class="type-card-body mt-3 text-slate-600 dark:text-slate-300">{excerpt(p)}</p>}
+
+                {promotionValidityText(p) && (
+                  <p class="type-meta mt-4 text-slate-500 dark:text-slate-400">
+                    {promotionValidityText(p)}
+                  </p>
+                )}
+
+                {p.appliesTo.length > 0 && (
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    {p.appliesTo.map((tag: string) => (
+                      <span class="rounded-full border border-slate-200 px-3 py-1 text-xs dark:border-slate-800">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div class="mt-5 flex gap-3">
+                  <a class="btn-base btn-primary" href={agendarPromotionHref(p)}>Request</a>
+                  <a class="btn-base btn-secondary" href={promotionHref(p)}>View detail</a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <div data-promo-empty class="mt-8 hidden rounded-2xl border border-slate-200 bg-white/95 p-5 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+      No promotions for that category right now.
+    </div>
   </main>
+
   <Footer />
 </Layout>
+
+<style>
+  .promo-media {
+    aspect-ratio: 4 / 3;
+  }
+  .promo-media--portrait {
+    aspect-ratio: 3 / 4;
+  }
+  .promo-media--landscape {
+    aspect-ratio: 4 / 3;
+  }
+</style>
+
+<script is:inline>
+  const filterButtons = Array.from(document.querySelectorAll("[data-promo-filter]"));
+  const promoCards = Array.from(document.querySelectorAll("[data-promo-card]"));
+  const emptyState = document.querySelector("[data-promo-empty]");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const isExpiredCard = (card) => {
+    const endRaw = String(card.getAttribute("data-promo-end") || "").trim();
+    if (!endRaw) return false;
+    const end = new Date(`${endRaw}T00:00:00`);
+    if (Number.isNaN(end.getTime())) return false;
+    return end < today;
+  };
+
+  const animateFilteredItems = (items) => {
+    items.forEach((item, index) => {
+      item.classList.remove("filter-item-in", "filter-item-in-slide");
+      item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+      void item.offsetWidth;
+      item.classList.add("filter-item-in-slide");
+    });
+  };
+
+  const setFilter = (category, animate = false) => {
+    let visibleCount = 0;
+    const visibleCards = [];
+
+    promoCards.forEach((card) => {
+      const categories = String(card.getAttribute("data-promo-categories") || "")
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+
+      const visible = !isExpiredCard(card) && (category === "todas" || categories.includes(category));
+      card.classList.toggle("hidden", !visible);
+      if (visible) {
+        visibleCount += 1;
+        visibleCards.push(card);
+      }
+    });
+
+    if (emptyState) {
+      emptyState.classList.toggle("hidden", visibleCount > 0);
+    }
+
+    filterButtons.forEach((btn) => {
+      const isActive = btn.getAttribute("data-promo-filter") === category;
+      btn.classList.toggle("category-chip--active", isActive);
+    });
+
+    if (animate) requestAnimationFrame(() => animateFilteredItems(visibleCards));
+  };
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const category = btn.getAttribute("data-promo-filter") || "todas";
+      setFilter(category, true);
+    });
+  });
+
+  setFilter("todas", false);
+
+  const promoImages = Array.from(document.querySelectorAll("[data-promo-image]"));
+  promoImages.forEach((img) => {
+    const media = img.closest("[data-promo-media]");
+    if (!media) return;
+
+    const applyRatio = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const isPortrait = img.naturalHeight > img.naturalWidth;
+      media.classList.toggle("promo-media--portrait", isPortrait);
+      media.classList.toggle("promo-media--landscape", !isPortrait);
+    };
+
+    if (img.complete) {
+      applyRatio();
+    } else {
+      img.addEventListener("load", applyRatio, { once: true });
+    }
+  });
+</script>
